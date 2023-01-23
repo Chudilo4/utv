@@ -11,5 +11,4 @@ urlpatterns = [
     path('cards/', CardsListView.as_view(), name='cards'),
     path('cards/create/', CardsCreateView.as_view(), name='card_create'),
     path('cards/<int:pk>/', CardDetailView.as_view(), name='card_detail'),
-    path('works/create/', WorkerCreateView.as_view(), name='work_create'),
 ]

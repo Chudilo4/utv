@@ -40,3 +40,4 @@ class Worker(models.Model):
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     actual_time = models.TimeField(verbose_name='Фактическое время', default=0)
     scheduled_time = models.TimeField(verbose_name='Плановое время', default=0)
+

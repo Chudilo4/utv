@@ -38,3 +38,5 @@ class WorkerForm(forms.ModelForm):
     class Meta:
         model = Worker
         fields = ['actual_time', 'scheduled_time', 'card']
+
+
