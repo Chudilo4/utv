@@ -6,6 +6,10 @@
     <p>Описание:{{ cards.description }}</p>
     <p>Дата создания: {{ cards.created }}</p>
     <p>Дедлайн: {{ cards.date_dedlain }}</p>
+    <form method="post">
+    {% csrf_token %}
+    {% bootstrap_form form2 %}
+    </form>
     <ul>
     {% for i in cards.performers.all %}
         <li><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"> {{ i.username }}</li>

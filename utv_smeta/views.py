@@ -91,7 +91,9 @@ class CardDetailView(DetailView, CreateView):
         return reverse('card_detail', kwargs={'pk': self.get_object().pk})
 
 
-
+class WorkerCreateView(CreateView):
+    form_class = WorkerForm
+    template_name = 'utv_smeta/worker_crete.html'
 
 
 

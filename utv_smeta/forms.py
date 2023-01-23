@@ -1,3 +1,4 @@
+from django.conf.global_settings import AUTH_USER_MODEL
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django_flatpickr.widgets import DateTimePickerInput
