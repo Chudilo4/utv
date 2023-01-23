@@ -1,0 +1,9 @@
+{% extends 'utv_smeta/base.html' %}
+{% load django_bootstrap5 %}
+{% block content %}
+    <form method="post" enctype="multipart/form-data">>
+    {% csrf_token %}
+    {% bootstrap_form form %}
+    {% bootstrap_button type=submit content='Изменить' %}
+    </form>
+{% endblock %}

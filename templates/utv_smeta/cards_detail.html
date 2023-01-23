@@ -1,0 +1,34 @@
+{% extends 'utv_smeta/base.html' %}
+{% load django_bootstrap5 %}
+{% block content %}
+    <p>Название: {{ cards.title }}</p>
+    <p>Автор:{{ cards.author.username }}</p>
+    <p>Описание:{{ cards.description }}</p>
+    <p>Дата создания: {{ cards.created }}</p>
+    <p>Дедлайн: {{ cards.date_dedlain }}</p>
+    <ul>
+    {% for i in cards.performers.all %}
+        <li><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"> {{ i.username }}</li>
+    {% endfor %}
+    </ul>
+    <form method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% bootstrap_button type=submit content='Оставить комент!' %}
+    </form>
+    <div class="my-3 p-3 bg-body rounded shadow-sm">
+    <h6 class="border-bottom pb-2 mb-0">Коментарии</h6>
+    <br>
+        {% for comment in cards.comments_set.all %}
+    <div class="d-flex text-muted pt-3">
+      <img class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" src="{{ comment.author.profileuser.avatar.url }}">
+        <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
+        <div class="d-flex justify-content-between">
+          <strong class="text-gray-dark">{{ comment.author }}</strong>
+        </div>
+        <span class="d-block">{{ comment.description }}</span>
+      </div>
+    </div>
+        {% endfor %}
+  </div>
+{% endblock %}

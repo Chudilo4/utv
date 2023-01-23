@@ -1,0 +1,20 @@
+{% load django_bootstrap5 %}
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    {% bootstrap_css %}
+    {% bootstrap_javascript %}
+</head>
+<body>
+<main class="container">
+  <div class="bg-light p-5 rounded">
+    <h1>Регистрация</h1>
+    <form method="post">
+        {% csrf_token %}
+        {% bootstrap_form form %}
+        {% bootstrap_button type=submit content='Войти' %}
+    </form>
+  </div>
+</main>
+</body>
+</html>
