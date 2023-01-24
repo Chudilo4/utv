@@ -1,31 +1,24 @@
 {% extends 'utv_smeta/base.html' %}
 {% load django_bootstrap5 %}
 {% block content %}
-<div class="d-flex flex-row">
-<div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white" style="width: 380px;">
-        <form method="post">
-        {% csrf_token %}
-        {% bootstrap_form form %}
-        {% bootstrap_button type=submit content='Оставить комент!' %}
-    </form>
-    <div class="my-3 p-3 bg-body rounded shadow-sm">
-    <h6 class="border-bottom pb-2 mb-0">Коментарии</h6>
-            {% for comment in cards.comments_set.all %}
-    <div class="d-flex text-muted pt-3">
-      <img class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" src="{{ comment.author.profileuser.avatar.url }}">
-        <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
-        <div class="d-flex justify-content-between">
-          <strong class="text-gray-dark">{{ comment.author }}</strong>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-2 p-2 m-3 bg-dark scroll-behavior comments h-1080">
+            <h3>Чат к проекту</h3>
+            <form method="post">
+                {% csrf_token %}
+                {% bootstrap_form form %}
+                {% bootstrap_button type=submit content='Отправить' %}
+            </form>
+            {% for i in cards.comments_set.all %}
+            <div class="shadow-none p-3 mb-5 bg-light rounded">
+                <a href="{% url 'profile' i.author.profileuser.pk %}"><img src="{{ i.author.profileuser.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle"></a>
+                <strong class="text-gray-dark">{{ i.author.username }}</strong>
+                <p class="text-break">{{ i.description }}</p>
+            </div>
+            {% endfor %}
         </div>
-        <span class="d-block">{{ comment.description }}</span>
-      </div>
-    </div>
-        {% endfor %}
-    <br>
-  </div>
-  </div>
-<main class="container">
-  <div class="bg-light p-5 rounded">
+        <div class="col-6 p-5 m-3 bg-light rounded">
     <p>Название: {{ cards.title }}</p>
     <p>Автор:{{ cards.author.username }}</p>
     <p>Описание:{{ cards.description }}</p>
@@ -66,6 +59,7 @@
 </table>
     <hr>
   </div>
-</main>
+        <div class="col-3 p-5 m-3 bg-primary"></div>
+    </div>
 </div>
 {% endblock %}
