@@ -10,3 +10,8 @@ class ProfileUserAdmin(admin.ModelAdmin):
 @admin.register(Cards)
 class CardsAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(Worker)
+class WorkersAdmin(admin.ModelAdmin):
+    pass

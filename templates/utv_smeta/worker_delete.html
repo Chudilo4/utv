@@ -1,0 +1,9 @@
+{% extends 'utv_smeta/base.html' %}
+{% load django_bootstrap5 %}
+{% block content %}
+    <h1>Вы действительно хотите удалить рабочку?</h1>
+    <form method="post">
+    {% csrf_token %}
+    <input class="btn btn-danger" type="submit" value="Да точно удалить!">
+    </form>
+{% endblock %}

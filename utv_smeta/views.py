@@ -1,5 +1,5 @@
 from django.contrib.messages.views import SuccessMessageMixin
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView, DeleteView, ListView
 from utv_smeta.forms import *
@@ -70,10 +70,10 @@ class CardsCreateView(CreateView):
     template_name = 'utv_smeta/cards_create.html'
     success_url = reverse_lazy('cards')
 
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        self.object = form.save()
-        return super().form_valid(form)
+    def get_form_kwargs(self):
+        kwargs = super(CardsCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
 
 class CardDetailView(DetailView, CreateView):
@@ -81,11 +81,11 @@ class CardDetailView(DetailView, CreateView):
     template_name = 'utv_smeta/cards_detail.html'
     form_class = CommentCreateForm
 
-    def form_valid(self, form):
-        form.instance.author = self.request.user
-        form.instance.card = self.get_object()
-        self.object = form.save()
-        return super().form_valid(form)
+    def get_form_kwargs(self):
+        kwargs = super(CardDetailView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        kwargs['card'] = self.get_object()
+        return kwargs
 
     def get_success_url(self):
         return reverse('card_detail', kwargs={'pk': self.get_object().pk})
@@ -95,5 +95,32 @@ class WorkerCreateView(CreateView):
     form_class = WorkerForm
     template_name = 'utv_smeta/worker_crete.html'
 
+    def get_success_url(self):
+        return reverse('card_detail', kwargs={'pk': self.object.card.pk})
+
+    def get_form_kwargs(self):
+        kwargs = super(WorkerCreateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
 
 
+class WorkerUpdateView(UpdateView):
+    template_name = 'utv_smeta/worker_update.html'
+    form_class = WorkerForm
+    model = Worker
+
+    def get_success_url(self):
+        return reverse('card_detail', kwargs={'pk': self.object.card.pk})
+
+    def get_form_kwargs(self):
+        kwargs = super(WorkerUpdateView, self).get_form_kwargs()
+        kwargs['user'] = self.request.user
+        return kwargs
+
+
+class WorkerDeleteView(DeleteView):
+    model = Worker
+    template_name = 'utv_smeta/worker_delete.html'
+
+    def get_success_url(self):
+        return reverse('card_detail', kwargs={'pk': self.get_object().card.pk})

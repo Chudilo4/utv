@@ -1,29 +1,16 @@
 {% extends 'utv_smeta/base.html' %}
 {% load django_bootstrap5 %}
 {% block content %}
-    <p>Название: {{ cards.title }}</p>
-    <p>Автор:{{ cards.author.username }}</p>
-    <p>Описание:{{ cards.description }}</p>
-    <p>Дата создания: {{ cards.created }}</p>
-    <p>Дедлайн: {{ cards.date_dedlain }}</p>
-    <form method="post">
-    {% csrf_token %}
-    {% bootstrap_form form2 %}
-    </form>
-    <ul>
-    {% for i in cards.performers.all %}
-        <li><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"> {{ i.username }}</li>
-    {% endfor %}
-    </ul>
-    <form method="post">
+<div class="d-flex flex-row">
+<div class="d-flex flex-column align-items-stretch flex-shrink-0 bg-white" style="width: 380px;">
+        <form method="post">
         {% csrf_token %}
         {% bootstrap_form form %}
         {% bootstrap_button type=submit content='Оставить комент!' %}
     </form>
     <div class="my-3 p-3 bg-body rounded shadow-sm">
     <h6 class="border-bottom pb-2 mb-0">Коментарии</h6>
-    <br>
-        {% for comment in cards.comments_set.all %}
+            {% for comment in cards.comments_set.all %}
     <div class="d-flex text-muted pt-3">
       <img class="bd-placeholder-img flex-shrink-0 me-2 rounded" width="32" height="32" src="{{ comment.author.profileuser.avatar.url }}">
         <div class="pb-3 mb-0 small lh-sm border-bottom w-100">
@@ -34,5 +21,51 @@
       </div>
     </div>
         {% endfor %}
+    <br>
   </div>
+  </div>
+<main class="container">
+  <div class="bg-light p-5 rounded">
+    <p>Название: {{ cards.title }}</p>
+    <p>Автор:{{ cards.author.username }}</p>
+    <p>Описание:{{ cards.description }}</p>
+    <p>Дата создания: {{ cards.created }}</p>
+    <p>Дедлайн: {{ cards.date_dedlain }}</p>
+    <hr>
+    <h2>Исполнители</h2>
+    {% for i in cards.performers.all %}
+        <a href="{% url 'profile' i.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"></a>
+    {% endfor %}
+    <hr>
+    <h2>Рабочка</h2>
+    <form method="get" action="{% url 'worker_create' %}">{% csrf_token %}{% bootstrap_button type=submit content='Создать!' %}</form>
+    <hr>
+    <table class="table">
+  <thead>
+    <tr>
+      <th scope="col">Исполнители</th>
+      <th scope="col">Фактическое время</th>
+      <th scope="col">Плановое время</th>
+      <th scope="col">Описание</th>
+      <th scope="col">Изменить</th>
+      <th scope="col">Удалить</th>
+    </tr>
+  </thead>
+  <tbody>
+   {% for i in cards.worker_set.all %}
+    <tr>
+      <th scope="row"><a href="{% url 'profile' i.author.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.author.profileuser.avatar.url }}"></a></th>
+      <td>{{ i.actual_time }}</td>
+      <td>{{ i.scheduled_time }}</td>
+      <td>{{ i.description }}</td>
+      <td><a href="{% url 'worker_update' i.pk %}">{% bootstrap_button content='Изменить' %}</a></td>
+      <td><a href="{% url 'worker_delete' i.pk %}" rel="nofollow"><input class="btn btn-danger" type="submit" value="Удалить"></a></td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+    <hr>
+  </div>
+</main>
+</div>
 {% endblock %}

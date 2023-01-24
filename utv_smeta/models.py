@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
-
+from django.urls import reverse_lazy, reverse
 # Create your models here.
 
 
@@ -24,6 +24,9 @@ class Cards(models.Model):
     def __str__(self):
         return self.title
 
+    def get_absolute_url(self):
+        return reverse('card_detail' , kwargs={'pk': self.pk})
+
 
 class Comments(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
@@ -38,6 +41,12 @@ class Comments(models.Model):
 class Worker(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
-    actual_time = models.TimeField(verbose_name='Фактическое время', default=0)
-    scheduled_time = models.TimeField(verbose_name='Плановое время', default=0)
+    actual_time = models.IntegerField(verbose_name='Фактическое время', default=0)
+    scheduled_time = models.IntegerField(verbose_name='Плановое время', default=0)
+    description = models.TextField(verbose_name='Описание работы', blank=True, null=True)
 
+    def get_absolute_url(self):
+        return reverse('worker_create', kwargs={'pk': self.pk})
+
+    def __str__(self):
+        return self.author.username + ' ' + self.card.title

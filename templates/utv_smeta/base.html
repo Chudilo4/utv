@@ -25,6 +25,7 @@
         <form class="col-12 col-lg-auto mb-3 mb-lg-0 me-lg-3" role="search">
           <input type="search" class="form-control" placeholder="Search..." aria-label="Search">
         </form>
+          {% if request.user.is_authenticated %}
         <div class="dropdown text-end">
           <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
             <img src="{{ request.user.profileuser.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle">
@@ -36,15 +37,16 @@
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="{% url 'logout' %}">Выйти</a></li>
           </ul>
+             {% else %}
+                <a href="{% url 'regiister' %}">Регисстрация</a>
+                <a href="{% url 'login' %}">Войти</a>
+            {% endif %}
         </div>
       </div>
     </div>
   </header>
-<main class="container">
-  <div class="bg-light p-5 rounded">
-   {% block content %}
-   {% endblock %}
-  </div>
-</main>
+{% block content %}
+
+{% endblock %}
 </body>
 </html>
