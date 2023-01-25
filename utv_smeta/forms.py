@@ -1,6 +1,7 @@
 from django.conf.global_settings import AUTH_USER_MODEL
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django_flatpickr.widgets import DateTimePickerInput
 from django import forms
 from django.conf import settings
@@ -37,7 +38,17 @@ class CardsCreateForm(forms.ModelForm):
 class CommentCreateForm(forms.ModelForm):
     class Meta:
         model = Comments
-        fields = ['description']
+        fields = ['text']
+        widgets = {
+            'text': forms.TextInput(attrs={'row': 20,
+                                           'cols': 40,
+                                           'class': "form-control"
+                                           },
+                                    )
+        }
+        labels = {
+            'text': 'Введите ваш комит!'
+        }
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
@@ -50,10 +61,10 @@ class CommentCreateForm(forms.ModelForm):
 class WorkerForm(forms.ModelForm):
     class Meta:
         model = Worker
-        fields = ['actual_time', 'scheduled_time', 'card', 'description']
+        fields = ['actual_time', 'scheduled_time', 'description', 'card']
 
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         super(WorkerForm, self).__init__(*args, **kwargs)
-        self.fields['card'] = forms.ModelChoiceField(queryset=Cards.objects.filter(performers=user))
+        self.fields['card'] = forms.ModelChoiceField(queryset=Cards.objects.filter(Q(performers=user) | Q(author=user)).exclude(worker__author=user))
         self.instance.author = user

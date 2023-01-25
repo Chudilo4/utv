@@ -6,7 +6,6 @@ from utv_smeta.forms import *
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
-
 from utv_smeta.models import Cards
 
 

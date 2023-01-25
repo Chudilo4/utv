@@ -31,11 +31,11 @@ class Cards(models.Model):
 class Comments(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
-    description = models.TextField()
+    text = models.TextField(verbose_name='Поле для коментария')
     created = models.DateTimeField(auto_now_add=True)
 
     class Meta:
-        ordering = ['created']
+        ordering = ('-created',)
 
 
 class Worker(models.Model):
