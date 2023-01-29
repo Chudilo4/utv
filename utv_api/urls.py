@@ -5,6 +5,7 @@ from .views import *
 
 urlpatterns = [
     path('cards/', CardsAPIListView.as_view()),
+    path('cards/create/', CardsAPICreateView.as_view()),
     path('worker/', WorkerAPIListView.as_view()),
     path('profile/', ProfileUserListView.as_view())
 ]

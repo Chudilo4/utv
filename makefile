@@ -7,3 +7,7 @@ installrequirements:
 	pip install -r requirements.txt
 addrequirements:
 	pip freeze > requirements.txt
+addbuilddocker:
+    docker build -t utv .
+rundockerbuild:
+    docker run -it utv

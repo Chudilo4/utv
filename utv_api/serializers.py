@@ -5,7 +5,7 @@ from utv_smeta.models import *
 class UserReadSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', "username"]
+        fields = ['id', "username", 'first_name']
 
 
 class ProfileUserSerializer(serializers.ModelSerializer):
@@ -25,8 +25,15 @@ class CommentsSerializers(serializers.ModelSerializer):
 
 
 class CardsSerializers(serializers.ModelSerializer):
-    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
     performers = ProfileUserSerializer(many=True)
+
+    class Meta:
+        model = Cards
+        fields = '__all__'
+
+
+class CardsCreateSerializer(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Cards
