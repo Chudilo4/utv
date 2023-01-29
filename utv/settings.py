@@ -40,6 +40,7 @@ INSTALLED_APPS = [
     'utv_smeta.apps.UtvSmetaConfig',
     'django_bootstrap5',
     "django_flatpickr",
+    'rest_framework',
 ]
 
 MIDDLEWARE = [

@@ -18,7 +18,7 @@ class Cards(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
-    performers = models.ManyToManyField(User, related_name='CardEvent', blank=True)
+    performers = models.ManyToManyField(ProfileUser, related_name='CardEvent', blank=True)
     date_dedlain = models.DateTimeField()
 
     def __str__(self):
