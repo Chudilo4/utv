@@ -8,6 +8,8 @@ installrequirements:
 addrequirements:
 	pip freeze > requirements.txt
 addbuilddocker:
-    docker build -t utv .
+	docker build -t utv .
 rundockerbuild:
-    docker run -it utv
+	docker run -it utv
+httpsdev:
+	python manage.py runsslserver --certificate cert.pem --key key.pem
