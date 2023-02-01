@@ -31,6 +31,7 @@ DEBUG = True
 ALLOWED_HOSTS = [
     '127.0.0.1',
     'localhost',
+    '*',
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -49,7 +50,6 @@ INSTALLED_APPS = [
     'django_bootstrap5',
     "django_flatpickr",
     'rest_framework',
-    'sslserver',
     'corsheaders',
     'rest_framework_simplejwt',
 ]
