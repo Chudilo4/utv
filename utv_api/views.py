@@ -15,7 +15,7 @@ class CardsAPIView(ModelViewSet):
     def get_queryset(self):
         if self.request.user.is_authenticated:
             return Cards.objects.filter(author=self.request.user)
-        return Cards.objects.all()
+        return Cards.objects.filter(author=None)
 
 
 class UserAPIView(ModelViewSet):
