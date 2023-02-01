@@ -1,6 +1,7 @@
 from django.shortcuts import render
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
+from rest_framework import mixins
 from utv_smeta.models import *
 from .serializers import *
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
@@ -9,8 +10,12 @@ from rest_framework.permissions import IsAuthenticatedOrReadOnly
 
 class CardsAPIView(ModelViewSet):
     serializer_class = CardsSerializers
-    queryset = Cards.objects.all()
     permission_classes = (IsAuthenticatedOrReadOnly, )
+
+    def get_queryset(self):
+        if self.request.user.is_authenticated:
+            return Cards.objects.filter(author=self.request.user)
+        return Cards.objects.all()
 
 
 class UserAPIView(ModelViewSet):
