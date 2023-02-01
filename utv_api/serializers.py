@@ -25,7 +25,6 @@ class CommentsSerializers(serializers.ModelSerializer):
 
 
 class CardsSerializers(serializers.ModelSerializer):
-    performers = ProfileUserSerializer(many=True)
 
     class Meta:
         model = Cards
