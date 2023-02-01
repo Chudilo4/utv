@@ -13,6 +13,12 @@ class CardsAPIView(ModelViewSet):
     permission_classes = (IsAuthenticatedOrReadOnly, )
 
 
+class UserAPIView(ModelViewSet):
+    serializer_class = UserListSerializers
+    queryset = User.objects.all()
+    permission_classes = (IsAuthenticatedOrReadOnly, )
+
+
 # class CardsAPIListView(ListAPIView):
 #     serializer_class = CardsSerializers
 #

@@ -9,6 +9,7 @@ from .views import *
 
 router = routers.DefaultRouter()
 router.register(r'cards', CardsAPIView)
+router.register(r'users', UserAPIView)
 
 
 

@@ -2,14 +2,13 @@ from rest_framework import serializers
 from utv_smeta.models import *
 
 
-class UserReadSerializers(serializers.ModelSerializer):
+class UserListSerializers(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ['id', "username", 'first_name']
+        fields = '__all__'
 
 
 class ProfileUserSerializer(serializers.ModelSerializer):
-    user = UserReadSerializers()
 
     class Meta:
         model = ProfileUser
@@ -25,6 +24,7 @@ class CommentsSerializers(serializers.ModelSerializer):
 
 
 class CardsSerializers(serializers.ModelSerializer):
+    author = serializers.HiddenField(default=serializers.CurrentUserDefault())
 
     class Meta:
         model = Cards
@@ -45,6 +45,7 @@ class WorkerSerializers(serializers.ModelSerializer):
     class Meta:
         model = Worker
         fields = '__all__'
+
 
 
 
