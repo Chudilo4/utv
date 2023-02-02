@@ -11,8 +11,6 @@ addbuilddocker:
 	docker build -t utv .
 rundockerbuild:
 	docker run -it utv
-httpsdev:
-	python manage.py runsslserver --certificate cert.pem --key key.pem
 starthttps:
 	gunicorn --certfile=selfsigned.crt --keyfile=selfsigned.key -w 2 -b 77.79.185.10:2443 utv.wsgi
 getssl:
