@@ -1,16 +1,20 @@
 from django.shortcuts import render
 from rest_framework.generics import ListCreateAPIView, RetrieveUpdateDestroyAPIView, ListAPIView, CreateAPIView
+from rest_framework.mixins import ListModelMixin, RetrieveModelMixin, UpdateModelMixin, DestroyModelMixin
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework import mixins
 from utv_smeta.models import *
 from .serializers import *
-from rest_framework.permissions import IsAuthenticatedOrReadOnly
+from rest_framework.permissions import IsAuthenticatedOrReadOnly, AllowAny, IsAuthenticated
+
+
 # Create your views here.
 
 
 class CardsAPIView(ModelViewSet):
     serializer_class = CardsSerializers
-    permission_classes = (IsAuthenticatedOrReadOnly, )
+    permission_classes = (IsAuthenticated,)
+    lookup_fields = ['title']
 
     def get_queryset(self):
         if self.request.user.is_authenticated:
@@ -18,33 +22,17 @@ class CardsAPIView(ModelViewSet):
         return Cards.objects.filter(author=None)
 
 
-class UserAPIView(ModelViewSet):
-    serializer_class = UserListSerializers
+class CreateUserView(CreateAPIView):
+    model = User
+    permission_classes = [AllowAny, ]
+    serializer_class = UserRegisterSerializers
+
+
+class UserAPIView(ListModelMixin,
+                  RetrieveModelMixin,
+                  UpdateModelMixin,
+                  DestroyModelMixin,
+                  GenericViewSet):
+    serializer_class = UserUpdateSerializer
+    permission_classes = (IsAuthenticated, )
     queryset = User.objects.all()
-    permission_classes = (IsAuthenticatedOrReadOnly, )
-
-
-# class CardsAPIListView(ListAPIView):
-#     serializer_class = CardsSerializers
-#
-#     def get_queryset(self):
-#         return Cards.objects.filter(author=self.request.user)
-#
-#
-# class CardsAPICreateView(CreateAPIView):
-#     serializer_class = CardsCreateSerializer
-#     queryset = Cards.objects.all()
-#
-#
-# class WorkerAPIListView(ListAPIView):
-#     serializer_class = WorkerSerializers
-#
-#     def get_queryset(self):
-#         return Worker.objects.filter(author=self.request.user)
-#
-#
-# class ProfileUserListView(ListAPIView):
-#     queryset = ProfileUser.objects.all()
-#     serializer_class = ProfileUserSerializer
-
-

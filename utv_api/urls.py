@@ -7,9 +7,9 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from .views import *
 
 
-router = routers.DefaultRouter()
+router = routers.SimpleRouter()
 router.register(r'cards', CardsAPIView, basename='cards')
-router.register(r'users', UserAPIView)
+router.register(r'users', UserAPIView, basename='users')
 
 
 

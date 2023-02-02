@@ -15,3 +15,8 @@ class CardsAdmin(admin.ModelAdmin):
 @admin.register(Worker)
 class WorkersAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(Comments)
+class CommentsAdmin(admin.ModelAdmin):
+    pass
