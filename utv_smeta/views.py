@@ -1,8 +1,13 @@
+import re
+
 from django.contrib.auth import logout
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy, reverse
+from django.views import View
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView, DeleteView, ListView
+from django.views.generic.edit import FormMixin
+
 from utv_smeta.forms import *
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import AuthenticationForm
@@ -91,17 +96,17 @@ class CardDetailView(DetailView, CreateView):
         return reverse('card_detail', kwargs={'pk': self.get_object().pk})
 
 
-class WorkerCreateView(CreateView):
-    form_class = WorkerForm
-    template_name = 'utv_smeta/worker_crete.html'
-
-    def get_success_url(self):
-        return reverse('card_detail', kwargs={'pk': self.object.card.pk})
-
-    def get_form_kwargs(self):
-        kwargs = super(WorkerCreateView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
+class WorkerCreateView(View):
+    def post(self, request, *args, **kwargs):
+        form = WorkerForm(request.POST)
+        pk = kwargs['pk']
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.card = Cards.objects.get(pk=pk)
+            comment.save()
+            return redirect('card_detail', pk=pk)
+        return redirect('cards')
 
 
 class WorkerUpdateView(UpdateView):

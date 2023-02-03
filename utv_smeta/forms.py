@@ -61,10 +61,5 @@ class CommentCreateForm(forms.ModelForm):
 class WorkerForm(forms.ModelForm):
     class Meta:
         model = Worker
-        fields = ['actual_time', 'scheduled_time', 'description', 'card']
+        fields = ['actual_time', 'scheduled_time']
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super(WorkerForm, self).__init__(*args, **kwargs)
-        self.fields['card'] = forms.ModelChoiceField(queryset=Cards.objects.filter(Q(performers=user) | Q(author=user)).exclude(worker__author=user))
-        self.instance.author = user

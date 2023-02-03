@@ -67,8 +67,18 @@
             {% endfor %}
             <hr>
             <h2>Рабочка</h2>
-            <a href="{% url 'worker_create' cards.pk %}"><button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop">Создать</button></a>
-        </div>
+            <form method="post" action="{% url 'worker_create' cards.pk %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label class="form-label" for="id_actual_time">Фактическое время</label>
+                    <input type="number" name="actual_time" value="0" class="form-control" placeholder="Фактическое время" required="" id="id_actual_time">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label" for="id_scheduled_time">Плановое время</label>
+                    <input type="number" name="scheduled_time" value="0" class="form-control" placeholder="Плановое время" required="" id="id_scheduled_time">
+                </div>
+                <button class="btn btn-primary" type="">Создать карточку!</button>
+                </form>
     </div>
 </div>
 {% endblock %}

@@ -20,8 +20,8 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', include('utv_smeta.urls')),
-    path('', include('utv_api.urls')),
+    path('', include('utv_smeta.urls')),
+    # path('', include('utv_api.urls')),
 ]
 
 if settings.DEBUG:

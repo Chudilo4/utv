@@ -18,7 +18,7 @@ class Cards(models.Model):
     title = models.CharField(max_length=255)
     description = models.TextField()
     created = models.DateTimeField(auto_now_add=True)
-    performers = models.ManyToManyField(ProfileUser, related_name='CardEvent', blank=True)
+    performers = models.ManyToManyField(User, related_name='CardEvent', blank=True)
     date_dedlain = models.DateTimeField()
 
     def __str__(self):
@@ -43,7 +43,6 @@ class Worker(models.Model):
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     actual_time = models.IntegerField(verbose_name='Фактическое время', default=0)
     scheduled_time = models.IntegerField(verbose_name='Плановое время', default=0)
-    description = models.TextField(verbose_name='Описание работы', blank=True, null=True)
 
     def get_absolute_url(self):
         return reverse('worker_create', kwargs={'pk': self.pk})
