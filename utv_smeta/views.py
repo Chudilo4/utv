@@ -54,10 +54,6 @@ class DeleteUserView(DeleteView):
     success_url = reverse_lazy('regiister')
 
 
-class LogoutUserView(LogoutView):
-    pass
-
-
 class HomeView(TemplateView):
     template_name = 'utv_smeta/base.html'
 
@@ -67,7 +63,7 @@ class CardsListView(ListView):
     model = Cards
 
     def get_queryset(self):
-        return Cards.objects.filter(Q(author=self.request.user) | Q(performers=self.request.user))
+        return Cards.objects.filter(author=self.request.user).union(Cards.objects.filter(performers=self.request.user))
 
 
 class CardsCreateView(CreateView):
@@ -96,7 +92,7 @@ class CardDetailView(DetailView, CreateView):
         return reverse('card_detail', kwargs={'pk': self.get_object().pk})
 
 
-class WorkerCreateView(View):
+class WorkerCreateUpdateView(View):
     def post(self, request, *args, **kwargs):
         form = WorkerForm(request.POST)
         pk = kwargs['pk']
@@ -109,23 +105,9 @@ class WorkerCreateView(View):
         return redirect('cards')
 
 
-class WorkerUpdateView(UpdateView):
-    template_name = 'utv_smeta/worker_update.html'
-    form_class = WorkerForm
-    model = Worker
-
-    def get_success_url(self):
-        return reverse('card_detail', kwargs={'pk': self.object.card.pk})
-
-    def get_form_kwargs(self):
-        kwargs = super(WorkerUpdateView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        return kwargs
-
-
 class WorkerDeleteView(DeleteView):
     model = Worker
-    template_name = 'utv_smeta/worker_delete.html'
+    http_method_names = ['post']
 
     def get_success_url(self):
         return reverse('card_detail', kwargs={'pk': self.get_object().card.pk})

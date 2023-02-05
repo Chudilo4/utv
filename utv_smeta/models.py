@@ -28,6 +28,7 @@ class Cards(models.Model):
         return reverse('card_detail' , kwargs={'pk': self.pk})
 
 
+
 class Comments(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
@@ -49,3 +50,6 @@ class Worker(models.Model):
 
     def __str__(self):
         return self.author.username + ' ' + self.card.title
+
+    def get_cards(self):
+        return self.card

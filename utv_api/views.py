@@ -28,11 +28,4 @@ class CreateUserView(CreateAPIView):
     serializer_class = UserRegisterSerializers
 
 
-class UserAPIView(ListModelMixin,
-                  RetrieveModelMixin,
-                  UpdateModelMixin,
-                  DestroyModelMixin,
-                  GenericViewSet):
-    serializer_class = UserUpdateSerializer
-    permission_classes = (IsAuthenticated, )
-    queryset = User.objects.all()
+

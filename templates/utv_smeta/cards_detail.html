@@ -30,7 +30,28 @@
             <p>Дата создания: {{ cards.created }}</p>
             <p>Дедлайн: {{ cards.date_dedlain }}</p>
             <hr>
-            <div class="overflow-auto" style="height: 340px">
+            <div style="height: 340px">
+            {% for i in cards.worker_set.all %}
+                {% if request.user == i.author %}
+                    <form class='row' method="post" action="{% url 'worker_update' cards.pk %}">
+                    {% csrf_token %}
+                    <div class="col-lg-3">
+                        <label class="form-label" for="id_actual_time">Фактическое время</label>
+                        <input type="number" name="actual_time" value="0" class="form-control" placeholder="Фактическое время" required="" id="id_actual_time">
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="form-label" for="id_scheduled_time">Плановое время</label>
+                        <input type="number" name="scheduled_time" value="0" class="form-control" placeholder="Плановое время" required="" id="id_scheduled_time">
+                    </div>
+                    <div class="col-lg-3">
+                    <button class="btn btn-primary" type="">Изменить своё время в проекте</button>
+                    </div>
+                    </form>
+                {% elif cards %}
+                    <h1>Hello</h1>
+                {% endif %}
+            {% endfor %}
+            <hr>
             <table class="table ">
 
                   <thead>
@@ -38,8 +59,6 @@
                       <th scope="col">Исполнители</th>
                       <th scope="col">Фактическое время</th>
                       <th scope="col">Плановое время</th>
-                      <th scope="col">Описание</th>
-                      <th scope="col">Изменить</th>
                       <th scope="col">Удалить</th>
                     </tr>
                   </thead>
@@ -49,9 +68,9 @@
                       <th scope="row"><a href="{% url 'profile' i.author.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.author.profileuser.avatar.url }}"></a></th>
                       <td>{{ i.actual_time }}</td>
                       <td>{{ i.scheduled_time }}</td>
-                      <td>{{ i.description }}</td>
-                      <td><a href="{% url 'worker_update' i.pk %}">{% bootstrap_button content='Изменить' %}</a></td>
-                      <td><a href="{% url 'worker_delete' i.pk %}" rel="nofollow"><input class="btn btn-danger" type="submit" value="Удалить"></a></td>
+                        {% if request.user == i.author %}
+                      <td><form method="post" action="{% url 'worker_delete' i.pk %}">{% csrf_token %}<a href="{% url 'worker_delete' i.pk %}" rel="nofollow"><input class="btn btn-danger" type="submit" value="Удалить"></a></form> </td>
+                        {% endif %}
                     </tr>
                   {% endfor %}
                   </tbody>
@@ -67,18 +86,6 @@
             {% endfor %}
             <hr>
             <h2>Рабочка</h2>
-            <form method="post" action="{% url 'worker_create' cards.pk %}">
-                {% csrf_token %}
-                <div class="mb-3">
-                    <label class="form-label" for="id_actual_time">Фактическое время</label>
-                    <input type="number" name="actual_time" value="0" class="form-control" placeholder="Фактическое время" required="" id="id_actual_time">
-                </div>
-                <div class="mb-3">
-                    <label class="form-label" for="id_scheduled_time">Плановое время</label>
-                    <input type="number" name="scheduled_time" value="0" class="form-control" placeholder="Плановое время" required="" id="id_scheduled_time">
-                </div>
-                <button class="btn btn-primary" type="">Создать карточку!</button>
-                </form>
     </div>
 </div>
 {% endblock %}
