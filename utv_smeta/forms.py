@@ -50,13 +50,6 @@ class CommentCreateForm(forms.ModelForm):
             'text': 'Введите ваш комит!'
         }
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        card = kwargs.pop('card', None)
-        super(CommentCreateForm, self).__init__(*args, **kwargs)
-        self.instance.card = card
-        self.instance.author = user
-
 
 class WorkerForm(forms.ModelForm):
     class Meta:

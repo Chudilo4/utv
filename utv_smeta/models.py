@@ -34,6 +34,7 @@ class Comments(models.Model):
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Поле для коментария')
     created = models.DateTimeField(auto_now_add=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
 
     class Meta:
         ordering = ('-created',)

@@ -11,6 +11,7 @@ urlpatterns = [
     path('cards/', CardsListView.as_view(), name='cards'),
     path('cards/create/', CardsCreateView.as_view(), name='card_create'),
     path('cards/<int:pk>/', CardDetailView.as_view(), name='card_detail'),
+    path('cards/<int:pk>/comment/create/', CommentsAddView.as_view(), name='comment_create'),
     path('cards/<int:pk>/worker/create/', WorkerCreateUpdateView.as_view(), name='worker_create'),
     path('worker/<int:pk>/update/', WorkerCreateUpdateView.as_view(), name='worker_update'),
     path('worker/<int:pk>/delete', WorkerDeleteView.as_view(), name='worker_delete')

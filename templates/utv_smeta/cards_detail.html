@@ -5,10 +5,13 @@
     <div class="row">
         <div class="col-2 p-2 bg-secondary overflow-auto" style="height: 821px">
             <h3>Чат к проекту</h3>
-            <form method="post">
+            <form method="post" action="{% url 'comment_create' cards.pk %}">
                 {% csrf_token %}
-                {% bootstrap_form form %}
-                {% bootstrap_button type=submit content='Отправить' %}
+                <div class="mb-3">
+                    <label class="form-label" for="id_text">Введите ваш комит!</label>
+                    <input type="text" name="text" row="20" cols="40" class="form-control" placeholder="Введите ваш комит!" required="" id="id_text">
+                </div>
+                <button class="btn btn-primary" type="">Отправить</button>
             </form>
             {% for i in cards.comments_set.all %}
             <div class="shadow-none p-3 m-1 bg-light rounded">
@@ -47,12 +50,10 @@
                     <button class="btn btn-primary" type="">Изменить своё время в проекте</button>
                     </div>
                     </form>
-                {% elif cards %}
-                    <h1>Hello</h1>
                 {% endif %}
             {% endfor %}
             <hr>
-            <table class="table ">
+            <table class="table">
 
                   <thead>
                     <tr>

@@ -77,24 +77,29 @@ class CardsCreateView(CreateView):
         return kwargs
 
 
-class CardDetailView(DetailView, CreateView):
+class CardDetailView(DetailView):
     model = Cards
     template_name = 'utv_smeta/cards_detail.html'
-    form_class = CommentCreateForm
 
-    def get_form_kwargs(self):
-        kwargs = super(CardDetailView, self).get_form_kwargs()
-        kwargs['user'] = self.request.user
-        kwargs['card'] = self.get_object()
-        return kwargs
 
-    def get_success_url(self):
-        return reverse('card_detail', kwargs={'pk': self.get_object().pk})
 
 
 class WorkerCreateUpdateView(View):
     def post(self, request, *args, **kwargs):
         form = WorkerForm(request.POST)
+        pk = kwargs['pk']
+        if form.is_valid():
+            comment = form.save(commit=False)
+            comment.author = request.user
+            comment.card = Cards.objects.get(pk=pk)
+            comment.save()
+            return redirect('card_detail', pk=pk)
+        return redirect('cards')
+
+
+class CommentsAddView(View):
+    def post(self, request, *args, **kwargs):
+        form = CommentCreateForm(request.POST)
         pk = kwargs['pk']
         if form.is_valid():
             comment = form.save(commit=False)
@@ -111,3 +116,4 @@ class WorkerDeleteView(DeleteView):
 
     def get_success_url(self):
         return reverse('card_detail', kwargs={'pk': self.get_object().card.pk})
+
