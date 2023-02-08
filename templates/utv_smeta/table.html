@@ -1,0 +1,44 @@
+{% extends 'utv_smeta/base.html' %}
+{% block content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-2 p-2 bg-secondary overflow-auto" style="height: 821px">
+            </div>
+            <div class="col-6 p-5 bg-light rounded" style="height: 821px">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th scope="col">Плановые данные</th>
+                      <th scope="col">Сметная стоимость</th>
+                      <th scope="col">Фактические данные</th>
+                      <th scope="col">Сметная стоимость</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <th scope="row">Плановая себестоимость</th>
+                      <td>{{ tableproject.planned_cost }}</td>
+                      <th>Фактическая себестоимость</th>
+                      <td>{{ tableproject.cost }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Плановая зарплата участников</th>
+                      <td>{{ tableproject.planned_salary }}</td>
+                      <th>Фактическая зарплата участников</th>
+                      <td>{{ tableproject.salary }}</td>
+                    </tr>
+                  {% for i in tableproject.salaryprojectuser_set.all %}
+                    <tr>
+                      <th scope="row">{{ i.worker.author }}</th>
+                      <td>{{ i.planned_salary }}</td>
+                      <th>Фактическая зарплата</th>
+                      <td>{{ i.salary }}</td>
+                    </tr>
+                  {% endfor %}
+                  </tbody>
+
+    </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

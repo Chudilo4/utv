@@ -1,5 +1,5 @@
 import re
-
+from django.contrib import messages
 from django.contrib.auth import logout
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect
@@ -12,7 +12,8 @@ from utv_smeta.forms import *
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
-from utv_smeta.models import Cards
+from utv_smeta.models import Cards, TableProject
+from utv_smeta.service import update_worker, get_my_worker, create_table, get_my_table, create_worker
 
 
 # Create your views here.
@@ -76,25 +77,56 @@ class CardsCreateView(CreateView):
         kwargs['user'] = self.request.user
         return kwargs
 
+    def form_valid(self, form):
+        self.object = form.save()
+        TableProject.objects.create(cards=self.object)
+        return super().form_valid(form)
+
 
 class CardDetailView(DetailView):
     model = Cards
     template_name = 'utv_smeta/cards_detail.html'
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['form_work_list'] = get_my_worker(card=self.get_object(), author=self.request.user)
+        context['table'] = get_my_table(self.get_object())
+        return context
 
 
+class CardTableCreateView(View):
+    def post(self, request, *args, **kwargs):
+        pk = kwargs['pk']
+        create_table(pk)
+        return redirect('card_detail', pk=pk)
 
-class WorkerCreateUpdateView(View):
+
+class TableDetailView(DetailView):
+    model = TableProject
+    template_name = 'utv_smeta/table.html'
+    pk_url_kwarg = 'table_pk'
+
+
+class WorkerCreateView(View):
     def post(self, request, *args, **kwargs):
         form = WorkerForm(request.POST)
         pk = kwargs['pk']
         if form.is_valid():
-            comment = form.save(commit=False)
-            comment.author = request.user
-            comment.card = Cards.objects.get(pk=pk)
-            comment.save()
+            create_worker(request, pk, request.POST['actual_time'], request.POST['scheduled_time'])
             return redirect('card_detail', pk=pk)
         return redirect('cards')
+
+
+class WorkerUpdateView(View):
+    def post(self, request, *args, **kwargs):
+        form = WorkerForm(request.POST)
+        cards_pk = kwargs['pk']
+        if form.is_valid():
+            update_worker(kwargs['worker_pk'], cards_pk, request.POST['actual_time'], request.POST['scheduled_time'])
+            messages.success(request, 'Рабочка обновлена')
+            return redirect('card_detail', pk=cards_pk)
+        messages.error(request, 'Рабочка не обновилась')
+        return redirect('card_detail', pk=cards_pk)
 
 
 class CommentsAddView(View):

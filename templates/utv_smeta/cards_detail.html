@@ -34,9 +34,23 @@
             <p>Дедлайн: {{ cards.date_dedlain }}</p>
             <hr>
             <div style="height: 340px">
-            {% for i in cards.worker_set.all %}
-                {% if request.user == i.author %}
-                    <form class='row' method="post" action="{% url 'worker_update' cards.pk %}">
+            {% if form_work_list == None %}
+                <form class='row' method="post" action="{% url 'worker_create' cards.pk %}">
+                    {% csrf_token %}
+                    <div class="col-lg-3">
+                        <label class="form-label" for="id_actual_time">Фактическое время</label>
+                        <input type="number" name="actual_time" value="0" class="form-control" placeholder="Фактическое время" required="" id="id_actual_time">
+                    </div>
+                    <div class="col-lg-3">
+                        <label class="form-label" for="id_scheduled_time">Плановое время</label>
+                        <input type="number" name="scheduled_time" value="0" class="form-control" placeholder="Плановое время" required="" id="id_scheduled_time">
+                    </div>
+                    <div class="col-lg-3">
+                    <button class="btn btn-primary" type="">Добавить своё время в проекте</button>
+                    </div>
+                    </form>
+            {% else %}
+                <form class='row' method="post" action="{% url 'worker_update' cards.pk form_work_list.pk %}">
                     {% csrf_token %}
                     <div class="col-lg-3">
                         <label class="form-label" for="id_actual_time">Фактическое время</label>
@@ -50,8 +64,7 @@
                     <button class="btn btn-primary" type="">Изменить своё время в проекте</button>
                     </div>
                     </form>
-                {% endif %}
-            {% endfor %}
+            {% endif %}
             <hr>
             <table class="table">
 
@@ -86,7 +99,8 @@
             <a href="{% url 'profile' i.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"></a>
             {% endfor %}
             <hr>
-            <h2>Рабочка</h2>
+            <a href="{% url 'table_detail' cards.pk table.pk %}"><h1>ТАБЛИЦА</h1></a>
+    </div>
     </div>
 </div>
 {% endblock %}

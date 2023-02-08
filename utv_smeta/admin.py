@@ -20,3 +20,18 @@ class WorkersAdmin(admin.ModelAdmin):
 @admin.register(Comments)
 class CommentsAdmin(admin.ModelAdmin):
     pass
+
+
+@admin.register(EmployeeRate)
+class EmployeeRateAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(TableProject)
+class TableProjectAdmin(admin.ModelAdmin):
+    pass
+
+
+@admin.register(SalaryProjectUser)
+class SalaryProjectUserAdmin(admin.ModelAdmin):
+    pass
