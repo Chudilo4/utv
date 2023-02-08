@@ -12,8 +12,8 @@ from utv_smeta.forms import *
 from django.contrib.auth.views import LoginView, LogoutView
 from django.contrib.auth.forms import AuthenticationForm
 from django.db.models import Q
-from utv_smeta.models import Cards, TableProject
-from utv_smeta.service import update_worker, get_my_worker, create_table, get_my_table, create_worker
+from utv_smeta.models import Cards, TableProject, EmployeeRate
+from utv_smeta.service import update_worker, get_my_worker, create_table, get_my_table, create_worker, get_table, Workers
 
 
 # Create your views here.
@@ -28,6 +28,7 @@ class RegisterUserView(SuccessMessageMixin, CreateView):
     def form_valid(self, form):
         self.object = form.save()
         ProfileUser.objects.create(user_id=self.object.pk)
+        EmployeeRate.objects.create(user=self.object, money=200)
         return super().form_valid(form)
 
 
@@ -89,7 +90,7 @@ class CardDetailView(DetailView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['form_work_list'] = get_my_worker(card=self.get_object(), author=self.request.user)
+        context['form_work_list'] = Workers(card_id=self.object.pk, author_id=self.request.user.pk).get_my_worker()
         context['table'] = get_my_table(self.get_object())
         return context
 
@@ -101,10 +102,10 @@ class CardTableCreateView(View):
         return redirect('card_detail', pk=pk)
 
 
-class TableDetailView(DetailView):
-    model = TableProject
-    template_name = 'utv_smeta/table.html'
-    pk_url_kwarg = 'table_pk'
+class TableDetailView(View):
+    def get(self, request, *args, **kwargs):
+        table = get_table(kwargs['table_pk'])
+        return render(request, 'utv_smeta/table.html', {'table': table})
 
 
 class WorkerCreateView(View):

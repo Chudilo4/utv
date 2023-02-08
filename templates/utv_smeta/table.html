@@ -17,17 +17,17 @@
                   <tbody>
                     <tr>
                       <th scope="row">Плановая себестоимость</th>
-                      <td>{{ tableproject.planned_cost }}</td>
+                      <td>{{ table.planned_cost }}</td>
                       <th>Фактическая себестоимость</th>
-                      <td>{{ tableproject.cost }}</td>
+                      <td>{{ table.cost }}</td>
                     </tr>
                     <tr>
                       <th scope="row">Плановая зарплата участников</th>
-                      <td>{{ tableproject.planned_salary }}</td>
+                      <td>{{ table.planned_salary }}</td>
                       <th>Фактическая зарплата участников</th>
-                      <td>{{ tableproject.salary }}</td>
+                      <td>{{ table.salary }}</td>
                     </tr>
-                  {% for i in tableproject.salaryprojectuser_set.all %}
+                  {% for i in table.salaryprojectuser_set.all %}
                     <tr>
                       <th scope="row">{{ i.worker.author }}</th>
                       <td>{{ i.planned_salary }}</td>
