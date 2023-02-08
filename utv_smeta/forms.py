@@ -29,11 +29,6 @@ class CardsCreateForm(forms.ModelForm):
             'date_dedlain': DateTimePickerInput()
         }
 
-    def __init__(self, *args, **kwargs):
-        user = kwargs.pop('user', None)
-        super(CardsCreateForm, self).__init__(*args, **kwargs)
-        self.instance.author = user
-
 
 class CommentCreateForm(forms.ModelForm):
     class Meta:

@@ -20,6 +20,7 @@ class Cards(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     performers = models.ManyToManyField(User, related_name='CardEvent', blank=True)
     date_dedlain = models.DateTimeField()
+    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
 
     def __str__(self):
         return self.title
@@ -44,6 +45,8 @@ class Worker(models.Model):
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     actual_time = models.IntegerField(verbose_name='Фактическое время', default=0)
     scheduled_time = models.IntegerField(verbose_name='Плановое время', default=0)
+    creared = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания работы')
+    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления работы')
 
     def __str__(self):
         return self.author.username + ' ' + self.card.title
@@ -65,14 +68,18 @@ class TableProject(models.Model):
     profit = models.IntegerField(verbose_name='Фактическая прибыль', null=True)
     planned_profitability = models.IntegerField(verbose_name='Плановая рентабельность', null=True)
     profitability = models.IntegerField(verbose_name='Фактическая рентабельность', null=True)
+    creared = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания таблицы')
+    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления таблицы')
 
     def __str__(self):
         return f'Таблица {self.cards.title}'
 
 
 class EmployeeRate(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     money = models.IntegerField(verbose_name='Заработок в час', null=True)
+    creared = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 
     def __str__(self):
         return f'ЗП в час сотрудника {self.user} составляет {self.money}'
