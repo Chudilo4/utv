@@ -1,7 +1,7 @@
-from utv_smeta.models import Worker, TableProject, Cards, EmployeeRate, SalaryProjectUser
+from utv_smeta.models import Worker, TableProject, Cards, EmployeeRate, SalaryProjectUser, Comments
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
-
+from django.contrib.auth.models import User
 
 class CardService:
     def __init__(self, request=None, user_pk=None, title=None, description=None, performers=None,
@@ -42,89 +42,113 @@ class CardService:
         return Cards.objects.get(pk=self.card_pk)
 
 
+class WorkerService:
+    def __init__(self, request=None, work_pk=None, author_pk=None, card_pk=None, actual_time=None, scheduled_time=None):
+        self.author_pk = author_pk
+        self.card_pk = card_pk
+        self.actual_time = actual_time
+        self.scheduled_time = scheduled_time
+        self.work_pk = work_pk
+        self.request = request
+
+    def create_worker(self):
+        w = Worker.objects.create(author_id=self.author_pk,
+                                  card_id=self.card_pk,
+                                  actual_time=self.actual_time,
+                                  scheduled_time=self.scheduled_time)
+
+    def my_work(self):
+        return Worker.objects.get(card_id=self.card_pk, author_id=self.author_pk)
+
+    def count_worker_in_card(self):
+        return Worker.objects.filter(author_id=self.author_pk, card_id=self.card_pk).count()
+
+    def update_worker(self):
+        w = self.my_work()
+        w.actual_time = self.actual_time
+        w.scheduled_time = self.scheduled_time
+        w.save()
+
+    def delete_worker(self):
+        w = self.my_work()
+        w.delete()
 
 
+class CommentService:
+    def __init__(self, request=None, comment_pk=None, author_pk=None, card_pk=None, text=None):
+        self.author_pk = author_pk
+        self.card_pk = card_pk
+        self.text = text
+        self.comment_pk = comment_pk
+    def create_comment(self):
+        c = Comments.objects.create(card_id=self.card_pk, author_id=self.author_pk, text=self.text)
 
-# def create_worker(request, card_pk, actual_time, scheduled_time):
-#     """В этой логике при создании пользователем работы
-#     происходит создание таблицы в которой указано сколько
-#     пользователь получит зарплаты за своё потраченно время"""
-#     c = Cards.objects.get(pk=card_pk)
-#     t = TableProject.objects.get(cards=c)
-#     w = Worker.objects.create(author=request.user,
-#                               card=c,
-#                               actual_time=actual_time,
-#                               scheduled_time=scheduled_time)
-#     try:
-#         a_t = int(w.actual_time) * w.author.employeerate.money
-#         s_t = int(w.scheduled_time) * w.author.employeerate.money
-#         SalaryProjectUser.objects.create(worker=w, table_project=t, salary=a_t, planned_salary=s_t)
-#     except:
-#         messages.error(request, 'Вам не проставлена зарплата')
-#
-#
-# def update_worker(worker_pk, card_pk, actual_time, scheduled_time):
-#     w = Worker.objects.get(pk=worker_pk)
-#     w.actual_time = actual_time
-#     w.scheduled_time = scheduled_time
-#     w.save()
-#     c = Cards.objects.get(pk=card_pk)
-#     t = TableProject.objects.get(cards=c)
-#     a_t = int(w.actual_time) * w.author.employeerate.money
-#     s_t = int(w.scheduled_time) * w.author.employeerate.money
-#     s = SalaryProjectUser.objects.get(table_project=t, worker=w)
-#     s.salary = a_t
-#     s.planned_salary = s_t
-#     s.save()
-#
-#
-# def get_my_worker(card, author):
-#     try:
-#         w = Worker.objects.get(card=card, author=author)
-#         return w
-#     except:
-#         return None
-#
-#
-# def create_table(pk):
-#     TableProject.objects.create(card=Cards.objects.get(pk=pk))
-#
-#
-# def get_my_table(card):
-#     t = TableProject.objects.get(cards=card)
-#     t.salaryprojectuser_set
-#     return t
-#
-#
-# def get_table(table_pk):
-#     return TableProject.objects.get(pk=table_pk)
-#
-# def refresh_table(card_id, table_pk):
-#     Worker.objects.filter(card_id=card_id)
-#     t = TableProject.objects.get(pk=table_pk)
-#
-#
-# class Workers:
-#     def __init__(self, card_id, author_id):
-#         self.card_id = card_id
-#         self.author_id = author_id
-#         self.count_worker = Worker.objects.filter(card_id=self.card_id).count()
-#
-#     def get_my_worker(self):
-#         try:
-#             w = Worker.objects.get(card_id=self.card_id, author_id=self.author_id)
-#             return w
-#         except:
-#             return None
-#
-#
-# class TableCardsService:
-#     def __init__(self, card_pk):
-#         self.card_pk = card_pk
-#         self.count_worker = Worker.objects.filter(card_id=self.card_pk).count()
-#
-#     def get_my_table(self):
-#         try:
-#             return TableProject.objects.get(cards_id=self.card_pk)
-#         except:
-#             return None
+    def my_comment(self):
+        return Comments.objects.get(pk=self.comment_pk, card_id=self.card_pk, author_id=self.author_pk)
+
+    def delete_comment(self):
+        c = self.my_comment()
+        c.delete()
+
+
+class TableService:
+    def __init__(self, request=None, card_pk=None, table_pk=None,
+                 planned_other_expenses=1, other_expenses=1, planned_price_client=1, price_client=1):
+        self.card_pk = card_pk
+        self.request = request
+        self.table_pk = table_pk
+        self.price_client = price_client
+        self.planned_other_expenses = planned_other_expenses
+        self.other_expenses = other_expenses
+        self.planed_price_client = planned_price_client
+
+    def perfomens(self):
+        return Worker.objects.filter(card_id=self.card_pk)
+
+    def create_table(self):
+        planned_salary, salary = self.salary_perfomance()  # Плановая зарплата сотрудников, Зарплата сотрудников
+        planned_taxes_fot = planned_salary * 0.5  # Плановые налоги с ФОТ
+        taxes_fot = salary * 0.5  # Налоги с ФОТ
+        planned_other_expenses = self.planned_other_expenses   #  Плановые прочие расходы
+        other_expenses = self.other_expenses  # Прочие расходы
+        planned_general_expenses = (planned_salary + planned_taxes_fot + planned_other_expenses) * 0.23 # Плановые общехозяйственные расходы
+        general_expenses = (salary + taxes_fot + other_expenses) * 0.23  # Общехозяйственные расходы
+        planned_cost = planned_salary + planned_taxes_fot + planned_other_expenses + planned_general_expenses  # Плановая себестоимость
+        cost = salary + taxes_fot + other_expenses + general_expenses  # Cебестоимость
+        planned_profit = self.price_client - planned_cost # Плановая прибыль
+        profit = self.price_client - cost  # Фактическая прибыль
+        planned_profitability = (planned_profit / self.planed_price_client) * 100  # Плановая рентабельность
+        profitability = (profit / self.price_client) * 100  # Фактическая рентабельность
+        TableProject.objects.create(cards_id=self.card_pk,
+                                    price_client=self.price_client,
+                                    planned_price_client=self.planed_price_client,
+                                    planned_cost=planned_cost,
+                                    cost=cost,
+                                    planned_salary=planned_salary,
+                                    salary=salary,
+                                    planned_taxes_FOT=planned_taxes_fot,
+                                    taxes_FOT=taxes_fot,
+                                    planned_other_expenses=self.planned_other_expenses,
+                                    other_expenses=self.other_expenses,
+                                    planned_general_expenses=planned_general_expenses,
+                                    general_expenses=general_expenses,
+                                    planned_profit=planned_profit,
+                                    profit=profit,
+                                    planned_profitability=planned_profitability,
+                                    profitability=profitability
+                                    )
+
+    def valid_table(self):
+        return self.salary_perfomance()
+
+    def get_table(self):
+        return TableProject.objects.get(pk=self.table_pk)
+
+    def salary_perfomance(self):
+        workersalary = 0
+        planedworkersalary = 0
+        for i in self.perfomens():
+            for i2 in i.author.employeerate_money.order_by('-creared')[:1]:
+                workersalary += i2.money * i.actual_time
+                planedworkersalary += i2.money * i.scheduled_time
+        return planedworkersalary, workersalary

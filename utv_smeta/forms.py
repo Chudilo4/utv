@@ -6,7 +6,7 @@ from django_flatpickr.widgets import DateTimePickerInput
 from django import forms
 from django.conf import settings
 
-from utv_smeta.models import ProfileUser, Cards, Comments, Worker
+from utv_smeta.models import ProfileUser, Cards, Comments, Worker, TableProject
 
 
 class UserRegisterForm(UserCreationForm):
@@ -51,3 +51,8 @@ class WorkerForm(forms.ModelForm):
         model = Worker
         fields = ['actual_time', 'scheduled_time']
 
+
+class TableForm(forms.ModelForm):
+    class Meta:
+        model = TableProject
+        fields = ['price_client', 'planned_price_client', 'planned_other_expenses', 'other_expenses']

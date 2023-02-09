@@ -16,6 +16,12 @@
                   </thead>
                   <tbody>
                     <tr>
+                      <th scope="row">Плановая ЦЕНА для клиента</th>
+                      <td>{{ table.planned_price_client }}</td>
+                      <th>Фактическая ЦЕНА для клиента</th>
+                      <td>{{ table.price_client }}</td>
+                    </tr>
+                    <tr>
                       <th scope="row">Плановая себестоимость</th>
                       <td>{{ table.planned_cost }}</td>
                       <th>Фактическая себестоимость</th>
@@ -35,6 +41,42 @@
                       <td>{{ i.salary }}</td>
                     </tr>
                   {% endfor %}
+                    <tr>
+                      <th scope="row">Плановые налоги с ФОТ</th>
+                      <td>{{ table.planned_taxes_FOT }}</td>
+                      <th>Фактическая налоги с ФОТ</th>
+                      <td>{{ table.taxes_FOT }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Плановые Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы</th>
+                      <td>{{ table.planned_other_expenses }}</td>
+                      <th>Фактическая Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы</th>
+                      <td>{{ table.other_expenses }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Плановые Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы</th>
+                      <td>{{ table.planned_other_expenses }}</td>
+                      <th>Фактическая Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы</th>
+                      <td>{{ table.other_expenses }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Плановые Общехозяйственные расходы</th>
+                      <td>{{ table.planned_general_expenses }}</td>
+                      <th>Фактическая Общехозяйственные расходы</th>
+                      <td>{{ table.general_expenses }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Плановая Прибыль</th>
+                      <td>{{ table.planned_profit }}</td>
+                      <th>Фактическая Прибыль</th>
+                      <td>{{ table.profit }}</td>
+                    </tr>
+                    <tr>
+                      <th scope="row">Плановая Рентабельность</th>
+                      <td>{{ table.planned_profitability }}%</td>
+                      <th>Фактическая Рентабельность</th>
+                      <td>{{ table.profitability }}%</td>
+                    </tr>
                   </tbody>
 
     </table>

@@ -3,27 +3,25 @@
 {% block content %}
 <div class="container-fluid">
     <div class="row">
-{#        <div class="col-2 p-2 bg-secondary overflow-auto" style="height: 821px">#}
-{#            <h3>Чат к проекту</h3>#}
-{#            <form method="post" action="{% url 'comment_create' cards.pk %}">#}
-{#                {% csrf_token %}#}
-{#                <div class="mb-3">#}
-{#                    <label class="form-label" for="id_text">Введите ваш комит!</label>#}
-{#                    <input type="text" name="text" row="20" cols="40" class="form-control" placeholder="Введите ваш комит!" required="" id="id_text">#}
-{#                </div>#}
-{#                <button class="btn btn-primary" type="">Отправить</button>#}
-{#            </form>#}
-{#            {% for i in cards.comments_set.all %}#}
-{#            <div class="shadow-none p-3 m-1 bg-light rounded">#}
-{#                <a href="{% url 'profile' i.author.profileuser.pk %}"><img src="{{ i.author.profileuser.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle"></a>#}
-{#                <strong class="text-gray-dark">{{ i.author.username }}</strong>#}
-{#                <hr>#}
-{#                <p class="text-break">{{ i.text }}</p>#}
-{#                <hr>#}
-{#                <p>{{ i.created }}</p>#}
-{#            </div>#}
-{#            {% endfor %}#}
-{#        </div>#}
+        <div class="col-2 p-2 bg-secondary overflow-auto" style="height: 821px">
+            <h3>Чат к проекту</h3>
+            <form method="post" action="{% url 'comment_create' cards.pk %}">
+                {% csrf_token %}
+                {% bootstrap_form form_comment %}
+                {% bootstrap_button content='Добавить коментарий' type='submit' %}
+            </form>
+            {% for i in cards.comments_set.all %}
+            <div class="shadow-none p-3 m-1 bg-light rounded">
+                <a href="{% url 'profile' i.author.profileuser.pk %}"><img src="{{ i.author.profileuser.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle"></a>
+                <strong class="text-gray-dark">{{ i.author.username }}</strong>
+                <hr>
+                <p class="text-break">{{ i.text }}</p>
+                <hr>
+                <p>{{ i.created }}</p>
+                <form method="post" action="{% url 'comment_delete' cards.pk %}">{% csrf_token %}<input type="hidden" name="comment_pk" value="{{ i.pk }}">{% bootstrap_button content='Удалить' type='submit' button_class='btn btn-danger'%}</form>
+            </div>
+            {% endfor %}
+        </div>
         <div class="col-6 p-5 bg-light rounded" style="height: 821px">
             <h1>{{ cards.title }}</h1>
             <hr>
@@ -33,37 +31,19 @@
             <p>Дата создания: {{ cards.created }}</p>
             <p>Дедлайн: {{ cards.date_dedlain }}</p>
             <hr>
-            <div style="height: 340px">
-            {% if form_work_list == None %}
-                <form class='row' method="post" action="{% url 'worker_create' cards.pk %}">
-                    {% csrf_token %}
-                    <div class="col-lg-3">
-                        <label class="form-label" for="id_actual_time">Фактическое время</label>
-                        <input type="number" name="actual_time" value="0" class="form-control" placeholder="Фактическое время" required="" id="id_actual_time">
-                    </div>
-                    <div class="col-lg-3">
-                        <label class="form-label" for="id_scheduled_time">Плановое время</label>
-                        <input type="number" name="scheduled_time" value="0" class="form-control" placeholder="Плановое время" required="" id="id_scheduled_time">
-                    </div>
-                    <div class="col-lg-3">
-                    <button class="btn btn-primary" type="">Добавить своё время в проекте</button>
-                    </div>
-                    </form>
+            <div class='overflow-auto' style="height: 340px" >
+            {% if my_work == 0 %}
+            <form class='row' method="post" action="{% url 'worker_create' cards.pk %}">
+                {% csrf_token %}
+                {% bootstrap_form form_worker %}
+                {% bootstrap_button content='Добавить рабочее время' type='submit' %}
+            </form>
             {% else %}
-                <form class='row' method="post" action="{% url 'worker_update' cards.pk form_work_list.pk %}">
-                    {% csrf_token %}
-                    <div class="col-lg-3">
-                        <label class="form-label" for="id_actual_time">Фактическое время</label>
-                        <input type="number" name="actual_time" value="0" class="form-control" placeholder="Фактическое время" required="" id="id_actual_time">
-                    </div>
-                    <div class="col-lg-3">
-                        <label class="form-label" for="id_scheduled_time">Плановое время</label>
-                        <input type="number" name="scheduled_time" value="0" class="form-control" placeholder="Плановое время" required="" id="id_scheduled_time">
-                    </div>
-                    <div class="col-lg-3">
-                    <button class="btn btn-primary" type="">Изменить своё время в проекте</button>
-                    </div>
-                    </form>
+            <form class='row' method="post" action="{% url 'worker_update' cards.pk %}">
+                {% csrf_token %}
+                {% bootstrap_form form_worker %}
+                {% bootstrap_button content='Изменить рабочее время' type='submit' %}
+            </form>
             {% endif %}
             <hr>
             <table class="table">
@@ -83,7 +63,7 @@
                       <td>{{ i.actual_time }}</td>
                       <td>{{ i.scheduled_time }}</td>
                         {% if request.user == i.author %}
-                      <td><form method="post" action="{% url 'worker_delete' i.pk %}">{% csrf_token %}<a href="{% url 'worker_delete' i.pk %}" rel="nofollow"><input class="btn btn-danger" type="submit" value="Удалить"></a></form> </td>
+                      <td><form method="post" action="{% url 'worker_delete' cards.pk %}">{% csrf_token %}{% bootstrap_button type='submit' content='Удалить' button_class='btn btn-danger' %}</form> </td>
                         {% endif %}
                     </tr>
                   {% endfor %}
@@ -93,14 +73,23 @@
             </div>
     <hr>
         </div>
-{#        <div class="col-4 p-5 bg-success" style="height: 821px">#}
-{#            <h2>Исполнители</h2>#}
-{#            {% for i in cards.performers.all %}#}
-{#            <a href="{% url 'profile' i.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"></a>#}
-{#            {% endfor %}#}
-{#            <hr>#}
-{#            <a href="{% url 'table_detail' cards.pk table.pk %}"><h1>ТАБЛИЦА</h1></a>#}
-{#    </div>#}
+        <div class="col-4 p-5 bg-success" style="height: 821px">
+            <h2>Исполнители</h2>
+            {% for i in cards.performers.all %}
+            <a href="{% url 'profile' i.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"></a>
+            {% endfor %}
+            <hr>
+            <form method="post" action="{% url 'table_create' cards.pk %}">
+                {% csrf_token %}
+                {% bootstrap_form form_table %}
+                {% bootstrap_button content='Создать таблицу' type='submit' %}
+            </form>
+            <hr>
+            <h1>Таблицы</h1>
+            {% for i in cards.tableproject_set.all %}
+                <a href="{% url 'table_detail' cards.pk i.pk %}">{% bootstrap_button 'Посмотреть таблицу {{ i.pk }}' type='submit' %}</a>
+            {% endfor %}
+        </div>
     </div>
 </div>
 {% endblock %}
