@@ -1,8 +1,13 @@
 {% extends 'utv_smeta/base.html' %}
+{% load django_bootstrap5 %}
 {% block content %}
     <div class="container-fluid">
         <div class="row">
             <div class="col-2 p-2 bg-secondary overflow-auto" style="height: 821px">
+                <form method="post" action="{% url 'table_update' table.cards.pk table.pk %}">
+                    {% csrf_token %}
+                    {% bootstrap_button content='Обновить таблицу' type='submit' %}
+                </form>
             </div>
             <div class="col-6 p-5 bg-light rounded" style="height: 821px">
                 <table class="table">
@@ -46,12 +51,6 @@
                       <td>{{ table.planned_taxes_FOT }}</td>
                       <th>Фактическая налоги с ФОТ</th>
                       <td>{{ table.taxes_FOT }}</td>
-                    </tr>
-                    <tr>
-                      <th scope="row">Плановые Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы</th>
-                      <td>{{ table.planned_other_expenses }}</td>
-                      <th>Фактическая Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы</th>
-                      <td>{{ table.other_expenses }}</td>
                     </tr>
                     <tr>
                       <th scope="row">Плановые Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы</th>

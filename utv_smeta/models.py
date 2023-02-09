@@ -71,7 +71,7 @@ class TableProject(models.Model):
     planned_profitability = models.IntegerField(verbose_name='Плановая рентабельность', null=True)
     profitability = models.IntegerField(verbose_name='Фактическая рентабельность', null=True)
     creared = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания таблицы')
-    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления таблицы')
+    updated = models.DateTimeField(auto_now=True, verbose_name='Дата обновления таблицы')
 
     def __str__(self):
         return f'Таблица {self.cards.title}'

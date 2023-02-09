@@ -20,10 +20,5 @@ urlpatterns = [
     path('card/<int:card_pk>/coment/delete/', CommentDeleteView.as_view(), name='comment_delete'),
     path('card/<int:card_pk>/table/create/', TableCreateView.as_view(), name='table_create'),
     path('card/<int:card_pk>/table/<int:table_pk>/', TableDetailView.as_view(), name='table_detail'),
-    # path('cards/<int:pk>/table/create', CardTableCreateView.as_view(), name='table_create'),
-    # path('cards/<int:pk>/table/<int:table_pk>/', TableDetailView.as_view(), name='table_detail'),
-    # path('cards/<int:pk>/comment/create/', CommentsAddView.as_view(), name='comment_create'),
-    # path('cards/<int:pk>/worker/create/', WorkerCreateView.as_view(), name='worker_create'),
-    # path('cards/<int:pk>/worker/<int:worker_pk>/update/', WorkerUpdateView.as_view(), name='worker_update'),
-    # path('worker/<int:pk>/delete', WorkerDeleteView.as_view(), name='worker_delete')
+    path('card/<int:card_pk>/table/<int:table_pk>/update/', TableUpdateView.as_view(), name='table_update'),
 ]
