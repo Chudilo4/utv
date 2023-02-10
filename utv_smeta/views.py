@@ -176,11 +176,20 @@ class TableCreateView(View):
 class TableDetailView(View):
 
     def get(self, request, *args, **kwargs):
-        c = {'table': TableService(table_pk=kwargs['table_pk']).get_table()}
+        c = {'table': TableService(table_pk=kwargs['table_pk']).get_table(),
+             'form_table': TableUpdateForm()}
         return render(request, 'utv_smeta/table.html', c)
+
+
+class TableCalcView(View):
+    def post(self, request, *args, **kwargs):
+        TableService(table_pk=kwargs['table_pk'], card_pk=kwargs['card_pk']).update_table_curent_salary()
+        return redirect('table_detail', card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'])
 
 
 class TableUpdateView(View):
     def post(self, request, *args, **kwargs):
-        TableService(table_pk=kwargs['table_pk'], card_pk=kwargs['card_pk']).update_table_curent_salary()
-        return redirect('table_detail', card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'])
+        form = TableUpdateForm(request.POST)
+        if form.is_valid():
+            TableService(table_pk=kwargs['table_pk'], card_pk=kwargs['card_pk'], **form.cleaned_data).update()
+            return redirect('table_detail', card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'])

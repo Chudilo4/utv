@@ -87,7 +87,7 @@
             <hr>
             <h1>Таблицы</h1>
             {% for i in cards.tableproject_set.all %}
-                <a href="{% url 'table_detail' cards.pk i.pk %}">{% bootstrap_button 'Посмотреть таблицу {{ i.pk }}' type='submit' %}</a>
+                <a href="{% url 'table_detail' cards.pk i.pk %}"><button type="button" class="btn btn-primary">Посмотреть таблицу за {{ i.created_time }}</button></a>
             {% endfor %}
         </div>
     </div>

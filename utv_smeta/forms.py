@@ -56,3 +56,9 @@ class TableForm(forms.ModelForm):
     class Meta:
         model = TableProject
         fields = ['planned_price_client', 'planned_other_expenses']
+
+
+class TableUpdateForm(forms.ModelForm):
+    class Meta:
+        model = TableProject
+        fields = ['planned_price_client', 'price_client', 'planned_other_expenses', 'other_expenses']

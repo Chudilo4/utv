@@ -4,8 +4,14 @@
     <div class="container-fluid">
         <div class="row">
             <div class="col-2 p-2 bg-secondary overflow-auto" style="height: 821px">
+                <form method="post" action="{% url 'table_calc' table.cards.pk table.pk %}">
+                    {% csrf_token %}
+                    {% bootstrap_button content='Обновить таблицу по текущей ЗП сотрудников' type='submit' %}
+                </form>
+                <hr>
                 <form method="post" action="{% url 'table_update' table.cards.pk table.pk %}">
                     {% csrf_token %}
+                    {% bootstrap_form form_table %}
                     {% bootstrap_button content='Обновить таблицу' type='submit' %}
                 </form>
             </div>
@@ -38,11 +44,14 @@
                       <th>Фактическая зарплата участников</th>
                       <td>{{ table.salary }}</td>
                     </tr>
+                    <tr>
+                        <th scope="row">Зп каждого сотрудника</th>
+                    </tr>
                   {% for i in table.salaryprojectuser_set.all %}
                     <tr>
-                      <th scope="row">{{ i.worker.author }}</th>
+                      <th scope="row"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.user.profileuser.avatar.url }}"></th>
                       <td>{{ i.planned_salary }}</td>
-                      <th>Фактическая зарплата</th>
+                      <th scope="row"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.user.profileuser.avatar.url }}"></th>
                       <td>{{ i.salary }}</td>
                     </tr>
                   {% endfor %}
