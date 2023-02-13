@@ -31,7 +31,3 @@ class EmployeeRateAdmin(admin.ModelAdmin):
 class TableProjectAdmin(admin.ModelAdmin):
     pass
 
-
-@admin.register(SalaryProjectUser)
-class SalaryProjectUserAdmin(admin.ModelAdmin):
-    list_display = ('id', 'table_project', 'user', 'planned_salary', 'salary', 'created_time')

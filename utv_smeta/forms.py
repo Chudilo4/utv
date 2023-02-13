@@ -55,10 +55,19 @@ class WorkerForm(forms.ModelForm):
 class TableForm(forms.ModelForm):
     class Meta:
         model = TableProject
-        fields = ['planned_price_client', 'planned_other_expenses']
+        fields = ['planed_actors_salary', 'planned_other_expenses', 'planned_buying_music',
+                  'planned_travel_expenses', 'planned_fare']
 
 
 class TableUpdateForm(forms.ModelForm):
     class Meta:
         model = TableProject
-        fields = ['planned_price_client', 'price_client', 'planned_other_expenses', 'other_expenses']
+        fields = ['price_client', 'planed_actors_salary', 'planned_other_expenses', 'planned_buying_music',
+                  'planned_travel_expenses', 'planned_fare']
+
+
+class TableUpdateFactForm(forms.ModelForm):
+    class Meta:
+        model = TableProject
+        fields = ['price_client', 'actors_salary', 'other_expenses', 'buying_music',
+                  'travel_expenses', 'fare']

@@ -101,8 +101,11 @@ class CardDeleteView(View):
 class CardDetailView(View):
 
     def get(self, request, *args, **kwargs):
+        w = WorkerService(card_pk=kwargs['card_pk'],
+                          author_pk=request.user.pk).my_work()
+        form = WorkerForm(instance=w)
         cont = {'cards': CardService(card_pk=kwargs['card_pk']).give_me_card(),
-                'form_worker': WorkerForm(),
+                'form_worker': form,
                 'my_work': WorkerService(author_pk=request.user.pk, card_pk=kwargs['card_pk']).count_worker_in_card(),
                 'form_comment': CommentCreateForm(),
                 'form_table': TableForm()}
@@ -176,20 +179,24 @@ class TableCreateView(View):
 class TableDetailView(View):
 
     def get(self, request, *args, **kwargs):
-        c = {'table': TableService(table_pk=kwargs['table_pk']).get_table(),
-             'form_table': TableUpdateForm()}
+        t = TableService(table_pk=kwargs['table_pk']).get_table()
+        c = {'table': t,
+             'form_table': TableUpdateForm(instance=t),
+             'form_fact_table': TableUpdateFactForm(instance=t)}
         return render(request, 'utv_smeta/table.html', c)
 
 
-class TableCalcView(View):
+class TablePlannedUpdateView(View):
     def post(self, request, *args, **kwargs):
-        TableService(table_pk=kwargs['table_pk'], card_pk=kwargs['card_pk']).update_table_curent_salary()
-        return redirect('table_detail', card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'])
+        form = TableUpdateForm(request.POST)
+        if form.is_valid():
+            TableService(table_pk=kwargs['table_pk'], card_pk=kwargs['card_pk'], **form.cleaned_data).update_planned_table()
+            return redirect('table_detail', card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'])
 
 
 class TableUpdateView(View):
     def post(self, request, *args, **kwargs):
-        form = TableUpdateForm(request.POST)
+        form = TableUpdateFactForm(request.POST)
         if form.is_valid():
-            TableService(table_pk=kwargs['table_pk'], card_pk=kwargs['card_pk'], **form.cleaned_data).update()
+            TableService(table_pk=kwargs['table_pk'], card_pk=kwargs['card_pk'], **form.cleaned_data).update_table()
             return redirect('table_detail', card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'])

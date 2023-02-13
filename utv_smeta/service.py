@@ -1,4 +1,4 @@
-from utv_smeta.models import Worker, TableProject, Cards, EmployeeRate, SalaryProjectUser, Comments
+from utv_smeta.models import Worker, TableProject, Cards, EmployeeRate, Comments
 from django.contrib import messages
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User
@@ -107,26 +107,36 @@ class CommentService:
 
 
 class TableService:
-    def __init__(self, request=None, card_pk=None, table_pk=None,
-                 planned_other_expenses=1, other_expenses=1, planned_price_client=1, price_client=1):
+    def __init__(self, request=None, card_pk=None, table_pk=None, planed_actors_salary=0,
+                 planned_buying_music=0, planned_travel_expenses=0, travel_expenses=0, fare=0,
+                 planned_other_expenses=0, other_expenses=0, price_client=15000, planned_fare=0, actors_salary=0, buying_music=0):
         self.card_pk = card_pk
         self.request = request
         self.table_pk = table_pk
         self.price_client = price_client
         self.planned_other_expenses = planned_other_expenses
         self.other_expenses = other_expenses
-        self.planed_price_client = planned_price_client
+        self.planed_actors_salary = planed_actors_salary
+        self.actors_salary = actors_salary
+        self.planned_buying_music = planned_buying_music
+        self.buying_music = buying_music
+        self.planned_travel_expenses = planned_travel_expenses
+        self.travel_expenses = travel_expenses
+        self.fare = fare
+        self.planned_fare = planned_fare
 
     def create_table(self):
         """Создаёт смету по созданному проекту"""
-        t = TableProject.objects.create(cards_id=self.card_pk,
-                                        planned_price_client=self.planed_price_client,
-                                        planned_other_expenses=self.planned_other_expenses,
-                                        )
-        self.salary_perfomance(table_pk=t.pk)
-        self.calculation_table(planned_price_client=self.planed_price_client,
-                               planned_other_expenses=self.planned_other_expenses,
-                               table_pk=t.pk)
+        content = self.calculation_table()
+        TableProject.objects.create(cards_id=self.card_pk,
+                                    price_client=self.price_client,
+                                    planed_actors_salary=self.planed_actors_salary,
+                                    planned_buying_music=self.planned_buying_music,
+                                    planned_travel_expenses=self.planned_travel_expenses,
+                                    planned_fare=self.planned_fare,
+                                    planned_other_expenses=self.planned_other_expenses,
+                                    **content
+                                    )
 
     def performers(self):
         """Собираем всех исполнителей по проекту"""
@@ -139,7 +149,7 @@ class TableService:
         """Возвращем таблицу по ключу"""
         return TableProject.objects.get(pk=self.table_pk)
 
-    def salary_perfomance(self, table_pk):
+    def salary_perfomance(self):
         """Расчитываем заработную плату сотрудников за проект и возвращаем её в виде кортежа"""
         # Фактический заработок сотрудников за проект
         workersalary = 0
@@ -147,48 +157,39 @@ class TableService:
         planedworkersalary = 0
         for i in self.performers():
             for i2 in i.author.employeerate.order_by('-created')[:1]:
-                workersalary += i2.money * i.actual_time
                 planedworkersalary += i2.money * i.scheduled_time
-                SalaryProjectUser.objects.create(table_project_id=table_pk,
-                                                 user_id=i.author.pk,
-                                                 planned_salary=planedworkersalary,
-                                                 salary=workersalary)
-        return planedworkersalary, workersalary
+                workersalary += i2.money * i.actual_time
+        return planedworkersalary + self.planed_actors_salary, workersalary + self.actors_salary
 
-    def calculation_table(self, planned_price_client, planned_other_expenses, table_pk):
+    def calculation_table(self,):
         """Расчитываем плановые и фактические расчёты затрат и прибыли за проект"""
         # Плановая зарплата сотрудников, Зарплата сотрудников
-        planned_salary, salary = self.salary_perfomance(table_pk=table_pk)
+        planned_salary, salary = self.salary_perfomance()
         # Плановые налоги с ФОТ
         planned_taxes_fot = planned_salary * 0.5
         # Налоги с ФОТ
         taxes_fot = salary * 0.5
-        # Плановые прочие расходы
-        planned_other_expenses = planned_other_expenses
-        # Прочие расходы
-        other_expenses = self.other_expenses
+
         # Плановые общехозяйственные расходы
-        planned_general_expenses = (planned_salary + planned_taxes_fot + planned_other_expenses) * 0.23
+        planned_general_expenses = (planned_salary + planned_taxes_fot + self.planned_other_expenses + self.planned_buying_music + self.planned_travel_expenses + self.planned_fare) * 0.23
         # Общехозяйственные расходы
-        general_expenses = (salary + taxes_fot + other_expenses) * 0.23
+        general_expenses = (salary + taxes_fot + self.other_expenses + self.buying_music + self.travel_expenses + self.fare) * 0.23
         # Плановая себестоимость
-        planned_cost = planned_salary + planned_taxes_fot + planned_other_expenses + planned_general_expenses
+        planned_cost = planned_salary + planned_taxes_fot + self.planned_other_expenses + planned_general_expenses
         # Cебестоимость
-        cost = salary + taxes_fot + other_expenses + general_expenses
+        cost = salary + taxes_fot + self.other_expenses + general_expenses
         # Плановая прибыль
-        planned_profit = planned_price_client - planned_cost
+        planned_profit = self.price_client - planned_cost
         # Фактическая прибыль
-        profit = planned_price_client - cost
+        profit = self.price_client - cost
         # Плановая рентабельность
-        planned_profitability = (planned_profit / planned_price_client) * 100
+        planned_profitability = (planned_profit / self.price_client) * 100
         # Фактическая рентабельность
-        profitability = (profit / planned_price_client) * 100
+        profitability = (profit / self.price_client) * 100
         return {'planned_salary': planned_salary,
                 'salary': salary,
-                'planned_taxes_fot': planned_taxes_fot,
-                'taxes_fot': taxes_fot,
-                'planned_other_expenses': planned_other_expenses,
-                'other_expenses': other_expenses,
+                'planned_taxes_FOT': planned_taxes_fot,
+                'taxes_FOT': taxes_fot,
                 'planned_general_expenses': planned_general_expenses,
                 'general_expenses': general_expenses,
                 'planned_cost': planned_cost,
@@ -196,56 +197,44 @@ class TableService:
                 'planned_profit': planned_profit,
                 'profit': profit,
                 'planned_profitability': planned_profitability,
-                'profitability': profitability,
+                'profitability': profitability
                 }
 
-    def update_table_curent_salary(self):
-        """Обновляем таблицу по имеюющейся на данный момент ставке сотрудников"""
-        t = self.get_table()
-        content = self.calculation_table(planned_price_client=t.planned_price_client,
-                                         planned_other_expenses=t.planned_other_expenses,
-                                         table_pk=t.pk)
-        t.planned_cost = content['planned_cost']
-        t.cost = content['cost']
-        t.planned_salary = content['planned_salary']
-        t.salary = content['salary']
-        t.planned_taxes_FOT = content['planned_taxes_fot']
-        t.taxes_FOT = content['taxes_fot']
-        t.planned_other_expenses = content['planned_other_expenses']
-        t.other_expenses = content['other_expenses']
-        t.planned_general_expenses = content['planned_general_expenses']
-        t.general_expenses = content['general_expenses']
-        t.planned_profit = content['planned_profit']
-        t.profit = content['profit']
-        t.planned_profitability = content['planned_profitability']
-        t.profitability = content['profitability']
-        t.save()
 
-    def update(self):
+    def update_planned_table(self):
         """Коректируем данные таблицы в случае если какие то поля не заполнены либо ЗП сотрудников поменялась"""
+        content = self.calculation_table()
         t = self.get_table()
-        t.planned_price_client = self.planed_price_client
+        t.planned_salary = content['planned_salary']
+        t.planned_taxes_FOT = content['planned_taxes_FOT']
+        t.planned_general_expenses = content['planned_general_expenses']
+        t.planned_cost = content['planned_cost']
+        t.planned_profit = content['planned_profit']
+        t.planned_profitability = content['planned_profitability']
         t.price_client = self.price_client
         t.planned_other_expenses = self.planned_other_expenses
-        t.other_expenses = self.other_expenses
+        t.planned_fare = self.planned_fare
+        t.planned_travel_expenses = self.planned_travel_expenses
+        t.planned_buying_music = self.planned_buying_music
         t.save()
-        self.update_table_curent_salary()
 
-    def actual_salary_users(self):
-        # Фактический заработок сотрудников за проект
-        workersalary = 0
-        # Плановый заработок сотрудников за проект
-        planedworkersalary = 0
-        for i in SalaryProjectUser.objects.filter(table_project_id=self.table_pk):
-            for i2 in i.author.employeerate.order_by('-created_time')[:1]:
-                workersalary += i2.money * i.actual_time
-                planedworkersalary += i2.money * i.scheduled_time
-                SalaryProjectUser.objects.create(table_project_id=self.table_pk,
-                                                 worker_id=i.pk,
-                                                 planned_salary=planedworkersalary,
-                                                 salary=workersalary)
-        return planedworkersalary, workersalary
-
+    def update_table(self):
+        """Коректируем данные таблицы в случае если какие то поля не заполнены либо ЗП сотрудников поменялась"""
+        content = self.calculation_table()
+        t = self.get_table()
+        t.salary = content['salary']
+        t.taxes_FOT = content['taxes_FOT']
+        t.general_expenses = content['general_expenses']
+        t.cost = content['cost']
+        t.profit = content['profit']
+        t.profitability = content['profitability']
+        t.price_client = self.price_client
+        t.other_expenses = self.other_expenses
+        t.fare = self.fare
+        t.travel_expenses = self.travel_expenses
+        t.buying_music = self.buying_music
+        t.actors_salary = self.actors_salary
+        t.save()
 
 
 
