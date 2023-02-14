@@ -47,12 +47,11 @@ class CardListSerializers(serializers.Serializer):
     date_dedlain = serializers.DateTimeField()
     update = serializers.DateTimeField()
 
-class CardCreateserializers(serializers.Serializer):
-    title = serializers.CharField()
-    description = serializers.CharField()
-    performers = UserSerializer(many=True)
-    date_dedlain = serializers.DateTimeField()
 
+class CardCreateserializers(serializers.ModelSerializer):
+    class Meta:
+        model = Cards
+        fields = '__all__'
 
 
 

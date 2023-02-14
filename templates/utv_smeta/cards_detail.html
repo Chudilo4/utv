@@ -79,6 +79,7 @@
             <a href="{% url 'profile' i.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"></a>
             {% endfor %}
             <hr>
+        {% if request.user == cards.author %}
             <form method="post" action="{% url 'table_create' cards.pk %}">
                 {% csrf_token %}
                 {% bootstrap_form form_table %}
@@ -90,6 +91,7 @@
             {% for table in cards.table.all %}
                 <a href="{% url 'table_detail' cards.pk table.pk %}"><button type="button" class="btn btn-primary">Посмотреть таблицу за {{ table.created_time }}</button></a>
             {% endfor %}
+        {% endif %}
         {% endif %}
         </div>
     </div>
