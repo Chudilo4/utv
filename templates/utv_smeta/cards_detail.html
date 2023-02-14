@@ -10,7 +10,7 @@
                 {% bootstrap_form form_comment %}
                 {% bootstrap_button content='Добавить коментарий' type='submit' %}
             </form>
-            {% for i in cards.comments_set.all %}
+            {% for i in cards.comment.all %}
             <div class="shadow-none p-3 m-1 bg-light rounded">
                 <a href="{% url 'profile' i.author.profileuser.pk %}"><img src="{{ i.author.profileuser.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle"></a>
                 <strong class="text-gray-dark">{{ i.author.username }}</strong>
@@ -31,15 +31,15 @@
             <p>Дата создания: {{ cards.created }}</p>
             <p>Дедлайн: {{ cards.date_dedlain }}</p>
             <hr>
-            <div class='overflow-auto' style="height: 340px" >
-            {% if my_work == 0 %}
-            <form class='row' method="post" action="{% url 'worker_create' cards.pk %}">
+            <div class='row' style="height: 340px" >
+            {% if not my_work %}
+            <form class='inline' method="post" action="{% url 'worker_create' cards.pk %}">
                 {% csrf_token %}
                 {% bootstrap_form form_worker %}
                 {% bootstrap_button content='Добавить рабочее время' type='submit' %}
             </form>
             {% else %}
-            <form class='row' method="post" action="{% url 'worker_update' cards.pk %}">
+            <form class='inline' method="post" action="{% url 'worker_update' cards.pk %}">
                 {% csrf_token %}
                 {% bootstrap_form form_worker %}
                 {% bootstrap_button content='Изменить рабочее время' type='submit' %}
@@ -57,7 +57,7 @@
                     </tr>
                   </thead>
                   <tbody>
-                   {% for i in cards.worker_set.all %}
+                   {% for i in cards.worker.all %}
                     <tr>
                       <th scope="row"><a href="{% url 'profile' i.author.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.author.profileuser.avatar.url }}"></a></th>
                       <td>{{ i.actual_time }}</td>
@@ -86,8 +86,11 @@
             </form>
             <hr>
             <h1>Таблицы</h1>
-                <a href="{% url 'table_detail' cards.pk cards.tableproject.pk %}"><button type="button" class="btn btn-primary">Посмотреть таблицу за {{ cards.tableproject.created_time }}</button></a>
-
+        {% if cards.table.count != 0 %}
+            {% for table in cards.table.all %}
+                <a href="{% url 'table_detail' cards.pk table.pk %}"><button type="button" class="btn btn-primary">Посмотреть таблицу за {{ table.created_time }}</button></a>
+            {% endfor %}
+        {% endif %}
         </div>
     </div>
 </div>

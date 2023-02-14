@@ -20,6 +20,9 @@ class Cards(models.Model):
     created = models.DateTimeField(auto_now_add=True)
     performers = models.ManyToManyField(User, related_name='CardEvent', blank=True)
     date_dedlain = models.DateTimeField()
+    comment = models.ManyToManyField('Comments', through='CommentsCards')
+    table = models.ManyToManyField('TableProject', through='TableCards')
+    worker = models.ManyToManyField('Worker', through='WorkerCards')
     update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
 
     def __str__(self):
@@ -31,10 +34,12 @@ class Cards(models.Model):
 
 class Comments(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     text = models.TextField(verbose_name='Поле для коментария')
     created = models.DateTimeField(auto_now_add=True)
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True)
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
+
+    def __str__(self):
+        return self.text
 
     class Meta:
         ordering = ('-created',)
@@ -42,18 +47,16 @@ class Comments(models.Model):
 
 class Worker(models.Model):
     author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
-    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     actual_time = models.IntegerField(verbose_name='Фактическое время', default=0)
     scheduled_time = models.IntegerField(verbose_name='Плановое время', default=0)
     creared = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания работы')
     update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления работы')
 
     def __str__(self):
-        return self.author.username + ' ' + self.card.title
+        return self.author.username
 
 
 class TableProject(models.Model):
-    cards = models.OneToOneField(Cards, on_delete=models.CASCADE)
     price_client = models.FloatField(verbose_name='Цена для клиента', null=True)
     planned_cost = models.FloatField(verbose_name='Плановая себестоимость', null=True)
     cost = models.FloatField(verbose_name='Фактическая себестоимость', null=True)
@@ -81,7 +84,7 @@ class TableProject(models.Model):
     updated_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления таблицы')
 
     def __str__(self):
-        return f'Таблица {self.cards.title}'
+        return f'Таблица {self.created_time}'
 
 
 class EmployeeRate(models.Model):
@@ -93,3 +96,17 @@ class EmployeeRate(models.Model):
     def __str__(self):
         return f'ЗП в час сотрудника {self.user} составляет {self.money}'
 
+
+class CommentsCards(models.Model):
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
+    comment = models.ForeignKey(Comments, on_delete=models.CASCADE)
+
+
+class WorkerCards(models.Model):
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
+    worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
+
+
+class TableCards(models.Model):
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
+    table = models.ForeignKey(TableProject, on_delete=models.CASCADE)

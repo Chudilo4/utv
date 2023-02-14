@@ -5,12 +5,7 @@ from rest_framework import routers
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-from .views import *
-
-
-
-
-
+from .views import UsersAPIView, CardsListAPIView, CardsDetailAPIView
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -18,7 +13,8 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('users/', UsersAPIView.as_view(), name='users_list'),
-    path('cards/', CardsAPIView.as_view(), name='cards_list')
+    path('cards/', CardsListAPIView.as_view(), name='cards_list'),
+    path('cards/<int:card_pk>/', CardsDetailAPIView.as_view(), name='cards_detail'),
 ]
 
 if settings.DEBUG:
