@@ -12,12 +12,12 @@
             </form>
             {% for i in cards.comment.all %}
             <div class="shadow-none p-3 m-1 bg-light rounded">
-                <a href="{% url 'profile' i.author.profileuser.pk %}"><img src="{{ i.author.profileuser.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle"></a>
+                <a href="{% url 'profile' i.author.pk %}"><img src="{{ i.author.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle"></a>
                 <strong class="text-gray-dark">{{ i.author.username }}</strong>
                 <hr>
                 <p class="text-break">{{ i.text }}</p>
                 <hr>
-                <p>{{ i.created }}</p>
+                <p>{{ i.created_time }}</p>
                 <form method="post" action="{% url 'comment_delete' cards.pk %}">{% csrf_token %}<input type="hidden" name="comment_pk" value="{{ i.pk }}">{% bootstrap_button content='Удалить' type='submit' button_class='btn btn-danger'%}</form>
             </div>
             {% endfor %}
@@ -59,7 +59,7 @@
                   <tbody>
                    {% for i in cards.worker.all %}
                     <tr>
-                      <th scope="row"><a href="{% url 'profile' i.author.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.author.profileuser.avatar.url }}"></a></th>
+                      <th scope="row"><a href="{% url 'profile' i.author.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.author.avatar.url }}"></a></th>
                       <td>{{ i.actual_time }}</td>
                       <td>{{ i.scheduled_time }}</td>
                         {% if request.user == i.author %}
@@ -76,7 +76,7 @@
         <div class="col-4 p-5 bg-success overflow-auto" style="height: 821px">
             <h2>Исполнители</h2>
             {% for i in cards.performers.all %}
-            <a href="{% url 'profile' i.profileuser.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.profileuser.avatar.url }}"></a>
+            <a href="{% url 'profile' i.pk %}"><img alt="mdo" width="32" height="32" class="rounded-circle" src="{{ i.avatar.url }}"></a>
             {% endfor %}
             <hr>
         {% if request.user == cards.author %}

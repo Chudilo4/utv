@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'utv_smeta.apps.UtvSmetaConfig',
+    'users.apps.UsersConfig',
     'django_bootstrap5',
     "django_flatpickr",
     'rest_framework',
@@ -127,6 +128,10 @@ TIME_ZONE = 'Asia/Yekaterinburg'
 USE_I18N = True
 
 USE_TZ = True
+
+
+# User
+AUTH_USER_MODEL = 'users.CustomUser'
 
 
 # Static files (CSS, JavaScript, Images)

@@ -1,18 +1,12 @@
 from rest_framework import serializers
-from django.contrib.auth.models import User
 
-from utv_smeta.models import Cards, Comments, TableProject, Worker
+from utv_smeta.models import Cards, Comments, TableProject
 
 
-class UserSerializer(serializers.Serializer):
+class UserReadSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
-
-
-class ProfileUserSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
     avatar = serializers.ImageField()
-    user = UserSerializer()
 
 
 class CommentsSerializers(serializers.ModelSerializer):
@@ -21,7 +15,7 @@ class CommentsSerializers(serializers.ModelSerializer):
         fields = ['id', 'author', 'text']
 
 
-class Tableserializers(serializers.ModelSerializer):
+class TableSerializers(serializers.ModelSerializer):
     class Meta:
         model = TableProject
         fields = '__all__'
@@ -29,29 +23,28 @@ class Tableserializers(serializers.ModelSerializer):
 
 class CardDetailSerializer(serializers.ModelSerializer):
     comment = CommentsSerializers(many=True)
-    table = Tableserializers(many=True)
-    performers = UserSerializer(many=True)
+    performers = UserReadSerializer(many=True)
 
     class Meta:
         model = Cards
-        fields = ['id', 'author', 'title', 'description', 'created', 'performers', 'date_dedlain', 'comment', 'table']
+        fields = ['id', 'author', 'title', 'description', 'created_time', 'performers', 'deadline', 'comment', 'table', 'worker']
 
 
 class CardListSerializers(serializers.Serializer):
     id = serializers.IntegerField()
-    author = UserSerializer()
+    author = UserReadSerializer()
     title = serializers.CharField()
     description = serializers.CharField()
-    created = serializers.DateTimeField()
-    performers = UserSerializer(many=True, read_only=True)
-    date_dedlain = serializers.DateTimeField()
-    update = serializers.DateTimeField()
+    created_time = serializers.DateTimeField()
+    performers = UserReadSerializer(many=True)
+    deadline = serializers.DateTimeField()
+    update_time = serializers.DateTimeField()
 
 
 class CardCreateserializers(serializers.ModelSerializer):
     class Meta:
         model = Cards
-        fields = '__all__'
+        fields = ['title', 'description', 'performers', 'date_dedlain']
 
 
 

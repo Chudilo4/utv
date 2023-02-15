@@ -6,24 +6,24 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from utv_smeta.models import *
-from .serializers import *
+from utv_api.serializers import UserReadSerializer, CardListSerializers, CardCreateserializers, CardDetailSerializer
 from utv_smeta.service import CardService
 
 
 # Create your views here.
 
 
-class UsersAPIView(APIView):
+class UsersReadAPIView(APIView):
 
     def get(self, request, format=None):
-        snippets = ProfileUser.objects.all()
-        serializer = ProfileUserSerializer(snippets, many=True)
+        snippets = CustomUser.objects.all()
+        serializer = UserReadSerializer(snippets, many=True)
         return Response(serializer.data)
 
 
 class CardsListAPIView(APIView):
     def get(self, request, format=None):
-        data = CardService(user_pk=request.user.pk).my_cards()
+        data = CardService(author=request.user.pk).my_cards()
         serializer = CardListSerializers(instance=data, many=True)
         return Response(serializer.data)
 
@@ -31,7 +31,7 @@ class CardsListAPIView(APIView):
         serializer = CardCreateserializers(data=request.data)
         print(serializer)
         if serializer.is_valid():
-            CardService(user_pk=request.user.pk, **serializer.data).create_card()
+            CardService(author=request.user.pk, **serializer.data).create_card()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -41,17 +41,6 @@ class CardsDetailAPIView(APIView):
         serializer = CardDetailSerializer(instance=card)
         return Response(serializer.data)
 
-# class TestApiView(APIView):
-#
-#     def post(self,request):
-#         data = request.body
-#         serialser = TestSerailizer(data=data)
-#         if not serialser.is_valid():
-#             return REspo
-#
-#         result = Persons().create_user(serialser.data)
-#         if result:
-#             return Respo()
 
 
 

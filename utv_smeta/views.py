@@ -8,9 +8,9 @@ from django.urls import reverse_lazy, reverse
 from django.views import View
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView, DeleteView
 
-from utv_smeta.forms import UserRegisterForm, ProfileUserForm, CardsCreateForm,\
-    WorkerForm, CommentCreateForm, TableForm, TableUpdateForm, TableUpdateFactForm
-from utv_smeta.models import ProfileUser
+from users.models import CustomUser
+from utv_smeta.forms import UserRegisterForm, CardsCreateForm, \
+    WorkerForm, CommentCreateForm, TableForm, TableUpdateForm, TableUpdateFactForm, UserCustomChangeForm
 from utv_smeta.service import CardService
 
 
@@ -25,27 +25,20 @@ class RegisterUserView(SuccessMessageMixin, CreateView):
 
     def form_valid(self, form):
         self.object = form.save()
-        ProfileUser.objects.create(user_id=self.object.pk)
         return super().form_valid(form)
 
+
+class UserChangeView(SuccessMessageMixin, UpdateView):
+    model = CustomUser
+    form_class = UserCustomChangeForm
+    template_name = 'utv_smeta/update_user.html'
+    success_message = 'Вы изменили профиль'
+    success_url = reverse_lazy('home')
 
 class LoginUserView(LoginView):
     template_name = 'utv_smeta/login.html'
     form_class = AuthenticationForm
 
-
-class ProfileUserView(DetailView):
-    model = ProfileUser
-    template_name = 'utv_smeta/profile_user.html'
-
-
-class UpdateProfileView(UpdateView):
-    form_class = ProfileUserForm
-    template_name = 'utv_smeta/profile_user_update.html'
-    model = ProfileUser
-
-    def get_success_url(self):
-        return reverse('profile', kwargs={'pk': self.request.user.profileuser.pk})
 
 
 class DeleteUserView(DeleteView):
@@ -59,7 +52,7 @@ class HomeView(TemplateView):
 
 class CardsListView(View):
     def get(self, request, *args, **kwargs):
-        cards = CardService(user_pk=self.request.user.pk).my_cards()
+        cards = CardService(author=self.request.user.pk).my_cards()
         return render(request, 'utv_smeta/cards.html', {'cards': cards})
 
 
@@ -72,7 +65,7 @@ class CardsCreateView(View):
         form = CardsCreateForm(request.POST)
         if form.is_valid():
             CardService(
-                user_pk=self.request.user.pk,
+                author=self.request.user.pk,
                 **form.cleaned_data).create_card()
             messages.success(request, 'Ваша карточка добавлена')
             return redirect('cards')
@@ -108,7 +101,7 @@ class CardDeleteView(View):
 
 class CardDetailView(View):
     def get(self, request, *args, **kwargs):
-        card = CardService(card_pk=kwargs['card_pk'], user_pk=request.user.pk)
+        card = CardService(card_pk=kwargs['card_pk'], author=request.user.pk)
         try:
             work = card.get_my_work()
             form = WorkerForm(instance=work)
@@ -128,7 +121,7 @@ class WorkerCreateView(View):
         context = {'form_worker': WorkerForm(request.POST)}
         form_worker = WorkerForm(request.POST)
         if form_worker.is_valid():
-            CardService(user_pk=request.user.pk,
+            CardService(author=request.user.pk,
                           card_pk=kwargs['card_pk'],
                           **form_worker.cleaned_data).create_worker()
             messages.success(request, 'Работа над проектом началась')
@@ -141,7 +134,7 @@ class WorkerUpdateView(View):
         context = {'form_worker': WorkerForm(request.POST)}
         form_worker = WorkerForm(request.POST)
         if form_worker.is_valid():
-            CardService(user_pk=request.user.pk,
+            CardService(author=request.user.pk,
                           card_pk=kwargs['card_pk'],
                           **form_worker.cleaned_data).update_worker()
             messages.success(request, 'Работа над проектом обновлена')
@@ -151,7 +144,7 @@ class WorkerUpdateView(View):
 
 class WorkerDeleteView(View):
     def post(self, request, *args, **kwargs):
-        CardService(user_pk=request.user.pk,
+        CardService(author=request.user.pk,
                       card_pk=kwargs['card_pk']).delete_worker()
         messages.success(request, 'Ваша работа над проектом удалена')
         return redirect('card_detail', card_pk=kwargs['card_pk'])
@@ -163,7 +156,7 @@ class CommentCreateView(View):
         form = CommentCreateForm(request.POST)
         if form.is_valid():
             CardService(
-                user_pk=request.user.pk,
+                author=request.user.pk,
                 card_pk=kwargs['card_pk'],
                 **form.cleaned_data).create_comment()
             messages.success(request, 'Комментарий добавлен')
@@ -174,7 +167,7 @@ class CommentCreateView(View):
 class CommentDeleteView(View):
     def post(self, request, *args, **kwargs):
         CardService(comment_pk=request.POST['comment_pk'],
-                       user_pk=request.user.pk,
+                       author=request.user.pk,
                        card_pk=kwargs['card_pk']).delete_comment()
         messages.success(request, 'Ваш коментарий удалён')
         return redirect('card_detail', card_pk=kwargs['card_pk'])

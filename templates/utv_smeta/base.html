@@ -31,11 +31,11 @@
           {% if request.user.is_authenticated %}
         <div class="dropdown text-end">
           <a href="#" class="d-block link-dark text-decoration-none dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-            <img src="{{ request.user.profileuser.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle">
+            <img src="{{ request.user.avatar.url }}" alt="mdo" width="32" height="32" class="rounded-circle">
           </a>
           <ul class="dropdown-menu text-small">
             <li><a class="dropdown-item" href="{% url 'card_create' %}">Новая карточка</a></li>
-            <li><a class="dropdown-item" href="{% url 'profile' request.user.profileuser.pk %}">Профиль</a></li>
+            <li><a class="dropdown-item" href="{% url 'profile' request.user.pk %}">Профиль</a></li>
             <li><hr class="dropdown-divider"></li>
             <li><a class="dropdown-item" href="{% url 'logout' %}">Выйти</a></li>
           </ul>

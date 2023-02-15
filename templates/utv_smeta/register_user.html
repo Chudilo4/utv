@@ -9,7 +9,7 @@
 <main class="container">
   <div class="bg-light p-5 rounded">
     <h1>Регистрация</h1>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         {% bootstrap_form form %}
         {% bootstrap_button type=submit content='Регистрация!' %}

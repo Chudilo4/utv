@@ -1,28 +1,25 @@
 from django.contrib.auth.views import LogoutView
 from django.urls import path
 
-from utv_smeta.views import RegisterUserView, LoginUserView, ProfileUserView,\
-    UpdateProfileView, HomeView, CardsListView, CardsCreateView, CardDetailView,\
-    CardUpdateView, CardDeleteView, WorkerCreateView, WorkerUpdateView, WorkerDeleteView,\
+from utv_smeta.views import RegisterUserView, LoginUserView, \
+    HomeView, CardsListView, CardsCreateView, CardDetailView, \
+    CardUpdateView, CardDeleteView, WorkerCreateView, WorkerUpdateView, WorkerDeleteView, \
     CommentCreateView, CommentDeleteView, TableCreateView, TableDetailView, TableUpdateView, \
-    TablePlannedUpdateView
+    TablePlannedUpdateView, UserChangeView
 
 urlpatterns = [
     path('register/',
          RegisterUserView.as_view(),
          name='regiister'),
+    path('profile/<int:pk>/',
+         UserChangeView.as_view(),
+         name='profile'),
     path('login/',
          LoginUserView.as_view(),
          name='login'),
     path('logout/',
          LogoutView.as_view(),
          name='logout'),
-    path('profile/<int:pk>',
-         ProfileUserView.as_view(),
-         name='profile'),
-    path('profile/<int:pk>/update/',
-         UpdateProfileView.as_view(),
-         name='prpfile_update'),
     path('',
          HomeView.as_view(),
          name='home'),

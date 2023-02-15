@@ -1,29 +1,23 @@
-from django.contrib.auth.models import User
 from django.db import models
 from django.urls import reverse_lazy, reverse
+
+from users.models import CustomUser
+
+
 # Create your models here.
 
 
-class ProfileUser(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    avatar = models.ImageField(upload_to='media/profile/avatar/', null=True,
-                               default='media/profile/avatar/Default_ava.png')
-
-    def __str__(self):
-        return self.user.username
-
-
 class Cards(models.Model):
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    created = models.DateTimeField(auto_now_add=True)
-    performers = models.ManyToManyField(User, related_name='CardEvent', blank=True)
-    date_dedlain = models.DateTimeField()
+    created_time = models.DateTimeField(auto_now_add=True)
+    performers = models.ManyToManyField(CustomUser, related_name='CardEvent', blank=True)
+    deadline = models.DateTimeField()
     comment = models.ManyToManyField('Comments', through='CommentsCards')
     table = models.ManyToManyField('TableProject', through='TableCards')
     worker = models.ManyToManyField('Worker', through='WorkerCards')
-    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
 
     def __str__(self):
         return self.title
@@ -33,24 +27,24 @@ class Cards(models.Model):
 
 
 class Comments(models.Model):
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     text = models.TextField(verbose_name='Поле для коментария')
-    created = models.DateTimeField(auto_now_add=True)
+    created_time = models.DateTimeField(auto_now_add=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
     def __str__(self):
         return self.text
 
     class Meta:
-        ordering = ('-created',)
+        ordering = ('-created_time',)
 
 
 class Worker(models.Model):
-    author = models.ForeignKey(User, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
     actual_time = models.IntegerField(verbose_name='Фактическое время', default=0)
     scheduled_time = models.IntegerField(verbose_name='Плановое время', default=0)
-    creared = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания работы')
-    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления работы')
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания работы')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления работы')
 
     def __str__(self):
         return self.author.username
@@ -88,10 +82,10 @@ class TableProject(models.Model):
 
 
 class EmployeeRate(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='employeerate')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='employeerate')
     money = models.IntegerField(verbose_name='Заработок в час', null=True)
-    created = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    update = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 
     def __str__(self):
         return f'ЗП в час сотрудника {self.user} составляет {self.money}'

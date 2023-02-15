@@ -1,32 +1,29 @@
-from django.conf.global_settings import AUTH_USER_MODEL
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User
-from django.db.models import Q
-from django_flatpickr.widgets import DateTimePickerInput
 from django import forms
-from django.conf import settings
+from django.contrib.auth.forms import UserCreationForm, UserChangeForm
+from django_flatpickr.widgets import DateTimePickerInput
 
-from utv_smeta.models import ProfileUser, Cards, Comments, Worker, TableProject
+from users.models import CustomUser
+from utv_smeta.models import Cards, Comments, Worker, TableProject
 
 
 class UserRegisterForm(UserCreationForm):
     class Meta:
-        model = User
-        fields = ['username', 'first_name', 'last_name', 'password1', 'password2']
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name', 'password1', 'password2', 'avatar']
 
 
-class ProfileUserForm(forms.ModelForm):
+class UserCustomChangeForm(UserChangeForm):
     class Meta:
-        model = ProfileUser
-        fields = ['avatar']
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name', 'avatar']
 
 
 class CardsCreateForm(forms.ModelForm):
     class Meta:
         model = Cards
-        fields = ['title', 'description', 'performers', 'date_dedlain']
+        fields = ['title', 'description', 'performers', 'deadline']
         widgets = {
-            'date_dedlain': DateTimePickerInput()
+            'deadline': DateTimePickerInput()
         }
 
 

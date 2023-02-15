@@ -2,17 +2,17 @@ from utv_smeta.models import Worker, TableProject, Cards, Comments
 
 
 class CardService:
-    def __init__(self, request=None, user_pk=None, title=None, description=None, performers=None,
-                 date_dedlain=None, card_pk=None, text=None, comment_pk=None,
+    def __init__(self, request=None, author=None, title=None, description=None, performers=None,
+                 deadline=None, card_pk=None, text=None, comment_pk=None,
                  planed_actors_salary=0, table_pk=None, work_pk=None,
                  planned_buying_music=0, planned_travel_expenses=0, travel_expenses=0, fare=0,
                  planned_other_expenses=0, other_expenses=0, price_client=15000, planned_fare=0, actors_salary=0,
                  buying_music=0, actual_time=0, scheduled_time=0):
-        self.author_id = user_pk
+        self.author_id = author
         self.title = title
         self.descriprion = description
         self.performers = performers
-        self.date_dedlain = date_dedlain
+        self.deadline = deadline
         self.card_pk = card_pk
         self.request = request
         self.text = text
@@ -38,9 +38,9 @@ class CardService:
         c = Cards.objects.create(author_id=self.author_id,
                                  title=self.title,
                                  description=self.descriprion,
-                                 date_dedlain=self.date_dedlain)
+                                 deadline=self.deadline)
         for user in self.performers:
-            c.performers.add(user.pk)
+            c.performers.add(user)
 
     def my_cards(self):
         """Возвращает карточки где пользователь является автором и исполнителем"""
@@ -120,7 +120,7 @@ class CardService:
         # Плановый заработок сотрудников за проект
         planedworkersalary = 0
         for i in self.executors():
-            for i2 in i.author.employeerate.order_by('-created')[:1]:
+            for i2 in i.author.employeerate.order_by('-created_time')[:1]:
                 planedworkersalary += i2.money * i.scheduled_time
                 workersalary += i2.money * i.actual_time
         return planedworkersalary + self.planed_actors_salary, workersalary + self.actors_salary
