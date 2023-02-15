@@ -5,7 +5,8 @@ from rest_framework import routers
 from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-from .views import UsersReadAPIView, CardsListAPIView, CardsDetailAPIView
+from .views import UsersReadAPIView, CardsListAPIView, CardsDetailAPIView, CommentListAPIView, CommentDetailAPIView, \
+    WorkerListAPIView, WorkerDetailAPIView, TableListAPIView, TableDetailAPIView
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -15,6 +16,12 @@ urlpatterns = [
     path('users/', UsersReadAPIView.as_view(), name='users_list'),
     path('cards/', CardsListAPIView.as_view(), name='cards_list'),
     path('cards/<int:card_pk>/', CardsDetailAPIView.as_view(), name='cards_detail'),
+    path('cards/<int:card_pk>/comment/', CommentListAPIView.as_view(), name='comment_create'),
+    path('cards/<int:card_pk>/comment/<int:com_pk>/', CommentDetailAPIView.as_view(), name='comment_detail'),
+    path('cards/<int:card_pk>/worker/', WorkerListAPIView.as_view(), name='worker_list'),
+    path('cards/<int:card_pk>/worker/<int:work_pk>/', WorkerDetailAPIView.as_view(), name='worker_detail'),
+    path('cards/<int:card_pk>/table/', TableListAPIView.as_view(), name='table_list'),
+    path('cards/<int:card_pk>/table/<int:table_pk>/', TableDetailAPIView.as_view(), name='table_detail')
 ]
 
 if settings.DEBUG:

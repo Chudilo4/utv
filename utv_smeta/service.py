@@ -3,7 +3,7 @@ from utv_smeta.models import Worker, TableProject, Cards, Comments
 
 class CardService:
     def __init__(self, request=None, author=None, title=None, description=None, performers=None,
-                 deadline=None, card_pk=None, text=None, comment_pk=None,
+                 deadline=None, card_pk=None, text=None, comment_pk=None, parent=None,
                  planed_actors_salary=0, table_pk=None, work_pk=None,
                  planned_buying_music=0, planned_travel_expenses=0, travel_expenses=0, fare=0,
                  planned_other_expenses=0, other_expenses=0, price_client=15000, planned_fare=0, actors_salary=0,
@@ -32,6 +32,7 @@ class CardService:
         self.actual_time = actual_time
         self.scheduled_time = scheduled_time
         self.work_pk = work_pk
+        self.parent = parent
 
     def create_card(self):
         """Создает карточку проекта"""
@@ -51,10 +52,11 @@ class CardService:
         c = self.give_me_card()
         c.title = self.title
         c.description = self.descriprion
-        c.date_dedlain = self.date_dedlain
+        c.deadline = self.deadline
         for user in self.performers:
-            c.performers.add(user.pk)
+            c.performers.add(user)
         c.save()
+        return c
 
     def delete_card(self):
         """Удаляет карточку"""
@@ -70,9 +72,10 @@ class CardService:
 
     def create_comment(self):
         """Создаёт коментарий в карточке"""
-        c = Comments.objects.create(author_id=self.author_id, text=self.text)
+        c = Comments.objects.create(author_id=self.author_id, text=self.text, parent_id=self.parent)
         card = self.give_me_card()
         card.comment.add(c)
+        return card
 
     def delete_comment(self):
         """Удаляет коментарий пользователя"""
@@ -82,6 +85,10 @@ class CardService:
     def my_comment(self):
         """Возвращет коментарий пользователя"""
         return Comments.objects.get(pk=self.comment_pk, author_id=self.author_id)
+
+    def get_my_comments(self):
+        card = self.give_me_card()
+        return card.comment
 
     def create_worker(self):
         """Создает рабочий процесс над карточкой"""
@@ -180,6 +187,7 @@ class CardService:
                                         )
         card = self.give_me_card()
         card.table.add(t)
+        return t
 
 
 
@@ -226,9 +234,14 @@ class CardService:
         t.actors_salary = self.actors_salary
         t.save()
 
+    def get_my_tables(self):
+        tables = self.give_me_card()
+        return tables.table
 
-
-
+    def delete_table(self):
+        card = self.give_me_card()
+        table = card.table.get(pk=self.table_pk)
+        table.delete()
 
 
 
