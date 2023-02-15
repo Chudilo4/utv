@@ -1,5 +1,6 @@
 from rest_framework import serializers
 
+from users.models import CustomUser
 from utv_smeta.models import Cards, Comments, TableProject, Worker
 
 
@@ -7,6 +8,17 @@ class UserReadSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
     avatar = serializers.ImageField()
+
+
+class UserCreateSerializers(serializers.ModelSerializer):
+    password = serializers.CharField(
+        write_only=True,
+        required=True,
+        max_length=256
+    )
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name', 'password', 'avatar']
 
 
 class TableListSerializers(serializers.Serializer):
@@ -82,6 +94,7 @@ class TableSerializers(serializers.ModelSerializer):
 
 
 class CardDetailSerializer(serializers.ModelSerializer):
+    author = UserReadSerializer()
     comment = CommentsSerializers(many=True)
     performers = UserReadSerializer(many=True)
     worker = WorkerListSerializers(many=True)
@@ -89,7 +102,7 @@ class CardDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cards
-        fields = ['id', 'author', 'title', 'description', 'created_time', 'performers', 'deadline', 'comment', 'table', 'worker']
+        fields = ['id', 'author', 'title', 'description', 'created_time', 'update_time', 'performers', 'deadline', 'comment', 'table', 'worker']
 
 
 class CardDetailUpdateSerializer(serializers.ModelSerializer):

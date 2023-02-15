@@ -9,7 +9,7 @@ from utv_smeta.models import *
 from utv_api.serializers import UserReadSerializer, CardListSerializers, CardCreateSerializers, CardDetailSerializer, \
     CardDetailUpdateSerializer, CommentCreateSerializers, CommentDetailUpdateSerializer, CommentListSerializers, \
     WorkerListSerializers, WorkerCreateSerializers, WorkerDetailSerializers, TableListSerializers, \
-    TableCreateSerializers, TablePlanedUpdateSerializers
+    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers
 from utv_smeta.service import CardService
 
 
@@ -22,6 +22,13 @@ class UsersReadAPIView(APIView):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True)
         return Response(serializer.data)
+
+    def post(self, request, *args, **kwargs):
+        serializer = UserCreateSerializers(data=request.data)
+        if serializer.is_valid():
+            CustomUser.objects.create_user(**serializer.data)
+            return Response(serializer.data, status.HTTP_201_CREATED)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
 class CardsListAPIView(APIView):
@@ -47,9 +54,9 @@ class CardsDetailAPIView(APIView):
     def put(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None):
             return Response({'Ошибка': 'Объект карточки не найден'})
-        card = CardService(card_pk=kwargs['card_pk'], **request.data).update_card()
-        serializer = CardDetailUpdateSerializer(instance=card, data=request.data)
+        serializer = CardDetailUpdateSerializer(data=request.data)
         if serializer.is_valid():
+            CardService(card_pk=kwargs['card_pk'], **serializer.data).update_card()
             return Response(serializer.data)
 
     def delete(self, request, *args, **kwargs):

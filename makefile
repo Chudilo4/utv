@@ -17,3 +17,9 @@ getssl:
 	sudo openssl req -x509 -nodes -days 3650 -newkey rsa:2048 -keyout ./selfsigned.key -out ./selfsigned.crt
 shell:
 	python manage.py shell
+test:
+	python manage.py test
+coverage-xml: #start tests code coverage and write report is xml-file for CodeClimate
+	coverage run --source='.' manage.py test
+	coverage xml
+

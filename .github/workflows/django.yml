@@ -7,7 +7,7 @@ on:
 jobs:
   build:
 
-    runs-on: self-hosted
+    runs-on: ubuntu-latest
     strategy:
       max-parallel: 4
       matrix:
@@ -26,6 +26,12 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
-    - name: Run Server
-      run: make dev
+    - name: Code Climate Coverage Action
+      uses: paambaati/codeclimate-action@v3.0.0
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        CC_TEST_REPORTER_ID: 3d736fed470d0631549e662fe73d3c7d6542de959aeeff3a45061d6556be3e0e
+      with:
+        coverageCommand: make coverage-xml
+        debug: true
         
