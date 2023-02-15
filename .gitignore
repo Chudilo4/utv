@@ -1,0 +1,7 @@
+venv
+.idea
+static
+media
+dn.sqlite3
+selfsigned.crt
+selfsigned.key
