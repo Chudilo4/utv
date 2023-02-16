@@ -148,9 +148,9 @@ class CardService:
         general_expenses = (salary + taxes_fot + self.other_expenses +
                             self.buying_music + self.travel_expenses + self.fare) * 0.23
         # Плановая себестоимость
-        planned_cost = planned_salary + planned_taxes_fot + self.planned_other_expenses + planned_general_expenses
+        planned_cost = planned_salary + planned_taxes_fot + self.planned_other_expenses + planned_general_expenses + self.planned_buying_music + self.planned_travel_expenses + self.planned_fare
         # Cебестоимость
-        cost = salary + taxes_fot + self.other_expenses + general_expenses
+        cost = salary + taxes_fot + self.other_expenses + general_expenses + self.buying_music + self.travel_expenses + self.fare
         # Плановая прибыль
         planned_profit = self.price_client - planned_cost
         # Фактическая прибыль

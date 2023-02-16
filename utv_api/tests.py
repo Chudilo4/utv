@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import CustomUser
-from utv_smeta.models import Cards, Worker
+from utv_smeta.models import Cards, Worker, TableProject, EmployeeRate
 
 
 class AccountTests(APITestCase):
@@ -169,3 +169,39 @@ class WorkerTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.worker.count(), 0)
+
+
+class TableTests(APITestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        employ = EmployeeRate.objects.create(user=self.user, money=200)
+        data = {
+            "title": "Тестовая карточка",
+            "description": "Описание для тестовой карточки",
+            'performers': [1],
+            "deadline": "2023-02-28T12:00:00+05:00",
+        }
+        self.client.login(username='Artem', password='123456789Zz')
+        self.url_card = reverse('cards_list')
+        self.client.post(self.url_card, data)
+        self.card = Cards.objects.get(title="Тестовая карточка")
+        self.url_worker = reverse('worker_list', kwargs={'card_pk': self.card.pk})
+        self.url_comment = reverse('comment_create', kwargs={'card_pk': self.card.pk})
+        self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
+        self.client.post(self.url_comment, {"text": "Тест коментария"})
+        self.client.post(self.url_worker, {"actual_time": 5, "scheduled_time": 4})
+
+    def test_created_table(self):
+        response = self.client.post(self.url_table, {"planed_actors_salary": 2000,
+                                                     "planned_other_expenses": 2000,
+                                                     "planned_buying_music": 2000,
+                                                     "planned_travel_expenses": 2000,
+                                                     "planned_fare": 2000})
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(self.card.table.count(), 1)
+        table = self.card.table.get(planned_other_expenses=2000.0)
+        self.assertEqual(table.planned_salary, 2800)
+        self.assertEqual(table.planned_cost, 15006)
+        self.assertEqual(table.planned_taxes_FOT, 1400)
+        self.assertEqual(table.planned_general_expenses, 2806)
+        self.assertEqual(table.planned_profit, -6)
