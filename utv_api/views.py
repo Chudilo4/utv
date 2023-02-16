@@ -1,15 +1,12 @@
-from django.contrib.auth.models import User
 from rest_framework import status
-from rest_framework.generics import CreateAPIView
-from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
-from utv_smeta.models import *
+
 from utv_api.serializers import UserReadSerializer, CardListSerializers, CardCreateSerializers, CardDetailSerializer, \
     CardDetailUpdateSerializer, CommentCreateSerializers, CommentDetailUpdateSerializer, CommentListSerializers, \
     WorkerListSerializers, WorkerCreateSerializers, WorkerDetailSerializers, TableListSerializers, \
-    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers
+    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers, UserDetailSerializers
+from utv_smeta.models import *
 from utv_smeta.service import CardService
 
 
@@ -18,10 +15,11 @@ from utv_smeta.service import CardService
 
 class UsersReadAPIView(APIView):
 
+
     def get(self, request, format=None):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True)
-        return Response(serializer.data)
+        return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = UserCreateSerializers(data=request.data)
@@ -34,6 +32,14 @@ class UsersReadAPIView(APIView):
             user.save()
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+
+class UserDetailAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        user = CustomUser.objects.get(pk=kwargs['user_pk'])
+        serializer = UserDetailSerializers(user)
+        return Response(serializer.data, status.HTTP_200_OK)
+
 
 
 class CardsListAPIView(APIView):

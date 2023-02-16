@@ -21,6 +21,12 @@ class UserCreateSerializers(serializers.ModelSerializer):
         fields = ['username', 'first_name', 'last_name', 'password', 'avatar']
 
 
+class UserDetailSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'first_name', 'last_name', 'password', 'avatar']
+
+
 class TableListSerializers(serializers.Serializer):
     id = serializers.IntegerField()
     price_client = serializers.FloatField()

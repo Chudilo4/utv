@@ -6,7 +6,7 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from .views import UsersReadAPIView, CardsListAPIView, CardsDetailAPIView, CommentListAPIView, CommentDetailAPIView, \
-    WorkerListAPIView, WorkerDetailAPIView, TableListAPIView, TableDetailAPIView
+    WorkerListAPIView, WorkerDetailAPIView, TableListAPIView, TableDetailAPIView, UserDetailAPIView
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -14,6 +14,7 @@ urlpatterns = [
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(), name='token_verify'),
     path('users/', UsersReadAPIView.as_view(), name='users_list'),
+    path('user/<int:user_pk>/', UserDetailAPIView.as_view(), name='users_detail'),
     path('cards/', CardsListAPIView.as_view(), name='cards_list'),
     path('cards/<int:card_pk>/', CardsDetailAPIView.as_view(), name='cards_detail'),
     path('cards/<int:card_pk>/comment/', CommentListAPIView.as_view(), name='comment_create'),

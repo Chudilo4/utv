@@ -54,6 +54,24 @@ class AccountTests(APITestCase):
             }])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_update_user(self):
+        """Тест на изменения аккаунта пользователя"""
+        url = reverse('users_list')
+        data = {'username': 'Nikita',
+                'password': '123456789Zz',
+                'first_name': 'Nikita',
+                'last_name': 'Metelev',
+                }
+        self.client.post(url, data)
+        url_put = reverse('users_detail', kwargs={'user_pk': 1})
+        data_put = {'username': 'Artem',
+                    'password': '987654321zZ',
+                    'first_name': 'Artem',
+                    'last_name': 'Bochkarev',
+                    }
+        response = self.client.put(url_put, data_put)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(CustomUser.objects.get(pk=1).username, "Artem")
 
 class CardTests(APITestCase):
     def test_create_card(self):
