@@ -189,7 +189,7 @@ class TableDetailAPIView(APIView):
         serializer = TablePlanedUpdateSerializers(data=request.data)
         if serializer.is_valid():
             CardService(card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'], **request.data).update_planned_table()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):

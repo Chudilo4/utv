@@ -54,7 +54,7 @@ class CardTests(APITestCase):
         }
         card = Cards.objects.create(author=user, **data)
         self.client.login(username='Artem', password='123456789Zz')
-        url = reverse('cards_detail', kwargs={'card_pk':card.pk})
+        url = reverse('cards_detail', kwargs={'card_pk': card.pk})
         response_get = self.client.get(url, format='json')
         self.assertEqual(response_get.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_get.data), 11)
@@ -102,10 +102,10 @@ class CommentTests(APITestCase):
     def setUp(self):
         user = CustomUser.objects.create_user('Artem', password='123456789Zz')
         self.card = Cards.objects.create(author=user,
-                                    title="Тестовая карточкацуцацац",
-                                    description="Описание для тестовой карточкиqwe",
-                                    deadline="2023-02-28T12:00:00+05:00",
-                                    )
+                                         title="Тестовая карточкацуцацац",
+                                         description="Описание для тестовой карточкиqwe",
+                                         deadline="2023-02-28T12:00:00+05:00",
+                                         )
         self.card.performers.add(user)
         self.client.login(username='Artem', password='123456789Zz')
         self.url = reverse('comment_create', kwargs={'card_pk': self.card.pk})
@@ -130,10 +130,10 @@ class WorkerTests(APITestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user('Artem', password='123456789Zz')
         self.card = Cards.objects.create(author=self.user,
-                                    title="Тестовая карточкацуцацац",
-                                    description="Описание для тестовой карточкиqwe",
-                                    deadline="2023-02-28T12:00:00+05:00",
-                                    )
+                                         title="Тестовая карточкацуцацац",
+                                         description="Описание для тестовой карточкиqwe",
+                                         deadline="2023-02-28T12:00:00+05:00",
+                                         )
         self.card.performers.add(self.user)
         self.client.login(username='Artem', password='123456789Zz')
         self.url = reverse('worker_list', kwargs={'card_pk': self.card.pk})
@@ -205,3 +205,36 @@ class TableTests(APITestCase):
         self.assertEqual(table.planned_taxes_FOT, 1400)
         self.assertEqual(table.planned_general_expenses, 2806)
         self.assertEqual(table.planned_profit, -6)
+
+    def test_update_planned_table(self):
+        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+                                          "planned_other_expenses": 2000,
+                                          "planned_buying_music": 2000,
+                                          "planned_travel_expenses": 2000,
+                                          "planned_fare": 2000})
+        table = self.card.table.get(planed_actors_salary=2000)
+        self.assertEqual(self.card.table.count(), 1)
+        url_table_detail = reverse('table_detail', kwargs={'card_pk': self.card.pk, 'table_pk': table.pk})
+        response = self.client.put(url_table_detail, '''{"planed_actors_salary": 2000,
+                                                      "planned_other_expenses": 2000,
+                                                      "planned_buying_music": 2000,
+                                                      "planned_travel_expenses": 2000,
+                                                      "planned_fare": 2000,
+                                                      "price_client": 150000}''', content_type='application/json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.card.table.count(), 1)
+        table = self.card.table.get(price_client=150000)
+        self.assertEqual(table.planned_profit, 134994)
+        self.assertEqual(table.planned_profitability, 89.996)
+
+    def test_delete_table(self):
+        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+                                          "planned_other_expenses": 2000,
+                                          "planned_buying_music": 2000,
+                                          "planned_travel_expenses": 2000,
+                                          "planned_fare": 2000})
+        table = self.card.table.get(planed_actors_salary=2000)
+        url_table_detail = reverse('table_detail', kwargs={'card_pk': self.card.pk, 'table_pk': table.pk})
+        response = self.client.delete(url_table_detail)
+        self.assertEqual(self.card.table.count(), 0)
+        self.assertEqual(response.status_code, 200)
