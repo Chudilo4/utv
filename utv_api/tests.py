@@ -1,5 +1,3 @@
-import json
-
 from django.urls import reverse, reverse_lazy
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -26,6 +24,7 @@ class AccountTests(APITestCase):
         self.assertEqual(response_post.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CustomUser.objects.get(username='Nikita').username, 'Nikita')
         self.assertEqual(CustomUser.objects.count(), 1)
+
 
 class CardTests(APITestCase):
     def test_create_card(self):
@@ -83,3 +82,49 @@ class CardTests(APITestCase):
         response = self.client.put(url, data2, format='json')
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(response.data), 4)
+
+    def test_read_card(self):
+        user = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        card = Cards.objects.create(author=user,
+                                    title="Тестовая карточкацуцацац",
+                                    description="Описание для тестовой карточкиqwe",
+                                    deadline="2023-02-28T12:00:00+05:00",
+                                    )
+        card.performers.add(user)
+        self.client.login(username='Artem', password='123456789Zz')
+        url = reverse('cards_list')
+        response_get = self.client.get(url)
+        self.assertEqual(response_get.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_get.data), 1)
+
+
+class CommentTests(APITestCase):
+    def setUp(self):
+        user = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        self.card = Cards.objects.create(author=user,
+                                    title="Тестовая карточкацуцацац",
+                                    description="Описание для тестовой карточкиqwe",
+                                    deadline="2023-02-28T12:00:00+05:00",
+                                    )
+        self.card.performers.add(user)
+        self.client.login(username='Artem', password='123456789Zz')
+        self.url = reverse('comment_create', kwargs={'card_pk': self.card.pk})
+
+    def test_create_comment(self):
+        response = self.client.post(self.url, {"text": "Тест коментария"})
+        self.assertEqual(self.card.comment.get(text="Тест коментария").text, "Тест коментария")
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(response.data), 1)
+
+    def test_delete_comment(self):
+        self.client.post(self.url, {"text": "Тест коментария"})
+        self.assertEqual(self.card.comment.count(), 1)
+        com_pk = self.card.comment.get(text="Тест коментария").pk
+        response = self.client.delete(path=reverse('comment_detail', kwargs={'card_pk': self.card.pk,
+                                                                             'com_pk': com_pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.card.comment.count(), 0)
+
+
+
+

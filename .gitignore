@@ -5,3 +5,5 @@ media
 dn.sqlite3
 selfsigned.crt
 selfsigned.key
+.coverage
+coverage.xml
