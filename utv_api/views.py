@@ -99,11 +99,11 @@ class CommentDetailAPIView(APIView):
 
     def put(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None) or not kwargs.get('com_pk', None):
-            return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_404_NOT_FOUND)
         serializer = CommentDetailUpdateSerializer(data=request.data)
         if serializer.is_valid():
             CardService(card_pk=kwargs['card_pk'], **request.data).create_comment()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
+            return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
@@ -134,7 +134,8 @@ class WorkerDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
         try:
             worker = CardService(card_pk=kwargs['card_pk'],
-                                 author=request.user.pk).get_my_work()
+                                 author=request.user.pk,
+                                 work_pk=kwargs['work_pk']).get_my_work()
         except Worker.DoesNotExist:
             return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = WorkerListSerializers(instance=worker)
@@ -145,14 +146,14 @@ class WorkerDetailAPIView(APIView):
             return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = WorkerDetailSerializers(data=request.data)
         if serializer.is_valid():
-            CardService(card_pk=kwargs['card_pk'], **request.data).create_worker()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+            CardService(card_pk=kwargs['card_pk'],work_pk=kwargs['work_pk'], **request.data).update_worker()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None) or not kwargs.get('work_pk', None):
             return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_400_BAD_REQUEST)
-        CardService(card_pk=kwargs['card_pk'], author=request.user.pk).delete_worker()
+        CardService(card_pk=kwargs['card_pk'],work_pk=kwargs['work_pk'], author=request.user.pk).delete_worker()
         return Response({'Выполнено': "Работа удалена"}, status=status.HTTP_200_OK)
 
 

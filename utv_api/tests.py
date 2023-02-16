@@ -3,7 +3,7 @@ from rest_framework.test import APITestCase
 from rest_framework import status
 
 from users.models import CustomUser
-from utv_smeta.models import Cards
+from utv_smeta.models import Cards, Worker
 
 
 class AccountTests(APITestCase):
@@ -126,5 +126,46 @@ class CommentTests(APITestCase):
         self.assertEqual(self.card.comment.count(), 0)
 
 
+class WorkerTests(APITestCase):
+    def setUp(self):
+        self.user = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        self.card = Cards.objects.create(author=self.user,
+                                    title="Тестовая карточкацуцацац",
+                                    description="Описание для тестовой карточкиqwe",
+                                    deadline="2023-02-28T12:00:00+05:00",
+                                    )
+        self.card.performers.add(self.user)
+        self.client.login(username='Artem', password='123456789Zz')
+        self.url = reverse('worker_list', kwargs={'card_pk': self.card.pk})
 
+    def test_create_worker(self):
+        response = self.client.post(self.url, {"actual_time": 5,
+                                               "scheduled_time": 4})
+        self.assertEqual(self.card.worker.count(), 1)
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(self.card.worker.get(author=self.user).actual_time, 5)
+        self.assertEqual(self.card.worker.get(author=self.user).scheduled_time, 4)
 
+    def test_update_worker(self):
+        self.client.post(self.url, {"actual_time": 5,
+                                    "scheduled_time": 4})
+        w = self.card.worker.get(author=self.user)
+        url = reverse('worker_detail', kwargs={'card_pk': self.card.pk,
+                                               'work_pk': w.pk})
+        response = self.client.put(url, '{"actual_time": 3, "scheduled_time": 3}', content_type='application/json')
+        self.assertEqual(self.card.worker.count(), 1)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response.data), 2)
+        self.assertEqual(self.card.worker.get(author=self.user).actual_time, 3)
+        self.assertEqual(self.card.worker.get(author=self.user).scheduled_time, 3)
+
+    def test_delete_work(self):
+        self.client.post(self.url, {"actual_time": 5,
+                                    "scheduled_time": 4})
+        w = self.card.worker.get(author=self.user)
+        url = reverse('worker_detail', kwargs={'card_pk': self.card.pk,
+                                               'work_pk': w.pk})
+        response = self.client.delete(url)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.card.worker.count(), 0)

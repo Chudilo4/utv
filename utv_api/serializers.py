@@ -76,10 +76,12 @@ class WorkerDetailSerializers(serializers.ModelSerializer):
         model = Worker
         fields = ['actual_time', 'scheduled_time']
 
+
 class WorkerCreateSerializers(serializers.ModelSerializer):
     class Meta:
         model = Worker
         fields = ['actual_time', 'scheduled_time']
+
 
 class CommentsSerializers(serializers.Serializer):
     id = serializers.IntegerField()
@@ -132,6 +134,7 @@ class CommentListSerializers(serializers.Serializer):
     id = serializers.IntegerField()
     text = serializers.CharField()
     author = UserReadSerializer()
+
 
 class CommentCreateSerializers(serializers.ModelSerializer):
     class Meta:

@@ -100,8 +100,8 @@ class CardService:
 
     def get_my_work(self):
         """Отдает рабочий процесс пользователя созданный в карточке"""
-        card = self.give_me_card()
-        return card.worker.get(author_id=self.author_id)
+        work = Worker.objects.get(pk=self.work_pk)
+        return work
 
     def update_worker(self):
         """Обновляет поля рабочего процесса"""
