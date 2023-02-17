@@ -2,6 +2,7 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from utv_api.permissions import IsOwnerOrReadOnly, IsOwnerOrPerformersReadOnly
 from utv_api.serializers import UserReadSerializer, CardListSerializers, CardCreateSerializers, CardDetailSerializer, \
     CardDetailUpdateSerializer, CommentCreateSerializers, CommentDetailUpdateSerializer, CommentListSerializers, \
     WorkerListSerializers, WorkerCreateSerializers, WorkerDetailSerializers, TableListSerializers, \
@@ -14,8 +15,6 @@ from utv_smeta.service import CardService
 
 
 class UsersReadAPIView(APIView):
-
-
     def get(self, request, format=None):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True)
@@ -35,6 +34,7 @@ class UsersReadAPIView(APIView):
 
 
 class UserDetailAPIView(APIView):
+    permission_classes = [IsOwnerOrReadOnly, ]
     def get(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
         serializer = UserDetailSerializers(user)
@@ -72,6 +72,7 @@ class CardsListAPIView(APIView):
 
 
 class CardsDetailAPIView(APIView):
+    permission_classes = [IsOwnerOrPerformersReadOnly, ]
     def get(self, request, *args, **kwargs):
         card = CardService(card_pk=kwargs['card_pk']).give_me_card()
         serializer = CardDetailSerializer(instance=card)
