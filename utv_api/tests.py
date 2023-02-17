@@ -73,6 +73,28 @@ class AccountTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.get(pk=1).username, "Artem")
 
+    def test_delete_user(self):
+        url = reverse('users_list')
+        url_delete = reverse('users_detail', kwargs={'user_pk': 2})
+        data = {'username': 'Nikita',
+                'password': '123456789Zz',
+                'first_name': 'Nikita',
+                'last_name': 'Metelev',
+                }
+        data2 = {'username': 'Artem',
+                 'password': '123456789Zz',
+                 'first_name': 'Artem',
+                 'last_name': 'Bochkarev',
+                 }
+        self.client.post(url, data)
+        self.client.post(url, data2)
+        self.assertEqual(CustomUser.objects.all().count(), 2)
+        self.client.login(username='Nikita', password='123456789Zz')
+        response = self.client.delete(url_delete)
+        self.assertEqual(CustomUser.objects.all().count(), 1)
+        self.assertEqual(response.status_code, 200)
+
+
 class CardTests(APITestCase):
     def test_create_card(self):
         url = reverse('cards_list')

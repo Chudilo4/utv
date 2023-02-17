@@ -40,7 +40,22 @@ class UserDetailAPIView(APIView):
         serializer = UserDetailSerializers(user)
         return Response(serializer.data, status.HTTP_200_OK)
 
+    def put(self, request, *args, **kwargs):
+        user = CustomUser.objects.get(pk=kwargs['user_pk'])
+        serializer = UserDetailSerializers(data=request.data)
+        if serializer.is_valid():
+            user.username = request.data['username']
+            user.first_name = request.data['first_name']
+            user.last_name = request.data['last_name']
+            user.set_password(request.data['password'])
+            user.save()
+            return Response(request.data, status.HTTP_200_OK)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
+    def delete(self, request, *args, **kwargs):
+        user = CustomUser.objects.get(pk=kwargs['user_pk'])
+        user.delete()
+        return Response(request.data, status.HTTP_200_OK)
 
 class CardsListAPIView(APIView):
     def get(self, request, format=None):
