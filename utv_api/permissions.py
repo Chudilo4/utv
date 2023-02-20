@@ -4,38 +4,13 @@ from users.models import CustomUser
 from utv_smeta.models import Cards
 
 
-class IsPerformensOnly(permissions.BasePermission):
-    def has_permission(self, request, view):
-        if request.user in Cards.objects.get(pk=request.data['card_pk']).performers:
-            return True
-        return False
-
-
-class IsOwnerOrReadOnly(permissions.BasePermission):
-    """
-    Custom permission to only allow owners of an object to edit it.
-    """
-
+class IsUser(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests.
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
-        # Write permissions are only allowed to the owner of the snippet.
-        return obj == request.user
+        return bool(request.user.pk == obj.pk)
 
 
 class IsOwnerOrPerformersReadOnly(permissions.BasePermission):
-    """
-    Custom permission to only allow owners of an object to edit it.
-    """
-
     def has_object_permission(self, request, view, obj):
-        # Read permissions are allowed to any request,
-        # so we'll always allow GET, HEAD or OPTIONS requests.
-        if request.method in permissions.SAFE_METHODS:
-            return True
-
         # Write permissions are only allowed to the owner of the snippet.
+        print(request)
         return obj.author == request.user or request.user in obj.performers.all()

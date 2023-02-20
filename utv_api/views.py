@@ -1,26 +1,32 @@
 from rest_framework import status
-from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from utv_api.permissions import IsOwnerOrReadOnly, IsOwnerOrPerformersReadOnly
+from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsUser, IsOwnerOrPerformersReadOnly
 from utv_api.serializers import UserReadSerializer, CardListSerializers, CardCreateSerializers, CardDetailSerializer, \
     CardDetailUpdateSerializer, CommentCreateSerializers, CommentDetailUpdateSerializer, CommentListSerializers, \
     WorkerListSerializers, WorkerCreateSerializers, WorkerDetailSerializers, TableListSerializers, \
-    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers, UserDetailSerializers
+    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers, UserDetailSerializers, \
+    CardReadSerializer
 from utv_smeta.models import *
 from utv_smeta.service import CardService
+from rest_framework import permissions
 
 
 # Create your views here.
 
 
 class UsersReadAPIView(APIView):
-    permission_classes = (AllowAny,)
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True)
         return Response(serializer.data, status.HTTP_200_OK)
+
+
+class UserRegisterAPIView(APIView):
+    permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
         serializer = UserCreateSerializers(data=request.data)
@@ -36,9 +42,10 @@ class UsersReadAPIView(APIView):
 
 
 class UserDetailAPIView(APIView):
+    permission_classes = [IsUser, permissions.IsAuthenticated]
     def get(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
-        serializer = UserDetailSerializers(user)
+        serializer = UserReadSerializer(user)
         return Response(serializer.data, status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
@@ -58,7 +65,10 @@ class UserDetailAPIView(APIView):
         user.delete()
         return Response(request.data, status.HTTP_200_OK)
 
+
 class CardsListAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, format=None):
         data = CardService(author=request.user.pk).my_cards()
         serializer = CardListSerializers(instance=data, many=True)
@@ -73,10 +83,10 @@ class CardsListAPIView(APIView):
 
 
 class CardsDetailAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly, ]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
     def get(self, request, *args, **kwargs):
         card = CardService(card_pk=kwargs['card_pk']).give_me_card()
-        serializer = CardDetailSerializer(instance=card)
+        serializer = CardReadSerializer(instance=card)
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
@@ -95,6 +105,7 @@ class CardsDetailAPIView(APIView):
 
 
 class CommentListAPIView(APIView):
+    permission_classes = [IsOwnerOrPerformersReadOnly]
     def post(self, request, *args, **kwargs):
         serializer = CommentCreateSerializers(data=request.data)
         if serializer.is_valid():

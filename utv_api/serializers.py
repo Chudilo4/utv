@@ -8,6 +8,8 @@ class UserReadSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
     avatar = serializers.ImageField()
+    first_name = serializers.CharField()
+    last_name = serializers.CharField()
 
 
 class UserCreateSerializers(serializers.ModelSerializer):
@@ -55,6 +57,7 @@ class TableListSerializers(serializers.Serializer):
     created_time = serializers.DateTimeField()
     updated_time = serializers.DateTimeField()
 
+
 class TableCreateSerializers(serializers.ModelSerializer):
     class Meta:
         model = TableProject
@@ -67,6 +70,7 @@ class TablePlanedUpdateSerializers(serializers.ModelSerializer):
         model = TableProject
         fields = ['price_client', 'planed_actors_salary', 'planned_other_expenses', 'planned_buying_music',
                   'planned_travel_expenses', 'planned_fare']
+
 
 class WorkerListSerializers(serializers.Serializer):
     id = serializers.IntegerField()
@@ -100,6 +104,16 @@ class TableSerializers(serializers.ModelSerializer):
         model = TableProject
         fields = '__all__'
 
+
+class CardReadSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    author = UserReadSerializer()
+    title = serializers.CharField()
+    description = serializers.CharField()
+    created_time = serializers.DateTimeField()
+    update_time = serializers.DateTimeField()
+    performers = UserReadSerializer(many=True, read_only=True)
+    deadline = serializers.DateTimeField()
 
 class CardDetailSerializer(serializers.ModelSerializer):
     author = UserReadSerializer()
