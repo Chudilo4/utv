@@ -26,6 +26,9 @@ jobs:
     - name: Run Tests
       run: |
         python manage.py test
+    - name: Run Lint
+      run: |
+        make lint
     - name: Code Climate Coverage Action
       uses: paambaati/codeclimate-action@v3.0.0
       env:
