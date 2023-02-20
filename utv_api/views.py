@@ -25,7 +25,7 @@ from utv_api.serializers import (
     UserDetailSerializers,
     TableFactUpdateSerializers)
 from utv_smeta.models import Comments, Worker, TableProject
-from utv_smeta.service import CardService
+from service_app.service import CardService
 
 
 class UsersReadAPIView(APIView):
@@ -54,7 +54,7 @@ class UserRegisterAPIView(APIView):
 
 
 class UserDetailAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated, IsUser]
+    permission_classes = [IsUser]
 
     def get(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])

@@ -1,11 +1,16 @@
 from rest_framework import permissions
 
+from users.models import CustomUser
 from utv_smeta.models import Cards
 
 
 class IsUser(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        return bool(request.user.pk == obj.pk)
+    def has_permission(self, request, view):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        user_pk = request.path.split('/')[4]
+        user = CustomUser.objects.get(pk=user_pk)
+        return bool(request.user == user)
 
 
 class IsOwnerOrPerformersReadOnly(permissions.BasePermission):

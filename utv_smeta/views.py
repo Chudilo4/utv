@@ -19,7 +19,7 @@ from utv_smeta.forms import (
     TableUpdateFactForm,
     UserCustomChangeForm)
 from utv_smeta.models import Worker
-from utv_smeta.service import CardService
+from service_app.service import CardService
 
 
 # Create your views here.

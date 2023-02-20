@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from users.models import CustomUser
-from utv_smeta.models import Cards, EmployeeRate, Comments
+from utv_smeta.models import Cards, EmployeeRate, Comments, TableProject
 
 
 class AccountTests(APITestCase):
@@ -82,7 +82,7 @@ class AccountTests(APITestCase):
 
     def test_delete_user(self):
         url = reverse('users_register')
-        url_delete = reverse('users_detail', kwargs={'user_pk': 2})
+        url_delete = reverse('users_detail', kwargs={'user_pk': 1})
         data = {'username': 'Nikita',
                 'password': '123456789Zz',
                 'first_name': 'Nikita',
@@ -408,6 +408,12 @@ class TestPermissions(APITestCase):
             'performers': [],
             "deadline": "2023-02-28T12:00:00+05:00",
         }
+        self.data2 = {
+            "title": "Тестовая карточкаffff",
+            "description": "Описание для тестовой карточки",
+            'performers': [],
+            "deadline": "2023-02-28T12:00:00+05:00",
+        }
         self.client.login(username='Artem', password='123456789Zz')
         self.url_card = reverse('cards_list')
         self.client.post(self.url_card, data)
@@ -415,11 +421,26 @@ class TestPermissions(APITestCase):
         self.url_worker = reverse('worker_create', kwargs={'card_pk': self.card.pk})
         self.url_comment = reverse('comment_list', kwargs={'card_pk': self.card.pk})
         self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
+        self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': self.card.pk})
         self.client.post(self.url_comment, {"text": "Тест коментария"})
         self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
+        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+                                          "planned_other_expenses": 2000,
+                                          "planned_buying_music": 2000,
+                                          "planned_travel_expenses": 2000,
+                                          "planned_fare": 2000})
+        self.table = TableProject.objects.get(pk=1)
+        self.url_table_detail = reverse('table_fact_detail',
+                                        kwargs={
+                                            'card_pk': self.card.pk,
+                                            'table_pk': self.table.pk
+                                        })
+        self.client.logout()
 
     def test_not_permission(self):
         CustomUser.objects.create_user('Nikita', password='123456789Zz')
+        self.client.login(username='Nikita',
+                          password='123456789Zz')
         response_get_cards = self.client.get(
             reverse('cards_list')
         )
@@ -427,9 +448,20 @@ class TestPermissions(APITestCase):
         get_detail_card = self.client.get(
             reverse('cards_detail', kwargs={'card_pk': self.card.pk}))
         self.assertEqual(get_detail_card.status_code, status.HTTP_403_FORBIDDEN)
+        delete_card = self.client.delete(self.url_card_detail)
+        self.assertEqual(delete_card.status_code, status.HTTP_403_FORBIDDEN)
+        put_card = self.client.put(self.url_card_detail, self.data2)
+        self.assertEqual(put_card.status_code, status.HTTP_403_FORBIDDEN)
         get_comments_card = self.client.get(
             reverse('comment_list', kwargs={"card_pk": self.card.pk})
         )
         self.assertEqual(get_comments_card.status_code, status.HTTP_403_FORBIDDEN)
         post_comment = self.client.post(reverse('comment_list', kwargs={"card_pk": self.card.pk}))
         self.assertEqual(post_comment.status_code, status.HTTP_403_FORBIDDEN)
+        delete_user_detail = self.client.delete(reverse('users_detail', kwargs={'user_pk': self.user.pk}))
+        self.assertEqual(delete_user_detail.status_code, status.HTTP_403_FORBIDDEN)
+        get_table_list = self.client.get(self.url_table)
+        self.assertEqual(get_table_list.status_code, status.HTTP_403_FORBIDDEN)
+        get_table_detail = self.client.get(self.url_table_detail)
+        self.assertEqual(get_table_detail.status_code, status.HTTP_403_FORBIDDEN)
+
