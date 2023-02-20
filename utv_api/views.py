@@ -141,7 +141,7 @@ class CommentDetailAPIView(APIView):
     def delete(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None) or not kwargs.get('com_pk', None):
             return Response({'Ошибка': 'Объект карточки или коментария не найден'}, status=status.HTTP_400_BAD_REQUEST)
-        CardService(comment_pk=kwargs['com_pk'], author=request.user.pk).delete_comment()
+        CardService(comment_pk=kwargs['com_pk'], card_pk=kwargs['card_pk']).delete_comment()
         return Response({'Выполнено': "Комментарий удален"}, status=status.HTTP_200_OK)
 
 
