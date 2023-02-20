@@ -151,18 +151,26 @@ class CardService:
         taxes_fot = salary * 0.5
 
         # Плановые общехозяйственные расходы
-        planned_general_expenses = (planned_salary + planned_taxes_fot + self.planned_other_expenses + self.planned_buying_music + self.planned_travel_expenses + self.planned_fare) * 0.23
+        list_planned_general_expenses = [
+            planned_salary, planned_taxes_fot, self.planned_other_expenses,
+            self.planned_buying_music, self.planned_travel_expenses,
+            self.planned_fare]
+        planned_general_expenses = sum(list_planned_general_expenses) * 0.23
         # Общехозяйственные расходы
-        general_expenses = (salary + taxes_fot + self.other_expenses + self.buying_music + self.travel_expenses + self.fare) * 0.23
+        list_general_expenses = [salary, taxes_fot, self.other_expenses, self.buying_music,
+                                 self.travel_expenses, self.fare]
+        general_expenses = sum(list_general_expenses) * 0.23
         # Плановая себестоимость
-        planned_cost = \
-            planned_salary + planned_taxes_fot + self.planned_other_expenses \
-            + planned_general_expenses + self.planned_buying_music \
-            + self.planned_travel_expenses + self.planned_fare
+        list_planned_cost = [
+            planned_salary, planned_taxes_fot, self.planned_other_expenses,
+            planned_general_expenses, self.planned_buying_music,
+            self.planned_travel_expenses, self.planned_fare]
+        planned_cost = sum(list_planned_cost)
         # Cебестоимость
-        cost = \
-            salary + taxes_fot + self.other_expenses + general_expenses \
-            + self.buying_music + self.travel_expenses + self.fare
+        list_cost = [salary, taxes_fot, self.other_expenses, general_expenses,
+                     self.buying_music, self.travel_expenses, self.fare]
+        cost = sum(list_cost)
+
         # Плановая прибыль
         planned_profit = self.price_client - planned_cost
         # Фактическая прибыль
@@ -175,7 +183,7 @@ class CardService:
                 'salary': salary,
                 'planned_taxes_FOT': planned_taxes_fot,
                 'taxes_FOT': taxes_fot,
-                'planned_general_expenses': planned_general_expenses * 0.23,
+                'planned_general_expenses': planned_general_expenses,
                 'general_expenses': general_expenses,
                 'planned_cost': planned_cost,
                 'cost': cost,

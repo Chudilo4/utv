@@ -25,4 +25,5 @@ coverage-xml: #start tests code coverage and write report is xml-file for CodeCl
 venv:
 	python3 -m venv venv
 	source venv/bin/activate
-
+lint:
+	flake8
