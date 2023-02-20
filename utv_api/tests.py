@@ -140,7 +140,7 @@ class CardTests(APITestCase):
 
     def test_update_card(self):
         user = CustomUser.objects.create_user('Artem', password='123456789Zz')
-        user2 = CustomUser.objects.create_user('Nikita', password='123456789Zz')
+        CustomUser.objects.create_user('Nikita', password='123456789Zz')
         data = {
             "title": "Тестовая карточка",
             "description": "Описание для тестовой карточки",
@@ -196,8 +196,9 @@ class CommentTests(APITestCase):
         self.client.post(self.url, {"text": "Тест коментария"})
         self.assertEqual(self.card.comment.count(), 1)
         com_pk = self.card.comment.get(text="Тест коментария").pk
-        response = self.client.delete(path=reverse('comment_detail', kwargs={'card_pk': self.card.pk,
-                                                                             'com_pk': com_pk}))
+        response = self.client.delete(
+            path=reverse('comment_detail', kwargs={'card_pk': self.card.pk,
+                                                   'com_pk': com_pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.comment.count(), 0)
 
@@ -229,7 +230,9 @@ class WorkerTests(APITestCase):
         w = self.card.worker.get(author=self.user)
         url = reverse('worker_detail', kwargs={'card_pk': self.card.pk,
                                                'work_pk': w.pk})
-        response = self.client.put(url, '{"actual_time": 3, "scheduled_time": 3}', content_type='application/json')
+        response = self.client.put(url,
+                                   '{"actual_time": 3, "scheduled_time": 3}',
+                                   content_type='application/json')
         self.assertEqual(self.card.worker.count(), 1)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 2)
@@ -250,7 +253,7 @@ class WorkerTests(APITestCase):
 class TableTests(APITestCase):
     def setUp(self):
         self.user = CustomUser.objects.create_user('Artem', password='123456789Zz')
-        employ = EmployeeRate.objects.create(user=self.user, money=200)
+        EmployeeRate.objects.create(user=self.user, money=200)
         data = {
             "title": "Тестовая карточка",
             "description": "Описание для тестовой карточки",
@@ -262,7 +265,7 @@ class TableTests(APITestCase):
         self.client.post(self.url_card, data)
         self.card = Cards.objects.get(title="Тестовая карточка")
         self.url_worker = reverse('worker_create', kwargs={'card_pk': self.card.pk})
-        self.url_comment = reverse('comment_create', kwargs={'card_pk': self.card.pk})
+        self.url_comment = reverse('comment_list', kwargs={'card_pk': self.card.pk})
         self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
         self.client.post(self.url_comment, {"text": "Тест коментария"})
         self.client.post(self.url_worker, {"actual_time": 5, "scheduled_time": 4})
@@ -289,20 +292,29 @@ class TableTests(APITestCase):
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
         table = self.card.table.get(planed_actors_salary=2000)
-        url_table_detail = reverse('table_detail', kwargs={'card_pk': self.card.pk, 'table_pk': table.pk})
-        response = self.client.put(url_table_detail, '''{"planed_actors_salary": 2000,
-                                                      "planned_other_expenses": 2000,
-                                                      "planned_buying_music": 2000,
-                                                      "planned_travel_expenses": 2000,
-                                                      "planned_fare": 2000,
-                                                      "price_client": 150000}''', content_type='application/json')
+        url_table_detail = reverse('table_planned_detail',
+                                   kwargs={'card_pk': self.card.pk,
+                                           'table_pk': table.pk})
+        response = self.client.put(url_table_detail,
+                                   '''{"planed_actors_salary": 2000,
+                                   "planned_other_expenses": 2000,
+                                   "planned_buying_music": 2000,
+                                   "planned_travel_expenses": 2000,
+                                   "planned_fare": 2000,
+                                   "price_client": 150000}''',
+                                   content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.table.count(), 1)
         table = self.card.table.get(price_client=150000)
+        self.assertEqual(table.planned_cost, 15006)
         self.assertEqual(table.planned_salary, 2800)
+        self.assertEqual(table.planned_other_expenses, 2000)
+        self.assertEqual(table.planned_buying_music, 2000)
+        self.assertEqual(table.planned_travel_expenses, 2000)
+        self.assertEqual(table.planned_fare, 2000)
         self.assertEqual(table.planned_taxes_FOT, 1400)
         self.assertEqual(table.planned_general_expenses, 2806)
-        self.assertEqual(table.planned_cost, 15006)
+
         self.assertEqual(table.planned_profit, 134994)
         self.assertEqual(table.planned_profitability, 89.996)
 
@@ -313,17 +325,9 @@ class TableTests(APITestCase):
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
         table = self.card.table.get(planed_actors_salary=2000)
-        url_table_detail = reverse('table_detail', kwargs={'card_pk': self.card.pk, 'table_pk': table.pk})
+        url_table_detail = reverse('table_planned_detail',
+                                   kwargs={'card_pk': self.card.pk,
+                                           'table_pk': table.pk})
         response = self.client.delete(url_table_detail)
         self.assertEqual(self.card.table.count(), 0)
         self.assertEqual(response.status_code, 200)
-
-    # def test_read_table(self):
-    #     self.client.post(self.url_table, {"planed_actors_salary": 2000,
-    #                                       "planned_other_expenses": 2000,
-    #                                       "planned_buying_music": 2000,
-    #                                       "planned_travel_expenses": 2000,
-    #                                       "planned_fare": 2000})
-    #     table = self.card.table.get(planed_actors_salary=2000)
-    #     url_table_detail = reverse('table_detail', kwargs={'card_pk': self.card.pk, 'table_pk': table.pk})
-    #     response = self.client.get(url_table_detail)

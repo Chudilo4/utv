@@ -6,7 +6,8 @@ class CardService:
                  deadline=None, card_pk=None, text=None, comment_pk=None, parent=None,
                  planed_actors_salary=0, table_pk=None, work_pk=None,
                  planned_buying_music=0, planned_travel_expenses=0, travel_expenses=0, fare=0,
-                 planned_other_expenses=0, other_expenses=0, price_client=15000, planned_fare=0, actors_salary=0,
+                 planned_other_expenses=0, other_expenses=0,
+                 price_client=15000, planned_fare=0, actors_salary=0,
                  buying_music=0, actual_time=0, scheduled_time=0):
         self.author_id = author
         self.title = title
@@ -45,7 +46,8 @@ class CardService:
 
     def my_cards(self):
         """Возвращает карточки где пользователь является автором и исполнителем"""
-        return Cards.objects.filter(author_id=self.author_id).union(Cards.objects.filter(performers=self.author_id))
+        return Cards.objects.filter(
+            author_id=self.author_id).union(Cards.objects.filter(performers=self.author_id))
 
     def update_card(self):
         """Обновляет поля карточки"""
@@ -87,6 +89,7 @@ class CardService:
         comment.text = self.text
         comment.save()
         return comment
+
     def my_comment(self):
         """Возвращет коментарий пользователя"""
         return self.give_me_card().comment.get(pk=self.comment_pk)
@@ -148,15 +151,18 @@ class CardService:
         taxes_fot = salary * 0.5
 
         # Плановые общехозяйственные расходы
-        planned_general_expenses = (planned_salary + planned_taxes_fot + self.planned_other_expenses +
-                                    self.planned_buying_music + self.planned_travel_expenses + self.planned_fare) * 0.23
+        planned_general_expenses = (planned_salary + planned_taxes_fot + self.planned_other_expenses + self.planned_buying_music + self.planned_travel_expenses + self.planned_fare) * 0.23
         # Общехозяйственные расходы
-        general_expenses = (salary + taxes_fot + self.other_expenses +
-                            self.buying_music + self.travel_expenses + self.fare) * 0.23
+        general_expenses = (salary + taxes_fot + self.other_expenses + self.buying_music + self.travel_expenses + self.fare) * 0.23
         # Плановая себестоимость
-        planned_cost = planned_salary + planned_taxes_fot + self.planned_other_expenses + planned_general_expenses + self.planned_buying_music + self.planned_travel_expenses + self.planned_fare
+        planned_cost = \
+            planned_salary + planned_taxes_fot + self.planned_other_expenses \
+            + planned_general_expenses + self.planned_buying_music \
+            + self.planned_travel_expenses + self.planned_fare
         # Cебестоимость
-        cost = salary + taxes_fot + self.other_expenses + general_expenses + self.buying_music + self.travel_expenses + self.fare
+        cost = \
+            salary + taxes_fot + self.other_expenses + general_expenses \
+            + self.buying_music + self.travel_expenses + self.fare
         # Плановая прибыль
         planned_profit = self.price_client - planned_cost
         # Фактическая прибыль
@@ -169,7 +175,7 @@ class CardService:
                 'salary': salary,
                 'planned_taxes_FOT': planned_taxes_fot,
                 'taxes_FOT': taxes_fot,
-                'planned_general_expenses': planned_general_expenses,
+                'planned_general_expenses': planned_general_expenses * 0.23,
                 'general_expenses': general_expenses,
                 'planned_cost': planned_cost,
                 'cost': cost,
@@ -183,25 +189,21 @@ class CardService:
         """Создаёт смету по созданному проекту"""
         content = self.calculation_table()
         t = TableProject.objects.create(
-                                        price_client=self.price_client,
-                                        planed_actors_salary=self.planed_actors_salary,
-                                        planned_buying_music=self.planned_buying_music,
-                                        planned_travel_expenses=self.planned_travel_expenses,
-                                        planned_fare=self.planned_fare,
-                                        planned_other_expenses=self.planned_other_expenses,
-                                        **content
-                                        )
+            price_client=self.price_client,
+            planed_actors_salary=self.planed_actors_salary,
+            planned_buying_music=self.planned_buying_music,
+            planned_travel_expenses=self.planned_travel_expenses,
+            planned_fare=self.planned_fare,
+            planned_other_expenses=self.planned_other_expenses,
+            **content
+        )
         card = self.give_me_card()
         card.table.add(t)
         return t
 
-
-
     def get_table(self):
         """Возвращем таблицу по ключу"""
         return TableProject.objects.get(pk=self.table_pk)
-
-
 
     def update_planned_table(self):
         """Коректируем данные таблицы в случае если
@@ -219,6 +221,24 @@ class CardService:
         t.planned_fare = self.planned_fare
         t.planned_travel_expenses = self.planned_travel_expenses
         t.planned_buying_music = self.planned_buying_music
+        t.save()
+
+    def update_fact_table(self):
+        """Коректируем данные таблицы в случае если
+         какие то поля не заполнены либо ЗП сотрудников поменялась"""
+        content = self.calculation_table()
+        t = self.get_table()
+        t.salary = content['salary']
+        t.taxes_FOT = content['taxes_FOT']
+        t.general_expenses = content['general_expenses']
+        t.cost = content['cost']
+        t.profit = content['profit']
+        t.profitability = content['profitability']
+        t.price_client = self.price_client
+        t.other_expenses = self.other_expenses
+        t.fare = self.fare
+        t.travel_expenses = self.travel_expenses
+        t.buying_music = self.buying_music
         t.save()
 
     def update_table(self):
@@ -248,6 +268,3 @@ class CardService:
         card = self.give_me_card()
         table = card.table.get(pk=self.table_pk)
         table.delete()
-
-
-

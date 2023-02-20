@@ -3,13 +3,28 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from users.models import CustomUser
 from utv_api.permissions import IsUser, \
     IsOwnerOrReadOnly, WorkOnlyOne, OnlyAuthorOrPerfomance, OnlyWorkAuthor, OnlyAuthorCard
-from utv_api.serializers import UserReadSerializer, CardListSerializers, CardCreateSerializers, CardDetailSerializer, \
-    CardDetailUpdateSerializer, CommentCreateSerializers, CommentDetailUpdateSerializer, CommentListSerializers, \
-    WorkerListSerializers, WorkerCreateSerializers, WorkerDetailSerializers, TableListSerializers, \
-    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers, UserDetailSerializers
-from utv_smeta.models import *
+from utv_api.serializers import (
+    UserReadSerializer,
+    CardListSerializers,
+    CardCreateSerializers,
+    CardDetailSerializer,
+    CardDetailUpdateSerializer,
+    CommentCreateSerializers,
+    CommentDetailUpdateSerializer,
+    CommentListSerializers,
+    WorkerListSerializers,
+    WorkerCreateSerializers,
+    WorkerDetailSerializers,
+    TableListSerializers,
+    TableCreateSerializers,
+    TablePlanedUpdateSerializers,
+    UserCreateSerializers,
+    UserDetailSerializers,
+    TableFactUpdateSerializers)
+from utv_smeta.models import Comments, Worker, TableProject
 from utv_smeta.service import CardService
 
 
@@ -114,18 +129,23 @@ class CommentListAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = CommentCreateSerializers(data=request.data)
         if serializer.is_valid():
-            CardService(author=request.user.pk, card_pk=kwargs['card_pk'], **serializer.data).create_comment()
+            CardService(author=request.user.pk,
+                        card_pk=kwargs['card_pk'],
+                        **serializer.data).create_comment()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class CommentDetailAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated, OnlyAuthorOrPerfomance]
+
     def get(self, request, *args, **kwargs):
         try:
-            comment = CardService(card_pk=kwargs['card_pk'], comment_pk=kwargs['com_pk'], author=request.user.pk).my_comment()
+            comment = CardService(card_pk=kwargs['card_pk'],
+                                  comment_pk=kwargs['com_pk'],
+                                  author=request.user.pk).my_comment()
         except Comments.DoesNotExist:
-            return Response({'Ошибка': 'Коментарий не найден'},status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = CommentDetailUpdateSerializer(instance=comment)
         return Response(serializer.data)
 
@@ -134,13 +154,16 @@ class CommentDetailAPIView(APIView):
             return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_404_NOT_FOUND)
         serializer = CommentDetailUpdateSerializer(data=request.data)
         if serializer.is_valid():
-            CardService(card_pk=kwargs['card_pk'], comment_pk=kwargs['com_pk'], **request.data).update_comment()
+            CardService(card_pk=kwargs['card_pk'],
+                        comment_pk=kwargs['com_pk'],
+                        **request.data).update_comment()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None) or not kwargs.get('com_pk', None):
-            return Response({'Ошибка': 'Объект карточки или коментария не найден'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Ошибка': 'Объект карточки или коментария не найден'},
+                            status=status.HTTP_400_BAD_REQUEST)
         CardService(comment_pk=kwargs['com_pk'], card_pk=kwargs['card_pk']).delete_comment()
         return Response({'Выполнено': "Комментарий удален"}, status=status.HTTP_200_OK)
 
@@ -162,7 +185,9 @@ class WorkerAddAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = WorkerCreateSerializers(data=request.data)
         if serializer.is_valid():
-            CardService(author=request.user.pk, card_pk=kwargs['card_pk'], **serializer.data).create_worker()
+            CardService(author=request.user.pk,
+                        card_pk=kwargs['card_pk'],
+                        **serializer.data).create_worker()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -185,19 +210,24 @@ class WorkerDetailAPIView(APIView):
             return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = WorkerDetailSerializers(data=request.data)
         if serializer.is_valid():
-            CardService(card_pk=kwargs['card_pk'], author=request.user.pk, **request.data).update_worker()
+            CardService(card_pk=kwargs['card_pk'],
+                        author=request.user.pk,
+                        **request.data).update_worker()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
     def delete(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None) or not kwargs.get('work_pk', None):
             return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_400_BAD_REQUEST)
-        CardService(card_pk=kwargs['card_pk'],work_pk=kwargs['work_pk'], author=request.user.pk).delete_worker()
+        CardService(card_pk=kwargs['card_pk'],
+                    work_pk=kwargs['work_pk'],
+                    author=request.user.pk).delete_worker()
         return Response({'Выполнено': "Работа удалена"}, status=status.HTTP_200_OK)
 
 
 class TableListAPIView(APIView):
     permission_classes = [OnlyAuthorCard]
+
     def get(self, request, *args, **kwargs):
         try:
             tables = CardService(card_pk=kwargs['card_pk']).get_my_tables()
@@ -209,12 +239,14 @@ class TableListAPIView(APIView):
     def post(self, request, *args, **kwargs):
         serializer = TableCreateSerializers(data=request.data)
         if serializer.is_valid():
-            CardService(author=request.user.pk, card_pk=kwargs['card_pk'], **serializer.data).create_table()
+            CardService(author=request.user.pk,
+                        card_pk=kwargs['card_pk'],
+                        **serializer.data).create_table()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TableDetailAPIView(APIView):
+class TablePlanedDetailAPIView(APIView):
     permission_classes = [OnlyAuthorCard]
 
     def get(self, request, *args, **kwargs):
@@ -230,7 +262,39 @@ class TableDetailAPIView(APIView):
             return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = TablePlanedUpdateSerializers(data=request.data)
         if serializer.is_valid():
-            CardService(card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk'], **request.data).update_planned_table()
+            CardService(card_pk=kwargs['card_pk'],
+                        table_pk=kwargs['table_pk'],
+                        **request.data).update_planned_table()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        if not kwargs.get('card_pk', None) or not kwargs.get('table_pk', None):
+            return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
+        CardService(card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk']).delete_table()
+        return Response({'Выполнено': "Работа удалена"}, status=status.HTTP_200_OK)
+
+
+class TableFactDetailAPIView(APIView):
+    permission_classes = [OnlyAuthorCard]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            table = CardService(card_pk=kwargs['card_pk']).get_my_tables()
+        except Worker.DoesNotExist:
+            return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TableListSerializers(instance=table, many=True)
+        return Response(serializer.data)
+
+    def put(self, request, *args, **kwargs):
+        if not kwargs.get('card_pk', None) or not kwargs.get('table_pk', None):
+            return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = TableFactUpdateSerializers(data=request.data)
+        if serializer.is_valid():
+            print(serializer.data)
+            CardService(card_pk=kwargs['card_pk'],
+                        table_pk=kwargs['table_pk'],
+                        **request.data).update_fact_table()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 

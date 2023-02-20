@@ -1,10 +1,7 @@
 from django.db import models
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 
 from users.models import CustomUser
-
-
-# Create your models here.
 
 
 class Cards(models.Model):
@@ -23,7 +20,7 @@ class Cards(models.Model):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('card_detail' , kwargs={'card_pk': self.pk})
+        return reverse('card_detail', kwargs={'card_pk': self.pk})
 
 
 class Comments(models.Model):
@@ -60,16 +57,26 @@ class TableProject(models.Model):
     actors_salary = models.FloatField(verbose_name='Зарплата актёрам', null=True)
     planned_taxes_FOT = models.FloatField(verbose_name='Плановые налоги с ФОТ', null=True)
     taxes_FOT = models.FloatField(verbose_name='Фактические налоги с ФОТ', null=True)
-    planned_other_expenses = models.FloatField(verbose_name='Плановые Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы', null=True)
-    other_expenses = models.FloatField(verbose_name='Плановые Покупка реквизита для организации съемочного процесса/ Непредвиденные расходы', null=True)
+    planned_other_expenses = models.FloatField(
+        verbose_name='Плановые Покупка реквизита для '
+                     'организации съемочного процесса/ '
+                     'Непредвиденные расходы', null=True)
+    other_expenses = models.FloatField(
+        verbose_name='Плановые Покупка реквизита для организации '
+                     'съемочного процесса/ Непредвиденные расходы',
+        null=True)
     planned_buying_music = models.FloatField(verbose_name='Плановая покупка музыки', null=True)
     buying_music = models.FloatField(verbose_name='Фактическая покупка музыки', null=True)
-    planned_travel_expenses = models.FloatField(verbose_name='Плановые командировачные расходы', null=True)
-    travel_expenses = models.FloatField(verbose_name='Фактические командировачные расходы', null=True)
+    planned_travel_expenses = models.FloatField(
+        verbose_name='Плановые командировачные расходы', null=True)
+    travel_expenses = models.FloatField(
+        verbose_name='Фактические командировачные расходы', null=True)
     planned_fare = models.FloatField(verbose_name='Плановые транспортные расходы', null=True)
     fare = models.FloatField(verbose_name='Фактические транспортные расходы', null=True)
-    planned_general_expenses = models.FloatField(verbose_name='Плановые общехозяйственные расходы', null=True)
-    general_expenses = models.FloatField(verbose_name='Фактические общехозяйственные расходы', null=True)
+    planned_general_expenses = models.FloatField(
+        verbose_name='Плановые общехозяйственные расходы', null=True)
+    general_expenses = models.FloatField(
+        verbose_name='Фактические общехозяйственные расходы', null=True)
     planned_profit = models.FloatField(verbose_name='Плановая прибыль', null=True)
     profit = models.FloatField(verbose_name='Фактическая прибыль', null=True)
     planned_profitability = models.FloatField(verbose_name='Плановая рентабельность', null=True)

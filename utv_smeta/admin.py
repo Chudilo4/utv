@@ -1,7 +1,5 @@
 from django.contrib import admin
-from utv_smeta.models import *
-# Register your models here.
-
+from utv_smeta.models import Cards, Worker, Comments, EmployeeRate, TableProject
 
 
 @admin.register(Cards)
@@ -27,4 +25,3 @@ class EmployeeRateAdmin(admin.ModelAdmin):
 @admin.register(TableProject)
 class TableProjectAdmin(admin.ModelAdmin):
     pass
-

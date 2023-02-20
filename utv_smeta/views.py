@@ -4,13 +4,21 @@ from django.contrib.auth.models import User
 from django.contrib.auth.views import LoginView
 from django.contrib.messages.views import SuccessMessageMixin
 from django.shortcuts import render, redirect
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse_lazy
 from django.views import View
-from django.views.generic import CreateView, DetailView, UpdateView, TemplateView, DeleteView
+from django.views.generic import CreateView, UpdateView, TemplateView, DeleteView
 
 from users.models import CustomUser
-from utv_smeta.forms import UserRegisterForm, CardsCreateForm, \
-    WorkerForm, CommentCreateForm, TableForm, TableUpdateForm, TableUpdateFactForm, UserCustomChangeForm
+from utv_smeta.forms import (
+    UserRegisterForm,
+    CardsCreateForm,
+    WorkerForm,
+    CommentCreateForm,
+    TableForm,
+    TableUpdateForm,
+    TableUpdateFactForm,
+    UserCustomChangeForm)
+from utv_smeta.models import Worker
 from utv_smeta.service import CardService
 
 
@@ -35,10 +43,10 @@ class UserChangeView(SuccessMessageMixin, UpdateView):
     success_message = 'Вы изменили профиль'
     success_url = reverse_lazy('home')
 
+
 class LoginUserView(LoginView):
     template_name = 'utv_smeta/login.html'
     form_class = AuthenticationForm
-
 
 
 class DeleteUserView(DeleteView):
@@ -105,7 +113,7 @@ class CardDetailView(View):
         try:
             work = card.get_my_work()
             form = WorkerForm(instance=work)
-        except:
+        except Worker.DoesNotExist:
             form = WorkerForm()
             work = False
         cont = {'cards': card.give_me_card(),
@@ -122,8 +130,8 @@ class WorkerCreateView(View):
         form_worker = WorkerForm(request.POST)
         if form_worker.is_valid():
             CardService(author=request.user.pk,
-                          card_pk=kwargs['card_pk'],
-                          **form_worker.cleaned_data).create_worker()
+                        card_pk=kwargs['card_pk'],
+                        **form_worker.cleaned_data).create_worker()
             messages.success(request, 'Работа над проектом началась')
             return redirect('card_detail', card_pk=kwargs['card_pk'])
         return reverse_lazy('card_detail', kwargs['card_pk'], context)
@@ -135,8 +143,8 @@ class WorkerUpdateView(View):
         form_worker = WorkerForm(request.POST)
         if form_worker.is_valid():
             CardService(author=request.user.pk,
-                          card_pk=kwargs['card_pk'],
-                          **form_worker.cleaned_data).update_worker()
+                        card_pk=kwargs['card_pk'],
+                        **form_worker.cleaned_data).update_worker()
             messages.success(request, 'Работа над проектом обновлена')
             return redirect('card_detail', card_pk=kwargs['card_pk'])
         return reverse_lazy('card_detail', kwargs['card_pk'], context)
@@ -145,7 +153,7 @@ class WorkerUpdateView(View):
 class WorkerDeleteView(View):
     def post(self, request, *args, **kwargs):
         CardService(author=request.user.pk,
-                      card_pk=kwargs['card_pk']).delete_worker()
+                    card_pk=kwargs['card_pk']).delete_worker()
         messages.success(request, 'Ваша работа над проектом удалена')
         return redirect('card_detail', card_pk=kwargs['card_pk'])
 
@@ -167,8 +175,8 @@ class CommentCreateView(View):
 class CommentDeleteView(View):
     def post(self, request, *args, **kwargs):
         CardService(comment_pk=request.POST['comment_pk'],
-                       author=request.user.pk,
-                       card_pk=kwargs['card_pk']).delete_comment()
+                    author=request.user.pk,
+                    card_pk=kwargs['card_pk']).delete_comment()
         messages.success(request, 'Ваш коментарий удалён')
         return redirect('card_detail', card_pk=kwargs['card_pk'])
 

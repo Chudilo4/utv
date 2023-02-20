@@ -18,6 +18,7 @@ class UserCreateSerializers(serializers.ModelSerializer):
         required=True,
         max_length=256
     )
+
     class Meta:
         model = CustomUser
         fields = ['username', 'first_name', 'last_name', 'password', 'avatar']
@@ -65,11 +66,18 @@ class TableCreateSerializers(serializers.ModelSerializer):
                   'planned_travel_expenses', 'planned_fare']
 
 
+class TableFactUpdateSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = TableProject
+        fields = ['price_client', 'actors_salary', 'other_expenses', 'buying_music',
+                  'travel_expenses', 'fare']
+
+
 class TablePlanedUpdateSerializers(serializers.ModelSerializer):
     class Meta:
         model = TableProject
-        fields = ['price_client', 'planed_actors_salary', 'planned_other_expenses', 'planned_buying_music',
-                  'planned_travel_expenses', 'planned_fare']
+        fields = ['price_client', 'planed_actors_salary', 'planned_other_expenses',
+                  'planned_buying_music', 'planned_travel_expenses', 'planned_fare']
 
 
 class WorkerListSerializers(serializers.Serializer):
@@ -125,7 +133,9 @@ class CardDetailSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Cards
-        fields = ['id', 'author', 'title', 'description', 'created_time', 'update_time', 'performers', 'deadline', 'comment', 'table', 'worker']
+        fields = ['id', 'author', 'title', 'description',
+                  'created_time', 'update_time', 'performers',
+                  'deadline', 'comment', 'table', 'worker']
 
 
 class CardDetailUpdateSerializer(serializers.ModelSerializer):
@@ -167,6 +177,3 @@ class CommentDetailUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = ['text']
-
-
-

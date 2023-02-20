@@ -1,5 +1,5 @@
 from rest_framework import permissions
-import re
+
 from utv_smeta.models import Cards
 
 
@@ -22,6 +22,7 @@ class IsOwnerOrReadOnly(permissions.BasePermission):
 class OnlyAuthorOrPerfomance(permissions.BasePermission):
     """Добавлять коментарии может только пользователь закрепленный за карточкой"""
     message = 'Вы не закреплены за карточкой'
+
     def has_permission(self, request, view):
         card_pk = request.path.split('/')[4]
         card = Cards.objects.get(pk=card_pk)
@@ -44,6 +45,7 @@ class WorkOnlyOne(permissions.BasePermission):
 
 class OnlyWorkAuthor(permissions.BasePermission):
     message = 'Вы не автор работы'
+
     def has_permission(self, request, view):
         card_pk = request.path.split('/')[4]
         work_pk = request.path.split('/')[6]
