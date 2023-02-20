@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from users.models import CustomUser
-from utv_smeta.models import Cards, EmployeeRate
+from utv_smeta.models import Cards, EmployeeRate, Comments
 
 
 class AccountTests(APITestCase):
@@ -160,7 +160,7 @@ class CardTests(APITestCase):
         self.assertEqual(len(response.data), 4)
 
     def test_read_card(self):
-        user = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        user = CustomUser.objects.create_user('Artem', password='123456789Zz', first_name='Artem', last_name="Bockarev")
         card = Cards.objects.create(author=user,
                                     title="Тестовая карточкацуцацац",
                                     description="Описание для тестовой карточкиqwe",
@@ -201,6 +201,26 @@ class CommentTests(APITestCase):
                                                    'com_pk': com_pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.comment.count(), 0)
+
+    def test_update_comment(self):
+        self.client.post(self.url, {"text": "Тест коментария"})
+        com_pk = self.card.comment.get(text="Тест коментария").pk
+        response_put = self.client.put(reverse('comment_detail',
+                                               kwargs={
+                                                   "card_pk": self.card.pk,
+                                                   'com_pk': com_pk}),
+                                       {"text": "Тест коментарияйцу"})
+        self.assertEqual(response_put.status_code, status.HTTP_200_OK)
+        self.assertEqual(
+            Comments.objects.get(pk=com_pk).text, "['Тест коментарияйцу']")
+        self.assertEqual(Comments.objects.all().count(), 1)
+
+    def test_read_comment(self):
+        self.client.post(self.url, {"text": "Тест коментария"})
+        self.client.post(self.url, {"text": "Тест коментария"})
+        response_get = self.client.get(self.url)
+        self.assertEqual(response_get.status_code, status.HTTP_200_OK)
+        self.assertEqual(len(response_get.data), 2)
 
 
 class WorkerTests(APITestCase):
@@ -248,6 +268,9 @@ class WorkerTests(APITestCase):
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.worker.count(), 0)
+
+
+
 
 
 class TableTests(APITestCase):
