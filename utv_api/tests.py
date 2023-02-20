@@ -11,14 +11,15 @@ class AccountTests(APITestCase):
         """
         Ensure we can create a new account object.
         """
-        url = reverse('users_list')
+        url = reverse('users_register')
+        url_users = reverse('users_list')
         data = {'username': 'Nikita',
                 'password': '123456789Zz',
                 'first_name': 'Artem',
                 'last_name': 'Bochkarev',
                 }
-        response = self.client.get(url)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        response = self.client.get(url_users)
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(CustomUser.objects.count(), 0)
         response_post = self.client.post(url, data)
         self.assertEqual(response_post.status_code, status.HTTP_201_CREATED)
@@ -26,7 +27,8 @@ class AccountTests(APITestCase):
         self.assertEqual(CustomUser.objects.count(), 1)
 
     def test_read_user(self):
-        url = reverse('users_list')
+        url = reverse('users_register')
+        url_users = reverse('users_list')
         data = {'username': 'Nikita',
                 'password': '123456789Zz',
                 'first_name': 'Nikita',
@@ -40,23 +42,27 @@ class AccountTests(APITestCase):
         self.client.post(url, data)
         self.client.post(url, data2)
         self.client.login(username="Nikita", password='123456789Zz')
-        response = self.client.get(url)
+        response = self.client.get(url_users)
         self.assertEqual(len(response.data), 2)
         self.assertEqual(response.data, [
             {"id": 1,
              "username": "Nikita",
-             "avatar": "/media/media/profile/avatar/Default_ava.png"
+             "avatar": "/media/media/profile/avatar/Default_ava.png",
+             "first_name": "Nikita",
+             "last_name": "Metelev"
              },
             {
                 "id": 2,
                 "username": "Artem",
-                "avatar": "/media/media/profile/avatar/Default_ava.png"
+                "avatar": "/media/media/profile/avatar/Default_ava.png",
+                "first_name": "Artem",
+                "last_name": "Bochkarev"
             }])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_user(self):
         """Тест на изменения аккаунта пользователя"""
-        url = reverse('users_list')
+        url = reverse('users_register')
         data = {'username': 'Nikita',
                 'password': '123456789Zz',
                 'first_name': 'Nikita',
@@ -69,12 +75,13 @@ class AccountTests(APITestCase):
                     'first_name': 'Artem',
                     'last_name': 'Bochkarev',
                     }
+        self.client.login(username='Nikita', password='123456789Zz')
         response = self.client.put(url_put, data_put)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.get(pk=1).username, "Artem")
 
     def test_delete_user(self):
-        url = reverse('users_list')
+        url = reverse('users_register')
         url_delete = reverse('users_detail', kwargs={'user_pk': 2})
         data = {'username': 'Nikita',
                 'password': '123456789Zz',
@@ -177,7 +184,7 @@ class CommentTests(APITestCase):
                                          )
         self.card.performers.add(user)
         self.client.login(username='Artem', password='123456789Zz')
-        self.url = reverse('comment_create', kwargs={'card_pk': self.card.pk})
+        self.url = reverse('comment_list', kwargs={'card_pk': self.card.pk})
 
     def test_create_comment(self):
         response = self.client.post(self.url, {"text": "Тест коментария"})
@@ -205,7 +212,7 @@ class WorkerTests(APITestCase):
                                          )
         self.card.performers.add(self.user)
         self.client.login(username='Artem', password='123456789Zz')
-        self.url = reverse('worker_list', kwargs={'card_pk': self.card.pk})
+        self.url = reverse('worker_create', kwargs={'card_pk': self.card.pk})
 
     def test_create_worker(self):
         response = self.client.post(self.url, {"actual_time": 5,
@@ -254,7 +261,7 @@ class TableTests(APITestCase):
         self.url_card = reverse('cards_list')
         self.client.post(self.url_card, data)
         self.card = Cards.objects.get(title="Тестовая карточка")
-        self.url_worker = reverse('worker_list', kwargs={'card_pk': self.card.pk})
+        self.url_worker = reverse('worker_create', kwargs={'card_pk': self.card.pk})
         self.url_comment = reverse('comment_create', kwargs={'card_pk': self.card.pk})
         self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
         self.client.post(self.url_comment, {"text": "Тест коментария"})
@@ -292,6 +299,10 @@ class TableTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.table.count(), 1)
         table = self.card.table.get(price_client=150000)
+        self.assertEqual(table.planned_salary, 2800)
+        self.assertEqual(table.planned_taxes_FOT, 1400)
+        self.assertEqual(table.planned_general_expenses, 2806)
+        self.assertEqual(table.planned_cost, 15006)
         self.assertEqual(table.planned_profit, 134994)
         self.assertEqual(table.planned_profitability, 89.996)
 

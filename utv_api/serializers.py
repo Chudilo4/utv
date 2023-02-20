@@ -115,6 +115,7 @@ class CardReadSerializer(serializers.Serializer):
     performers = UserReadSerializer(many=True, read_only=True)
     deadline = serializers.DateTimeField()
 
+
 class CardDetailSerializer(serializers.ModelSerializer):
     author = UserReadSerializer()
     comment = CommentsSerializers(many=True)

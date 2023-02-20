@@ -82,11 +82,16 @@ class CardService:
         c = self.my_comment()
         c.delete()
 
+    def update_comment(self):
+        comment = self.my_comment()
+        comment.text = self.text
+        comment.save()
+        return comment
     def my_comment(self):
         """Возвращет коментарий пользователя"""
-        return Comments.objects.get(pk=self.comment_pk, author_id=self.author_id)
+        return self.give_me_card().comment.get(pk=self.comment_pk)
 
-    def get_my_comments(self):
+    def get_comments_card(self):
         card = self.give_me_card()
         return card.comment
 
@@ -100,7 +105,8 @@ class CardService:
 
     def get_my_work(self):
         """Отдает рабочий процесс пользователя созданный в карточке"""
-        work = Worker.objects.get(pk=self.work_pk)
+        card = self.give_me_card()
+        work = card.worker.get(author_id=self.author_id)
         return work
 
     def update_worker(self):

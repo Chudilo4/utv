@@ -1,19 +1,16 @@
+from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsUser, IsOwnerOrPerformersReadOnly
+from utv_api.permissions import IsUser, \
+    IsOwnerOrReadOnly, WorkOnlyOne, OnlyAuthorOrPerfomance, OnlyWorkAuthor, OnlyAuthorCard
 from utv_api.serializers import UserReadSerializer, CardListSerializers, CardCreateSerializers, CardDetailSerializer, \
     CardDetailUpdateSerializer, CommentCreateSerializers, CommentDetailUpdateSerializer, CommentListSerializers, \
     WorkerListSerializers, WorkerCreateSerializers, WorkerDetailSerializers, TableListSerializers, \
-    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers, UserDetailSerializers, \
-    CardReadSerializer
+    TableCreateSerializers, TablePlanedUpdateSerializers, UserCreateSerializers, UserDetailSerializers
 from utv_smeta.models import *
 from utv_smeta.service import CardService
-from rest_framework import permissions
-
-
-# Create your views here.
 
 
 class UsersReadAPIView(APIView):
@@ -42,7 +39,8 @@ class UserRegisterAPIView(APIView):
 
 
 class UserDetailAPIView(APIView):
-    permission_classes = [IsUser, permissions.IsAuthenticated]
+    permission_classes = [permissions.IsAuthenticated, IsUser]
+
     def get(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
         serializer = UserReadSerializer(user)
@@ -83,10 +81,11 @@ class CardsListAPIView(APIView):
 
 
 class CardsDetailAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly]
+    permission_classes = [IsOwnerOrReadOnly]
+
     def get(self, request, *args, **kwargs):
         card = CardService(card_pk=kwargs['card_pk']).give_me_card()
-        serializer = CardReadSerializer(instance=card)
+        serializer = CardDetailSerializer(instance=card)
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
@@ -105,7 +104,13 @@ class CardsDetailAPIView(APIView):
 
 
 class CommentListAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly]
+    permission_classes = [permissions.IsAuthenticated, OnlyAuthorOrPerfomance]
+
+    def get(self, request, *args, **kwargs):
+        comment = CardService(card_pk=kwargs['card_pk'], author=request.user.pk).get_comments_card()
+        serializer = CommentListSerializers(instance=comment, many=True)
+        return Response(serializer.data)
+
     def post(self, request, *args, **kwargs):
         serializer = CommentCreateSerializers(data=request.data)
         if serializer.is_valid():
@@ -113,16 +118,9 @@ class CommentListAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def get(self, request, *args, **kwargs):
-        try:
-            comment = CardService(card_pk=kwargs['card_pk'], author=request.user.pk).get_my_comments()
-        except Comments.DoesNotExist:
-            return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = CommentListSerializers(instance=comment, many=True)
-        return Response(serializer.data)
-
 
 class CommentDetailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated, OnlyAuthorOrPerfomance]
     def get(self, request, *args, **kwargs):
         try:
             comment = CardService(card_pk=kwargs['card_pk'], comment_pk=kwargs['com_pk'], author=request.user.pk).my_comment()
@@ -136,7 +134,7 @@ class CommentDetailAPIView(APIView):
             return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_404_NOT_FOUND)
         serializer = CommentDetailUpdateSerializer(data=request.data)
         if serializer.is_valid():
-            CardService(card_pk=kwargs['card_pk'], **request.data).create_comment()
+            CardService(card_pk=kwargs['card_pk'], comment_pk=kwargs['com_pk'], **request.data).update_comment()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -148,12 +146,6 @@ class CommentDetailAPIView(APIView):
 
 
 class WorkerListAPIView(APIView):
-    def post(self, request, *args, **kwargs):
-        serializer = WorkerCreateSerializers(data=request.data)
-        if serializer.is_valid():
-            CardService(author=request.user.pk, card_pk=kwargs['card_pk'], **serializer.data).create_worker()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
         try:
@@ -164,7 +156,20 @@ class WorkerListAPIView(APIView):
         return Response(serializer.data)
 
 
+class WorkerAddAPIView(APIView):
+    permission_classes = [WorkOnlyOne]
+
+    def post(self, request, *args, **kwargs):
+        serializer = WorkerCreateSerializers(data=request.data)
+        if serializer.is_valid():
+            CardService(author=request.user.pk, card_pk=kwargs['card_pk'], **serializer.data).create_worker()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
 class WorkerDetailAPIView(APIView):
+    permission_classes = [OnlyWorkAuthor]
+
     def get(self, request, *args, **kwargs):
         try:
             worker = CardService(card_pk=kwargs['card_pk'],
@@ -180,7 +185,7 @@ class WorkerDetailAPIView(APIView):
             return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = WorkerDetailSerializers(data=request.data)
         if serializer.is_valid():
-            CardService(card_pk=kwargs['card_pk'],work_pk=kwargs['work_pk'], **request.data).update_worker()
+            CardService(card_pk=kwargs['card_pk'], author=request.user.pk, **request.data).update_worker()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_404_NOT_FOUND)
 
@@ -192,6 +197,7 @@ class WorkerDetailAPIView(APIView):
 
 
 class TableListAPIView(APIView):
+    permission_classes = [OnlyAuthorCard]
     def get(self, request, *args, **kwargs):
         try:
             tables = CardService(card_pk=kwargs['card_pk']).get_my_tables()
@@ -209,6 +215,8 @@ class TableListAPIView(APIView):
 
 
 class TableDetailAPIView(APIView):
+    permission_classes = [OnlyAuthorCard]
+
     def get(self, request, *args, **kwargs):
         try:
             table = CardService(card_pk=kwargs['card_pk']).get_my_tables()
