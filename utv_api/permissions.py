@@ -15,6 +15,13 @@ class IsOwnerOrPerformersReadOnly(permissions.BasePermission):
 
 
 class IsOwnerOrReadOnly(permissions.BasePermission):
+    def has_permission(self, request, view):
+        card_pk = request.path.split('/')[4]
+        card = Cards.objects.get(pk=card_pk)
+        if request.user in card.performers.all() or request.user is card.author:
+            return True
+        return False
+
     def has_object_permission(self, request, view, obj):
         return obj.author == request.user
 

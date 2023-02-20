@@ -291,7 +291,6 @@ class TableFactDetailAPIView(APIView):
             return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
         serializer = TableFactUpdateSerializers(data=request.data)
         if serializer.is_valid():
-            print(serializer.data)
             CardService(card_pk=kwargs['card_pk'],
                         table_pk=kwargs['table_pk'],
                         **request.data).update_fact_table()
