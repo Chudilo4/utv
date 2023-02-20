@@ -458,10 +458,10 @@ class TestPermissions(APITestCase):
         self.assertEqual(get_comments_card.status_code, status.HTTP_403_FORBIDDEN)
         post_comment = self.client.post(reverse('comment_list', kwargs={"card_pk": self.card.pk}))
         self.assertEqual(post_comment.status_code, status.HTTP_403_FORBIDDEN)
-        delete_user_detail = self.client.delete(reverse('users_detail', kwargs={'user_pk': self.user.pk}))
+        delete_user_detail = self.client.delete(reverse('users_detail',
+                                                        kwargs={'user_pk': self.user.pk}))
         self.assertEqual(delete_user_detail.status_code, status.HTTP_403_FORBIDDEN)
         get_table_list = self.client.get(self.url_table)
         self.assertEqual(get_table_list.status_code, status.HTTP_403_FORBIDDEN)
         get_table_detail = self.client.get(self.url_table_detail)
         self.assertEqual(get_table_detail.status_code, status.HTTP_403_FORBIDDEN)
-
