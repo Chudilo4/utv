@@ -3,9 +3,9 @@ from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from service_app.service import CardService
 from users.models import CustomUser
-from utv_api.permissions import IsUser, \
-    IsOwnerOrReadOnly, WorkOnlyOne, OnlyAuthorOrPerfomance, OnlyWorkAuthor, OnlyAuthorCard
+from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
     UserReadSerializer,
     CardListSerializers,
@@ -25,7 +25,6 @@ from utv_api.serializers import (
     UserDetailSerializers,
     TableFactUpdateSerializers)
 from utv_smeta.models import Comments, Worker, TableProject
-from service_app.service import CardService
 
 
 class UsersReadAPIView(APIView):
@@ -96,7 +95,7 @@ class CardsListAPIView(APIView):
 
 
 class CardsDetailAPIView(APIView):
-    permission_classes = [IsOwnerOrReadOnly]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         card = CardService(card_pk=kwargs['card_pk']).give_me_card()
@@ -119,7 +118,7 @@ class CardsDetailAPIView(APIView):
 
 
 class CommentListAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated, OnlyAuthorOrPerfomance]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         comment = CardService(card_pk=kwargs['card_pk'], author=request.user.pk).get_comments_card()
@@ -137,7 +136,7 @@ class CommentListAPIView(APIView):
 
 
 class CommentDetailAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated, OnlyAuthorOrPerfomance]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         try:
@@ -169,6 +168,7 @@ class CommentDetailAPIView(APIView):
 
 
 class WorkerListAPIView(APIView):
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         try:
@@ -180,7 +180,7 @@ class WorkerListAPIView(APIView):
 
 
 class WorkerAddAPIView(APIView):
-    permission_classes = [WorkOnlyOne]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def post(self, request, *args, **kwargs):
         serializer = WorkerCreateSerializers(data=request.data)
@@ -193,7 +193,7 @@ class WorkerAddAPIView(APIView):
 
 
 class WorkerDetailAPIView(APIView):
-    permission_classes = [OnlyWorkAuthor]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         try:
@@ -234,7 +234,7 @@ class TableListAPIView(APIView):
     "planned_travel_expenses": 2000.0,
     "planned_fare": 2000.0
     }"""
-    permission_classes = [OnlyAuthorCard]
+    permission_classes = [IsOwnerCard]
 
     def get(self, request, *args, **kwargs):
         try:
@@ -255,7 +255,7 @@ class TableListAPIView(APIView):
 
 
 class TablePlanedDetailAPIView(APIView):
-    permission_classes = [OnlyAuthorCard]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         try:
@@ -284,7 +284,7 @@ class TablePlanedDetailAPIView(APIView):
 
 
 class TableFactDetailAPIView(APIView):
-    permission_classes = [OnlyAuthorCard]
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         try:

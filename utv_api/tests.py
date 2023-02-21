@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from users.models import CustomUser
-from utv_smeta.models import Cards, EmployeeRate, Comments, TableProject
+from utv_smeta.models import Cards, EmployeeRate, Comments, TableProject, Worker
 
 
 class AccountTests(APITestCase):
@@ -418,7 +418,7 @@ class TestPermissions(APITestCase):
         self.url_card = reverse('cards_list')
         self.client.post(self.url_card, data)
         self.card = Cards.objects.get(title="Тестовая карточка")
-        self.url_worker = reverse('worker_create', kwargs={'card_pk': self.card.pk})
+        self.url_worker = reverse('worker_create', kwargs={'card_pk': 1})
         self.url_comment = reverse('comment_list', kwargs={'card_pk': self.card.pk})
         self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
         self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': self.card.pk})
@@ -438,30 +438,80 @@ class TestPermissions(APITestCase):
         self.client.logout()
 
     def test_not_permission(self):
+        table_post_data = {
+            "planed_actors_salary": 2000,
+            "planned_other_expenses": 2000,
+            "planned_buying_music": 2000,
+            "planned_travel_expenses": 2000,
+            "planned_fare": 2000
+        }
         CustomUser.objects.create_user('Nikita', password='123456789Zz')
         self.client.login(username='Nikita',
                           password='123456789Zz')
-        response_get_cards = self.client.get(
-            reverse('cards_list')
-        )
-        self.assertEqual(response_get_cards.status_code, status.HTTP_200_OK)
+        # Проверка на доуступ к карточке
         get_detail_card = self.client.get(
             reverse('cards_detail', kwargs={'card_pk': self.card.pk}))
         self.assertEqual(get_detail_card.status_code, status.HTTP_403_FORBIDDEN)
+        # Првоерка доступа на удаление карточки
         delete_card = self.client.delete(self.url_card_detail)
         self.assertEqual(delete_card.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на изменение карточки
         put_card = self.client.put(self.url_card_detail, self.data2)
         self.assertEqual(put_card.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на чтение коментаторов
         get_comments_card = self.client.get(
             reverse('comment_list', kwargs={"card_pk": self.card.pk})
         )
         self.assertEqual(get_comments_card.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на изменение коментария
         post_comment = self.client.post(reverse('comment_list', kwargs={"card_pk": self.card.pk}))
         self.assertEqual(post_comment.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на удаление комментария
+        delete_comment = self.client.delete(reverse('comment_detail',
+                                                    kwargs={
+                                                        "card_pk": 1,
+                                                        "com_pk": 1
+                                                    }))
+        self.assertEqual(delete_comment.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на изменение комментария
+        put_comment = self.client.put(reverse('comment_detail',
+                                              kwargs={
+                                                  "card_pk": 1,
+                                                  "com_pk": 1
+                                              }))
+        self.assertEqual(put_comment.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на изменение пользователя
+        put_user = self.client.put(reverse("users_detail", kwargs={
+            "user_pk": 1
+        }))
+        self.assertEqual(put_user.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на удаление пользователя
         delete_user_detail = self.client.delete(reverse('users_detail',
                                                         kwargs={'user_pk': self.user.pk}))
         self.assertEqual(delete_user_detail.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на доступ к списку таблиц
         get_table_list = self.client.get(self.url_table)
         self.assertEqual(get_table_list.status_code, status.HTTP_403_FORBIDDEN)
+        # Создание таблицы
+        post_table = self.client.post(self.url_table, data=table_post_data)
+        self.assertEqual(post_table.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(TableProject.objects.all().count(), 1)
+        # Проверка на доступ к таблице
         get_table_detail = self.client.get(self.url_table_detail)
         self.assertEqual(get_table_detail.status_code, status.HTTP_403_FORBIDDEN)
+        # Проверка на удаление таблицы
+        delete_table = self.client.delete(self.url_table_detail)
+        self.assertEqual(delete_table.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(TableProject.objects.all().count(), 1)
+        # Проверка на создание работы в карточке где пользователь не учавствует
+        post_work = self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
+        self.assertEqual(post_work.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Worker.objects.all().count(), 1)
+        # Проверка на изменение чужой работы
+        put_work = self.client.put(self.url_worker, {"actual_time": 5, "scheduled_time": 5})
+        self.assertEqual(put_work.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Worker.objects.all().count(), 1)
+        # Проверка на удаление работы
+        delete_work = self.client.delete(self.url_worker)
+        self.assertEqual(delete_work.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Worker.objects.all().count(), 1)

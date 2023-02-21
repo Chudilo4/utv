@@ -230,6 +230,7 @@ class CardService:
         t.planned_travel_expenses = self.planned_travel_expenses
         t.planned_buying_music = self.planned_buying_music
         t.save()
+        return t
 
     def update_fact_table(self):
         """Коректируем данные таблицы в случае если
@@ -248,6 +249,7 @@ class CardService:
         t.travel_expenses = self.travel_expenses
         t.buying_music = self.buying_music
         t.save()
+        return t
 
     def update_table(self):
         """Коректируем данные таблицы в случае если какие то
@@ -267,6 +269,7 @@ class CardService:
         t.buying_music = self.buying_music
         t.actors_salary = self.actors_salary
         t.save()
+        return t
 
     def get_my_tables(self):
         tables = self.give_me_card()
