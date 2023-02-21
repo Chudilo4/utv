@@ -20,7 +20,7 @@ shell:
 test:
 	python manage.py test
 coverage-xml: #start tests code coverage and write report is xml-file for CodeClimate
-	coverage run --source='.' manage.py test
+	coverage run manage.py test
 	coverage xml
 venv:
 	python3 -m venv venv
