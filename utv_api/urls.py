@@ -1,6 +1,7 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path, include
+from django.views.decorators.cache import cache_page
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
 from .views import (
@@ -26,15 +27,15 @@ urlpatterns = [
          name='token_refresh'),
     path('token/verify/', TokenVerifyView.as_view(),
          name='token_verify'),
-    path('users/', UsersReadAPIView.as_view(),
+    path('users/', cache_page(60)(UsersReadAPIView.as_view()),
          name='users_list'),
     path('users/register/', UserRegisterAPIView.as_view(),
          name='users_register'),
-    path('users/<int:user_pk>/', UserDetailAPIView.as_view(),
+    path('users/<int:user_pk>/', cache_page(60)(UserDetailAPIView.as_view()),
          name='users_detail'),
-    path('cards/', CardsListAPIView.as_view(),
+    path('cards/', cache_page(60)(CardsListAPIView.as_view()),
          name='cards_list'),
-    path('cards/<int:card_pk>/', CardsDetailAPIView.as_view(),
+    path('cards/<int:card_pk>/', cache_page(60)(CardsDetailAPIView.as_view()),
          name='cards_detail'),
     path('cards/<int:card_pk>/comment/', CommentListAPIView.as_view(),
          name='comment_list'),

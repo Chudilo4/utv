@@ -70,7 +70,8 @@ class CardService:
 
     def give_me_card(self):
         '''Отдаём нужную карточку по ключу'''
-        return Cards.objects.get(pk=self.card_pk)
+        card = Cards.objects.get(pk=self.card_pk)
+        return card
 
     def create_comment(self):
         """Создаёт коментарий в карточке"""

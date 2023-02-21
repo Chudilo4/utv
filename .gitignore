@@ -7,3 +7,4 @@ selfsigned.crt
 selfsigned.key
 .coverage
 coverage.xml
+cache/.
