@@ -226,6 +226,14 @@ class WorkerDetailAPIView(APIView):
 
 
 class TableListAPIView(APIView):
+    """Пример POST
+    {
+    "planed_actors_salary": 2000.0,
+    "planned_other_expenses": 2000.0,
+    "planned_buying_music": 2000.0,
+    "planned_travel_expenses": 2000.0,
+    "planned_fare": 2000.0
+    }"""
     permission_classes = [OnlyAuthorCard]
 
     def get(self, request, *args, **kwargs):
