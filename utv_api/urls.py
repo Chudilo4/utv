@@ -10,11 +10,9 @@ from .views import (
     WorkerListAPIView,
     WorkerDetailAPIView,
     TableListAPIView,
-    TablePlanedDetailAPIView,
     UserDetailAPIView,
     UserRegisterAPIView,
-    WorkerAddAPIView,
-    TableFactDetailAPIView)
+    TableDetailAPIView)
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -40,14 +38,10 @@ urlpatterns = [
          name='comment_detail'),
     path('cards/<int:card_pk>/worker/', WorkerListAPIView.as_view(),
          name='worker_list'),
-    path('cards/<int:card_pk>/worker/add/', WorkerAddAPIView.as_view(),
-         name='worker_create'),
     path('cards/<int:card_pk>/worker/<int:work_pk>/', WorkerDetailAPIView.as_view(),
          name='worker_detail'),
     path('cards/<int:card_pk>/table/', TableListAPIView.as_view(),
          name='table_list'),
-    path('cards/<int:card_pk>/table/<int:table_pk>/planned', TablePlanedDetailAPIView.as_view(),
-         name='table_planned_detail'),
-    path('cards/<int:card_pk>/table/<int:table_pk>/fact',
-         TableFactDetailAPIView.as_view(), name='table_fact_detail'),
+    path('cards/<int:card_pk>/table/<int:table_pk>/planned', TableDetailAPIView.as_view(),
+         name='table_detail'),
 ]

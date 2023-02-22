@@ -240,7 +240,7 @@ class WorkerTests(APITestCase):
                                          )
         self.card.performers.add(self.user)
         self.client.login(username='Artem', password='123456789Zz')
-        self.url = reverse('worker_create', kwargs={'card_pk': self.card.pk})
+        self.url = reverse('worker_list', kwargs={'card_pk': self.card.pk})
 
     def test_create_worker(self):
         response = self.client.post(self.url, {"actual_time": 5,
@@ -299,7 +299,7 @@ class TableTests(APITestCase):
         self.url_card = reverse('cards_list')
         self.client.post(self.url_card, data)
         self.card = Cards.objects.get(title="Тестовая карточка")
-        self.url_worker = reverse('worker_create', kwargs={'card_pk': self.card.pk})
+        self.url_worker = reverse('worker_list', kwargs={'card_pk': self.card.pk})
         self.url_comment = reverse('comment_list', kwargs={'card_pk': self.card.pk})
         self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
         self.client.post(self.url_comment, {"text": "Тест коментария"})
@@ -327,7 +327,7 @@ class TableTests(APITestCase):
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
         table = self.card.table.get(planed_actors_salary=2000)
-        url_table_detail = reverse('table_planned_detail',
+        url_table_detail = reverse('table_detail',
                                    kwargs={'card_pk': self.card.pk,
                                            'table_pk': table.pk})
         response = self.client.put(url_table_detail,
@@ -359,7 +359,7 @@ class TableTests(APITestCase):
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
         table = self.card.table.get(planed_actors_salary=2000)
-        url_table_detail = reverse('table_fact_detail',
+        url_table_detail = reverse('table_detail',
                                    kwargs={'card_pk': self.card.pk,
                                            'table_pk': table.pk})
         response = self.client.put(url_table_detail,
@@ -391,7 +391,7 @@ class TableTests(APITestCase):
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
         table = self.card.table.get(planed_actors_salary=2000)
-        url_table_detail = reverse('table_planned_detail',
+        url_table_detail = reverse('table_detail',
                                    kwargs={'card_pk': self.card.pk,
                                            'table_pk': table.pk})
         response = self.client.delete(url_table_detail)
@@ -419,7 +419,7 @@ class TestPermissions(APITestCase):
         self.url_card = reverse('cards_list')
         self.client.post(self.url_card, data)
         self.card = Cards.objects.get(title="Тестовая карточка")
-        self.url_worker = reverse('worker_create', kwargs={'card_pk': 1})
+        self.url_worker = reverse('worker_list', kwargs={'card_pk': 1})
         self.url_comment = reverse('comment_list', kwargs={'card_pk': self.card.pk})
         self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
         self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': self.card.pk})
@@ -431,7 +431,7 @@ class TestPermissions(APITestCase):
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
         self.table = TableProject.objects.get(pk=1)
-        self.url_table_detail = reverse('table_fact_detail',
+        self.url_table_detail = reverse('table_detail',
                                         kwargs={
                                             'card_pk': self.card.pk,
                                             'table_pk': self.table.pk

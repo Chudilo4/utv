@@ -177,10 +177,6 @@ class WorkerListAPIView(APIView):
         serializer = WorkerListSerializers(instance=work)
         return Response(serializer.data)
 
-
-class WorkerAddAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly]
-
     def post(self, request, *args, **kwargs):
         serializer = WorkerCreateSerializers(data=request.data)
         if serializer.is_valid():
@@ -253,36 +249,7 @@ class TableListAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TablePlanedDetailAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly]
-
-    def get(self, request, *args, **kwargs):
-        try:
-            table = CardService(card_pk=kwargs['card_pk']).get_my_tables()
-        except Worker.DoesNotExist:
-            return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = TableListSerializers(instance=table, many=True)
-        return Response(serializer.data)
-
-    def put(self, request, *args, **kwargs):
-        if not kwargs.get('card_pk', None) or not kwargs.get('table_pk', None):
-            return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = TableUpdateSerializers(data=request.data)
-        if serializer.is_valid():
-            CardService(card_pk=kwargs['card_pk'],
-                        table_pk=kwargs['table_pk'],
-                        **request.data).update_table()
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-    def delete(self, request, *args, **kwargs):
-        if not kwargs.get('card_pk', None) or not kwargs.get('table_pk', None):
-            return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
-        CardService(card_pk=kwargs['card_pk'], table_pk=kwargs['table_pk']).delete_table()
-        return Response({'Выполнено': "Работа удалена"}, status=status.HTTP_200_OK)
-
-
-class TableFactDetailAPIView(APIView):
+class TableDetailAPIView(APIView):
     permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
