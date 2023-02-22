@@ -214,7 +214,7 @@ class CardService:
         """Возвращем таблицу по ключу"""
         return TableProject.objects.get(pk=self.table_pk)
 
-    def update_planned_table(self):
+    def update_table(self):
         """Коректируем данные таблицы в случае если
          какие то поля не заполнены либо ЗП сотрудников поменялась"""
         content = self.calculation_table()
@@ -230,14 +230,6 @@ class CardService:
         t.planned_fare = self.planned_fare
         t.planned_travel_expenses = self.planned_travel_expenses
         t.planned_buying_music = self.planned_buying_music
-        t.save()
-        return t
-
-    def update_fact_table(self):
-        """Коректируем данные таблицы в случае если
-         какие то поля не заполнены либо ЗП сотрудников поменялась"""
-        content = self.calculation_table()
-        t = self.get_table()
         t.salary = content['salary']
         t.taxes_FOT = content['taxes_FOT']
         t.general_expenses = content['general_expenses']
@@ -249,26 +241,6 @@ class CardService:
         t.fare = self.fare
         t.travel_expenses = self.travel_expenses
         t.buying_music = self.buying_music
-        t.save()
-        return t
-
-    def update_table(self):
-        """Коректируем данные таблицы в случае если какие то
-         поля не заполнены либо ЗП сотрудников поменялась"""
-        content = self.calculation_table()
-        t = self.get_table()
-        t.salary = content['salary']
-        t.taxes_FOT = content['taxes_FOT']
-        t.general_expenses = content['general_expenses']
-        t.cost = content['cost']
-        t.profit = content['profit']
-        t.profitability = content['profitability']
-        t.price_client = self.price_client
-        t.other_expenses = self.other_expenses
-        t.fare = self.fare
-        t.travel_expenses = self.travel_expenses
-        t.buying_music = self.buying_music
-        t.actors_salary = self.actors_salary
         t.save()
         return t
 

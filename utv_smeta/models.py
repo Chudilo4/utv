@@ -48,39 +48,39 @@ class Worker(models.Model):
 
 
 class TableProject(models.Model):
-    price_client = models.FloatField(verbose_name='Цена для клиента', null=True)
-    planned_cost = models.FloatField(verbose_name='Плановая себестоимость', null=True)
-    cost = models.FloatField(verbose_name='Фактическая себестоимость', null=True)
-    planned_salary = models.FloatField(verbose_name='Плановая зарплата', null=True)
-    salary = models.FloatField(verbose_name='Фактическая зарплата', null=True)
-    planed_actors_salary = models.FloatField(verbose_name='Плановая зарплата актёрам', null=True)
-    actors_salary = models.FloatField(verbose_name='Зарплата актёрам', null=True)
-    planned_taxes_FOT = models.FloatField(verbose_name='Плановые налоги с ФОТ', null=True)
-    taxes_FOT = models.FloatField(verbose_name='Фактические налоги с ФОТ', null=True)
+    price_client = models.FloatField(verbose_name='Цена для клиента', null=True, blank=True)
+    planned_cost = models.FloatField(verbose_name='Плановая себестоимость', null=True, blank=True)
+    cost = models.FloatField(verbose_name='Фактическая себестоимость', null=True, blank=True)
+    planned_salary = models.FloatField(verbose_name='Плановая зарплата', null=True, blank=True)
+    salary = models.FloatField(verbose_name='Фактическая зарплата', null=True, blank=True)
+    planed_actors_salary = models.FloatField(verbose_name='Плановая зарплата актёрам', null=True, blank=True)
+    actors_salary = models.FloatField(verbose_name='Зарплата актёрам', null=True, blank=True)
+    planned_taxes_FOT = models.FloatField(verbose_name='Плановые налоги с ФОТ', null=True, blank=True)
+    taxes_FOT = models.FloatField(verbose_name='Фактические налоги с ФОТ', null=True, blank=True)
     planned_other_expenses = models.FloatField(
         verbose_name='Плановые Покупка реквизита для '
                      'организации съемочного процесса/ '
-                     'Непредвиденные расходы', null=True)
+                     'Непредвиденные расходы', null=True, blank=True)
     other_expenses = models.FloatField(
         verbose_name='Плановые Покупка реквизита для организации '
                      'съемочного процесса/ Непредвиденные расходы',
-        null=True)
-    planned_buying_music = models.FloatField(verbose_name='Плановая покупка музыки', null=True)
-    buying_music = models.FloatField(verbose_name='Фактическая покупка музыки', null=True)
+        null=True, blank=True)
+    planned_buying_music = models.FloatField(verbose_name='Плановая покупка музыки', null=True, blank=True)
+    buying_music = models.FloatField(verbose_name='Фактическая покупка музыки', null=True, blank=True)
     planned_travel_expenses = models.FloatField(
-        verbose_name='Плановые командировачные расходы', null=True)
+        verbose_name='Плановые командировачные расходы', null=True, blank=True)
     travel_expenses = models.FloatField(
-        verbose_name='Фактические командировачные расходы', null=True)
-    planned_fare = models.FloatField(verbose_name='Плановые транспортные расходы', null=True)
-    fare = models.FloatField(verbose_name='Фактические транспортные расходы', null=True)
+        verbose_name='Фактические командировачные расходы', null=True, blank=True)
+    planned_fare = models.FloatField(verbose_name='Плановые транспортные расходы', null=True, blank=True)
+    fare = models.FloatField(verbose_name='Фактические транспортные расходы', null=True, blank=True)
     planned_general_expenses = models.FloatField(
-        verbose_name='Плановые общехозяйственные расходы', null=True)
+        verbose_name='Плановые общехозяйственные расходы', null=True, blank=True)
     general_expenses = models.FloatField(
-        verbose_name='Фактические общехозяйственные расходы', null=True)
-    planned_profit = models.FloatField(verbose_name='Плановая прибыль', null=True)
-    profit = models.FloatField(verbose_name='Фактическая прибыль', null=True)
-    planned_profitability = models.FloatField(verbose_name='Плановая рентабельность', null=True)
-    profitability = models.FloatField(verbose_name='Фактическая рентабельность', null=True)
+        verbose_name='Фактические общехозяйственные расходы', null=True, blank=True)
+    planned_profit = models.FloatField(verbose_name='Плановая прибыль', null=True, blank=True)
+    profit = models.FloatField(verbose_name='Фактическая прибыль', null=True, blank=True)
+    planned_profitability = models.FloatField(verbose_name='Плановая рентабельность', null=True, blank=True)
+    profitability = models.FloatField(verbose_name='Фактическая рентабельность', null=True, blank=True)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания таблицы')
     updated_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления таблицы')
 

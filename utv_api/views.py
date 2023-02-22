@@ -20,10 +20,9 @@ from utv_api.serializers import (
     WorkerDetailSerializers,
     TableListSerializers,
     TableCreateSerializers,
-    TablePlanedUpdateSerializers,
     UserCreateSerializers,
     UserDetailSerializers,
-    TableFactUpdateSerializers)
+    TableUpdateSerializers)
 from utv_smeta.models import Comments, Worker, TableProject
 
 
@@ -268,11 +267,11 @@ class TablePlanedDetailAPIView(APIView):
     def put(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None) or not kwargs.get('table_pk', None):
             return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = TablePlanedUpdateSerializers(data=request.data)
+        serializer = TableUpdateSerializers(data=request.data)
         if serializer.is_valid():
             CardService(card_pk=kwargs['card_pk'],
                         table_pk=kwargs['table_pk'],
-                        **request.data).update_planned_table()
+                        **request.data).update_table()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -297,11 +296,11 @@ class TableFactDetailAPIView(APIView):
     def put(self, request, *args, **kwargs):
         if not kwargs.get('card_pk', None) or not kwargs.get('table_pk', None):
             return Response({'Ошибка': 'Таблица не найдена'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = TableFactUpdateSerializers(data=request.data)
+        serializer = TableUpdateSerializers(data=request.data)
         if serializer.is_valid():
             CardService(card_pk=kwargs['card_pk'],
                         table_pk=kwargs['table_pk'],
-                        **request.data).update_fact_table()
+                        **request.data).update_table()
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
