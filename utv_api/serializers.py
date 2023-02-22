@@ -67,13 +67,12 @@ class TableCreateSerializers(serializers.ModelSerializer):
 
 
 class TableUpdateSerializers(serializers.ModelSerializer):
-    price_client = serializers.IntegerField()
     class Meta:
         model = TableProject
         fields = ['price_client', 'actors_salary', 'planed_actors_salary',
                   'other_expenses', 'planned_other_expenses',
                   'buying_music', 'planned_buying_music',
-                  'travel_expenses',  'planned_travel_expenses',
+                  'travel_expenses', 'planned_travel_expenses',
                   'fare', 'planned_fare']
 
 
