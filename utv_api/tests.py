@@ -163,10 +163,11 @@ class CardTests(APITestCase):
         self.assertEqual(len(response.data), 4)
 
     def test_read_card(self):
-        user = CustomUser.objects.create_user('Artem',
-                                              password='123456789Zz',
+        user = CustomUser.objects.create_user(username='Artem',
                                               first_name='Artem',
                                               last_name="Bockarev")
+        user.set_password('123456789Zz')
+        user.save()
         card = Cards.objects.create(author=user,
                                     title="Тестовая карточкацуцацац",
                                     description="Описание для тестовой карточкиqwe",
