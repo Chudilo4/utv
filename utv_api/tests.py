@@ -320,17 +320,20 @@ class TableTests(APITestCase):
         # self.assertEqual(table.planned_general_expenses, 2806)
         # self.assertEqual(table.planned_profit, -6)
 
-    def test_update_planned_table(self):
+    def test_update_table(self):
         self.client.post(self.url_table, {"planed_actors_salary": 2000,
                                           "planned_other_expenses": 2000,
                                           "planned_buying_music": 2000,
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
         table = self.card.table.get(planed_actors_salary=2000)
-        url_table_detail = reverse('table_detail',
-                                   kwargs={'card_pk': self.card.pk,
-                                           'table_pk': table.pk})
-        response = self.client.put(url_table_detail,
+        url_table_planned = reverse('table_update_planned',
+                                    kwargs={'card_pk': self.card.pk,
+                                            'table_pk': table.pk})
+        url_table_fact = reverse('table_update_fact',
+                                 kwargs={'card_pk': self.card.pk,
+                                         'table_pk': table.pk})
+        response = self.client.put(url_table_planned,
                                    '''{"planed_actors_salary": 2000,
                                    "planned_other_expenses": 2000,
                                    "planned_buying_music": 2000,
@@ -338,50 +341,37 @@ class TableTests(APITestCase):
                                    "planned_fare": 2000,
                                    "price_client": 150000}''',
                                    content_type='application/json')
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.card.table.count(), 1)
-        table = self.card.table.get(price_client=150000)
-        self.assertEqual(table.planned_cost, 15006)
-        self.assertEqual(table.planned_salary, 2800)
-        self.assertEqual(table.planned_other_expenses, 2000)
-        self.assertEqual(table.planned_buying_music, 2000)
-        self.assertEqual(table.planned_travel_expenses, 2000)
-        self.assertEqual(table.planned_fare, 2000)
-        self.assertEqual(table.planned_taxes_FOT, 1400)
-        self.assertEqual(table.planned_general_expenses, 2806)
-        self.assertEqual(table.planned_profit, 134994)
-        self.assertEqual(table.planned_profitability, 89.996)
-
-    def test_update_fact_table(self):
-        self.client.post(self.url_table, {"planed_actors_salary": 2000,
-                                          "planned_other_expenses": 2000,
-                                          "planned_buying_music": 2000,
-                                          "planned_travel_expenses": 2000,
-                                          "planned_fare": 2000})
-        table = self.card.table.get(planed_actors_salary=2000)
-        url_table_detail = reverse('table_detail',
-                                   kwargs={'card_pk': self.card.pk,
-                                           'table_pk': table.pk})
-        response = self.client.put(url_table_detail,
-                                   '''{"actors_salary": 2000,
+        response2 = self.client.put(url_table_fact,
+                                    '''{"actors_salary": 2000,
                                    "other_expenses": 2000,
                                    "buying_music": 2000,
                                    "travel_expenses": 2000,
                                    "fare": 2000,
                                    "price_client": 150000}''',
-                                   content_type='application/json')
+                                    content_type='application/json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.table.count(), 1)
         table = self.card.table.get(price_client=150000)
+        self.assertEqual(table.planned_cost, 15006)
         self.assertEqual(table.cost, 15006)
+        self.assertEqual(table.planned_salary, 2800)
         self.assertEqual(table.salary, 2800)
+        self.assertEqual(table.planned_other_expenses, 2000)
         self.assertEqual(table.other_expenses, 2000)
+        self.assertEqual(table.planned_buying_music, 2000)
         self.assertEqual(table.buying_music, 2000)
+        self.assertEqual(table.planned_travel_expenses, 2000)
         self.assertEqual(table.travel_expenses, 2000)
+        self.assertEqual(table.planned_fare, 2000)
         self.assertEqual(table.fare, 2000)
+        self.assertEqual(table.planned_taxes_FOT, 1400)
         self.assertEqual(table.taxes_FOT, 1400)
+        self.assertEqual(table.planned_general_expenses, 2806)
         self.assertEqual(table.general_expenses, 2806)
+        self.assertEqual(table.planned_profit, 134994)
         self.assertEqual(table.profit, 134994)
+        self.assertEqual(table.planned_profitability, 89.996)
         self.assertEqual(table.profitability, 89.996)
 
     def test_delete_table(self):

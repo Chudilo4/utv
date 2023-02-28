@@ -2,150 +2,136 @@ from utv_smeta.models import Worker, TableProject, Cards, Comments
 
 
 class CardService:
-    def __init__(self, request=None, author=None, title=None, description=None, performers=None,
-                 deadline=None, card_pk=None, text=None, comment_pk=None, parent=None,
-                 planed_actors_salary=0, table_pk=None, work_pk=None,
-                 planned_buying_music=0, planned_travel_expenses=0, travel_expenses=0, fare=0,
-                 planned_other_expenses=0, other_expenses=0,
-                 price_client=15000, planned_fare=0, actors_salary=0,
-                 buying_music=0, actual_time=0, scheduled_time=0):
-        self.author_id = author
-        self.title = title
-        self.descriprion = description
-        self.performers = performers
-        self.deadline = deadline
-        self.card_pk = card_pk
-        self.request = request
-        self.text = text
-        self.comment_pk = comment_pk
-        self.price_client = price_client
-        self.planned_other_expenses = planned_other_expenses
-        self.other_expenses = other_expenses
-        self.planed_actors_salary = planed_actors_salary
-        self.actors_salary = actors_salary
-        self.planned_buying_music = planned_buying_music
-        self.buying_music = buying_music
-        self.planned_travel_expenses = planned_travel_expenses
-        self.travel_expenses = travel_expenses
-        self.fare = fare
-        self.planned_fare = planned_fare
-        self.table_pk = table_pk
-        self.actual_time = actual_time
-        self.scheduled_time = scheduled_time
-        self.work_pk = work_pk
-        self.parent = parent
-
-    def create_card(self):
+    @staticmethod
+    def create_card(author_id: int, title: str, description: str, deadline, performers):
         """Создает карточку проекта"""
-        c = Cards.objects.create(author_id=self.author_id,
-                                 title=self.title,
-                                 description=self.descriprion,
-                                 deadline=self.deadline)
-        for user in self.performers:
+        c = Cards.objects.create(author_id=author_id,
+                                 title=title,
+                                 description=description,
+                                 deadline=deadline)
+        for user in performers:
             c.performers.add(user)
+        return c
 
-    def my_cards(self):
+    @staticmethod
+    def my_cards(author_id: int):
         """Возвращает карточки где пользователь является автором и исполнителем"""
         return Cards.objects.filter(
-            author_id=self.author_id).union(Cards.objects.filter(performers=self.author_id))
+            author_id=author_id).union(Cards.objects.filter(performers=author_id))
 
-    def update_card(self):
+    @classmethod
+    def update_card(cls, card_pk: int, title: str, description: str, deadline, performers):
         """Обновляет поля карточки"""
-        c = self.give_me_card()
-        c.title = self.title
-        c.description = self.descriprion
-        c.deadline = self.deadline
-        for user in self.performers:
+        c = cls.give_me_card(card_pk=card_pk)
+        c.title = title
+        c.description = description
+        c.deadline = deadline
+        for user in performers:
             c.performers.add(user)
         c.save()
         return c
 
-    def delete_card(self):
+    @classmethod
+    def delete_card(cls, card_pk):
         """Удаляет карточку"""
-        c = self.give_me_card()
+        c = cls.give_me_card(card_pk=card_pk)
         c.comment.all().delete()
         c.worker.all().delete()
         c.table.all().delete()
         c.delete()
 
-    def give_me_card(self):
-        '''Отдаём нужную карточку по ключу'''
-        card = Cards.objects.get(pk=self.card_pk)
+    @staticmethod
+    def give_me_card(card_pk):
+        """Отдаём нужную карточку по ключу"""
+        card = Cards.objects.get(pk=card_pk)
         return card
 
-    def create_comment(self):
+
+class CommentService(CardService):
+
+    def create_comment(self, author_id: int, text: str, card_pk: int, parent=None):
         """Создаёт коментарий в карточке"""
-        c = Comments.objects.create(author_id=self.author_id, text=self.text, parent_id=self.parent)
-        card = self.give_me_card()
+        c = Comments.objects.create(author_id=author_id, text=text, parent_id=parent)
+        card = super().give_me_card(card_pk=card_pk)
         card.comment.add(c)
-        return card
+        return c
 
-    def delete_comment(self):
+    def delete_comment(self, card_pk: int, com_pk: int):
         """Удаляет коментарий пользователя"""
-        c = self.my_comment()
+        c = self.my_comment(card_pk=card_pk, com_pk=com_pk)
         c.delete()
 
-    def update_comment(self):
-        comment = self.my_comment()
-        comment.text = self.text
+    def update_comment(self, text: str, card_pk: int, com_pk: int):
+        comment = self.my_comment(card_pk=card_pk, com_pk=com_pk)
+        comment.text = text
         comment.save()
         return comment
 
-    def my_comment(self):
+    def my_comment(self, card_pk: int, com_pk: int):
         """Возвращет коментарий пользователя"""
-        return self.give_me_card().comment.get(pk=self.comment_pk)
+        return super().give_me_card(card_pk=card_pk).comment.get(pk=com_pk)
 
-    def get_comments_card(self):
-        card = self.give_me_card()
+    def get_comments_card(self, card_pk):
+        card = super().give_me_card(card_pk=card_pk)
         return card.comment
 
-    def create_worker(self):
-        """Создает рабочий процесс над карточкой"""
-        w = Worker.objects.create(author_id=self.author_id,
-                                  actual_time=self.actual_time,
-                                  scheduled_time=self.scheduled_time)
-        card = self.give_me_card()
-        card.worker.add(w)
 
-    def get_my_work(self):
+class WorkerService(CardService):
+
+    def create_worker(self, author_id: int, card_pk: int, actual_time: int, scheduled_time: int):
+        """Создает рабочий процесс над карточкой"""
+        w = Worker.objects.create(author_id=author_id,
+                                  actual_time=actual_time,
+                                  scheduled_time=scheduled_time)
+        card = self.give_me_card(card_pk=card_pk)
+        card.worker.add(w)
+        return w
+
+    def get_my_work(self, card_pk: int, author_id: int):
         """Отдает рабочий процесс пользователя созданный в карточке"""
-        card = self.give_me_card()
-        work = card.worker.get(author_id=self.author_id)
+        card = self.give_me_card(card_pk=card_pk)
+        work = card.worker.get(author_id=author_id)
         return work
 
-    def update_worker(self):
+    def update_worker(self, **kwargs):
         """Обновляет поля рабочего процесса"""
-        w = self.get_my_work()
-        w.actual_time = self.actual_time
-        w.scheduled_time = self.scheduled_time
+        w = self.get_my_work(kwargs['card_pk'], kwargs['author_id'])
+        w.actual_time = kwargs['actual_time']
+        w.scheduled_time = kwargs['scheduled_time']
         w.save()
+        return w
 
-    def delete_worker(self):
+    def delete_worker(self, card_pk: int, author_id: int):
         """Удаляет рабочий процесс в карточке"""
-        w = self.get_my_work()
+        w = self.get_my_work(card_pk, author_id)
         w.delete()
 
-    def executors(self):
+
+class TableService(CardService):
+    def executors(self, card_pk: int):
         """Собираем всех исполнителей по проекту"""
-        card = self.give_me_card()
+        card = self.give_me_card(card_pk=card_pk)
         return card.worker.all()
 
-    def salary_executors(self):
+    def salary_executors(self, card_pk, planed_actors_salary: int, actors_salary: int):
         """Расчитываем заработную плату сотрудников за проект и возвращаем её в виде кортежа"""
         # Фактический заработок сотрудников за проект
         workersalary = 0
         # Плановый заработок сотрудников за проект
         planedworkersalary = 0
-        for i in self.executors():
+        for i in self.executors(card_pk=card_pk):
             for i2 in i.author.employeerate.order_by('-created_time')[:1]:
                 planedworkersalary += i2.money * i.scheduled_time
                 workersalary += i2.money * i.actual_time
-        return planedworkersalary + self.planed_actors_salary, workersalary + self.actors_salary
+        return planedworkersalary + planed_actors_salary, workersalary + actors_salary
 
-    def calculation_table(self):
+    def calculation_table(self, card_pk, **kwargs):
         """Расчитываем плановые и фактические расчёты затрат и прибыли за проект"""
         # Плановая зарплата сотрудников, Зарплата сотрудников
-        planned_salary, salary = self.salary_executors()
+        planned_salary, salary = self.salary_executors(
+            card_pk=card_pk,
+            planed_actors_salary=kwargs.get('planed_actors_salary', 0),
+            actors_salary=kwargs.get('actors_salary', 0))
         # Плановые налоги с ФОТ
         planned_taxes_fot = planned_salary * 0.5
         # Налоги с ФОТ
@@ -153,33 +139,35 @@ class CardService:
 
         # Плановые общехозяйственные расходы
         list_planned_general_expenses = [
-            planned_salary, planned_taxes_fot, self.planned_other_expenses,
-            self.planned_buying_music, self.planned_travel_expenses,
-            self.planned_fare]
+            planned_salary, planned_taxes_fot, kwargs.get('planned_other_expenses', 0),
+            kwargs.get('planned_buying_music', 0), kwargs.get('planned_travel_expenses', 0),
+            kwargs.get('planned_fare', 0)]
         planned_general_expenses = sum(list_planned_general_expenses) * 0.23
         # Общехозяйственные расходы
-        list_general_expenses = [salary, taxes_fot, self.other_expenses, self.buying_music,
-                                 self.travel_expenses, self.fare]
+        list_general_expenses = [
+            salary, taxes_fot, kwargs.get('other_expenses', 0), kwargs.get('buying_music', 0),
+            kwargs.get('travel_expenses', 0), kwargs.get('fare', 0)]
         general_expenses = sum(list_general_expenses) * 0.23
         # Плановая себестоимость
         list_planned_cost = [
-            planned_salary, planned_taxes_fot, self.planned_other_expenses,
-            planned_general_expenses, self.planned_buying_music,
-            self.planned_travel_expenses, self.planned_fare]
+            planned_salary, planned_taxes_fot, kwargs.get('planned_other_expenses', 0),
+            planned_general_expenses, kwargs.get('planned_buying_music', 0),
+            kwargs.get('planned_travel_expenses', 0), kwargs.get('planned_fare', 0)]
         planned_cost = sum(list_planned_cost)
         # Cебестоимость
-        list_cost = [salary, taxes_fot, self.other_expenses, general_expenses,
-                     self.buying_music, self.travel_expenses, self.fare]
+        list_cost = [salary, taxes_fot, kwargs.get('other_expenses', 0), general_expenses,
+                     kwargs.get('buying_music', 0), kwargs.get('travel_expenses', 0),
+                     kwargs.get('fare', 0)]
         cost = sum(list_cost)
 
         # Плановая прибыль
-        planned_profit = self.price_client - planned_cost
+        planned_profit = kwargs.get('price_client', 15000) - planned_cost
         # Фактическая прибыль
-        profit = self.price_client - cost
+        profit = kwargs.get('price_client', 15000) - cost
         # Плановая рентабельность
-        planned_profitability = (planned_profit / self.price_client) * 100
+        planned_profitability = (planned_profit / kwargs.get('price_client', 15000)) * 100
         # Фактическая рентабельность
-        profitability = (profit / self.price_client) * 100
+        profitability = (profit / kwargs.get('price_client', 15000)) * 100
         return {'planned_salary': planned_salary,
                 'salary': salary,
                 'planned_taxes_FOT': planned_taxes_fot,
@@ -194,61 +182,69 @@ class CardService:
                 'profitability': profitability
                 }
 
-    def create_table(self):
+    def create_table(self, card_pk: int, **kwargs):
         """Создаёт смету по созданному проекту"""
-        content = self.calculation_table()
+        content = self.calculation_table(card_pk=card_pk, **kwargs)
         t = TableProject.objects.create(
-            price_client=self.price_client,
-            planed_actors_salary=self.planed_actors_salary,
-            planned_buying_music=self.planned_buying_music,
-            planned_travel_expenses=self.planned_travel_expenses,
-            planned_fare=self.planned_fare,
-            planned_other_expenses=self.planned_other_expenses,
+            price_client=15000,
+            planed_actors_salary=kwargs['planed_actors_salary'],
+            planned_buying_music=kwargs['planned_buying_music'],
+            planned_travel_expenses=kwargs['planned_travel_expenses'],
+            planned_fare=kwargs['planned_fare'],
+            planned_other_expenses=kwargs['planned_other_expenses'],
             **content
         )
-        card = self.give_me_card()
+        card = self.give_me_card(card_pk)
         card.table.add(t)
         return t
 
-    def get_table(self):
+    def get_table(self, table_pk):
         """Возвращем таблицу по ключу"""
-        return TableProject.objects.get(pk=self.table_pk)
+        return TableProject.objects.get(pk=table_pk)
 
-    def update_table(self):
+    def update_planed_table(self, card_pk: int, table_pk: int, **kwargs):
         """Коректируем данные таблицы в случае если
          какие то поля не заполнены либо ЗП сотрудников поменялась"""
-        content = self.calculation_table()
-        t = self.get_table()
+        content = self.calculation_table(card_pk, **kwargs)
+        t = self.get_table(table_pk)
         t.planned_salary = content['planned_salary']
         t.planned_taxes_FOT = content['planned_taxes_FOT']
         t.planned_general_expenses = content['planned_general_expenses']
         t.planned_cost = content['planned_cost']
         t.planned_profit = content['planned_profit']
         t.planned_profitability = content['planned_profitability']
-        t.price_client = self.price_client
-        t.planned_other_expenses = self.planned_other_expenses
-        t.planned_fare = self.planned_fare
-        t.planned_travel_expenses = self.planned_travel_expenses
-        t.planned_buying_music = self.planned_buying_music
+        t.price_client = kwargs['price_client']
+        t.planned_other_expenses = kwargs.get('planned_other_expenses', t.planned_other_expenses)
+        t.planned_fare = kwargs.get('planned_fare', t.planned_fare)
+        t.planned_travel_expenses = kwargs.get('planned_travel_expenses', t.planned_travel_expenses)
+        t.planned_buying_music = kwargs.get('planned_buying_music', t.planned_buying_music)
+        t.save()
+        return t
+
+    def update_fact_table(self, card_pk: int, table_pk: int, **kwargs):
+        """Коректируем данные таблицы в случае если
+         какие то поля не заполнены либо ЗП сотрудников поменялась"""
+        content = self.calculation_table(card_pk, **kwargs)
+        t = self.get_table(table_pk)
         t.salary = content['salary']
         t.taxes_FOT = content['taxes_FOT']
         t.general_expenses = content['general_expenses']
         t.cost = content['cost']
         t.profit = content['profit']
         t.profitability = content['profitability']
-        t.price_client = self.price_client
-        t.other_expenses = self.other_expenses
-        t.fare = self.fare
-        t.travel_expenses = self.travel_expenses
-        t.buying_music = self.buying_music
+        t.price_client = kwargs['price_client']
+        t.other_expenses = kwargs.get('other_expenses', t.other_expenses)
+        t.fare = kwargs.get('fare', t.fare)
+        t.travel_expenses = kwargs.get('travel_expenses', t.travel_expenses)
+        t.buying_music = kwargs.get('buying_music', t.buying_music)
         t.save()
         return t
 
-    def get_my_tables(self):
-        tables = self.give_me_card()
+    def get_my_tables(self, card_pk):
+        tables = self.give_me_card(card_pk=card_pk)
         return tables.table
 
-    def delete_table(self):
-        card = self.give_me_card()
-        table = card.table.get(pk=self.table_pk)
+    def delete_table(self, card_pk, table_pk):
+        card = self.give_me_card(card_pk=card_pk)
+        table = card.table.get(pk=table_pk)
         table.delete()

@@ -66,14 +66,24 @@ class TableCreateSerializers(serializers.ModelSerializer):
                   'planned_travel_expenses', 'planned_fare']
 
 
-class TableUpdateSerializers(serializers.ModelSerializer):
+class TableUpdatePlannedSerializers(serializers.ModelSerializer):
     class Meta:
         model = TableProject
-        fields = ['price_client', 'actors_salary', 'planed_actors_salary',
-                  'other_expenses', 'planned_other_expenses',
-                  'buying_music', 'planned_buying_music',
-                  'travel_expenses', 'planned_travel_expenses',
-                  'fare', 'planned_fare']
+        fields = ['price_client', 'planed_actors_salary',
+                  'planned_other_expenses',
+                  'planned_buying_music',
+                  'planned_travel_expenses',
+                  'planned_fare']
+
+
+class TableUpdateFactSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = TableProject
+        fields = ['price_client', 'actors_salary',
+                  'other_expenses',
+                  'buying_music',
+                  'travel_expenses',
+                  'fare']
 
 
 class WorkerListSerializers(serializers.Serializer):
