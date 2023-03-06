@@ -1,5 +1,3 @@
-from django.contrib import admin
-
 from utv_api.models import Cards, EmployeeRate, CustomUser
 from django.contrib import admin
 

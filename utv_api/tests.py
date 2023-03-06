@@ -1,12 +1,11 @@
-from PIL import Image
-from django.core.files import File
 import io
+
+from PIL import Image
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
 from utv_api.models import Cards, EmployeeRate, Comments, TableProject, Worker, CustomUser
-
 
 
 class AccountTests(APITestCase):
@@ -18,6 +17,7 @@ class AccountTests(APITestCase):
         file.name = 'test.png'
         file.seek(0)
         return file
+
     def setUp(self):
         self.url_register = reverse('users_register')
         self.url_users = reverse('users_list')
