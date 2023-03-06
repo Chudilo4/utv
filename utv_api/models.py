@@ -1,7 +1,11 @@
+from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
 
-from users.models import CustomUser
+
+class CustomUser(AbstractUser):
+    avatar = models.ImageField(upload_to='profile/avatar/', null=True,
+                               default='profile/avatar/Default_ava.png')
 
 
 class Cards(models.Model):

@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
-from users.models import CustomUser
-from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel
+from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel, CustomUser
 
 
 class UserReadSerializer(serializers.ModelSerializer):
@@ -19,6 +18,7 @@ class UserCreateSerializers(serializers.ModelSerializer):
         max_length=256
     )
     avatar = serializers.ImageField(allow_null=False)
+
     class Meta:
         model = CustomUser
         fields = ['username', 'first_name', 'last_name', 'password', 'avatar']

@@ -45,7 +45,6 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'users.apps.UsersConfig',
     'utv_api.apps.UtvApiConfig',
     'rest_framework',
     'corsheaders',
@@ -127,7 +126,7 @@ USE_I18N = True
 USE_TZ = True
 
 # User
-AUTH_USER_MODEL = 'users.CustomUser'
+AUTH_USER_MODEL = 'utv_api.CustomUser'
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.1/howto/static-files/

@@ -12,7 +12,7 @@ from service_app.service import (
     TableService,
     create_excel,
     get_my_excel_table)
-from users.models import CustomUser
+from utv_api.models import CustomUser
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
     UserReadSerializer,
@@ -81,13 +81,18 @@ class UserDetailAPIView(APIView):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
         serializer = UserDetailSerializers(data=request.data)
         if serializer.is_valid():
+            avatar = request.data['avatar']
             user.username = request.data['username']
             user.first_name = request.data['first_name']
             user.last_name = request.data['last_name']
             user.set_password(request.data['password'])
+            user.avatar.delete(save=False)
+            user.avatar = avatar
             user.save()
             logger.info(f'{timezone.now()} {request.user} поменял свой профиль')
-            return Response(request.data, status.HTTP_200_OK)
+            serializer2 = UserReadSerializer(instance=user)
+            return Response(serializer2.data, status.HTTP_200_OK)
+        print(serializer.errors)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):

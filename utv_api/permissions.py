@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from users.models import CustomUser
+from utv_api.models import CustomUser
 from utv_api.models import Cards
 
 

@@ -1,95 +1,73 @@
+from PIL import Image
+from django.core.files import File
+import io
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APITestCase
 
-from users.models import CustomUser
-from utv_api.models import Cards, EmployeeRate, Comments, TableProject, Worker
+from utv_api.models import Cards, EmployeeRate, Comments, TableProject, Worker, CustomUser
+
 
 
 class AccountTests(APITestCase):
-    ava = open('media/profile/avatar/Default_ava.png', 'rb')
+
+    def generate_photo_file(self):
+        file = io.BytesIO()
+        image = Image.new('RGBA', size=(100, 100), color=(155, 0, 0))
+        image.save(file, 'png')
+        file.name = 'test.png'
+        file.seek(0)
+        return file
+    def setUp(self):
+        self.url_register = reverse('users_register')
+        self.url_users = reverse('users_list')
+        self.url_put = reverse('users_detail', kwargs={'user_pk': 1})
+        self.data = {'username': 'Nikita',
+                     'password': '123456789Zz',
+                     'first_name': 'Nikita',
+                     'last_name': 'Metelev',
+                     'avatar': self.generate_photo_file()
+                     }
+        self.data2 = {'username': 'Artem',
+                      'password': '123456789Zz',
+                      'first_name': 'Artem',
+                      'last_name': 'Tue',
+                      'avatar': self.generate_photo_file()
+                      }
 
     def test_create_account(self):
         """
-        Ensure we can create a new account object.
+        Тест на создание пользователя
         """
-        url = reverse('users_register')
-        url_users = reverse('users_list')
-        data = {'username': 'Nikita',
-                'password': '123456789Zz',
-                'first_name': 'Artem',
-                'last_name': 'Bochkarev',
-                'avatar': self.ava
-                }
-        response = self.client.get(url_users)
+        response = self.client.get(self.url_users)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(CustomUser.objects.count(), 0)
-        response_post = self.client.post(url, data)
+        response_post = self.client.post(self.url_register, self.data)
         self.assertEqual(response_post.status_code, status.HTTP_201_CREATED)
         self.assertEqual(CustomUser.objects.get(username='Nikita').username, 'Nikita')
         self.assertEqual(CustomUser.objects.count(), 1)
 
     def test_read_user(self):
-        url = reverse('users_register')
-        url_users = reverse('users_list')
-        data = {'username': 'Nikita',
-                'password': '123456789Zz',
-                'first_name': 'Nikita',
-                'last_name': 'Metelev',
-                'avatar': self.ava
-                }
-        data2 = {'username': 'Artem',
-                 'password': '123456789Zz',
-                 'first_name': 'Artem',
-                 'last_name': 'Bochkarev',
-                 'avatar': self.ava
-                 }
-        self.client.post(url, data)
-        self.client.post(url, data2)
+        resp_post = self.client.post(self.url_register, self.data)
+        self.assertEqual(resp_post.status_code, status.HTTP_201_CREATED)
         self.client.login(username="Nikita", password='123456789Zz')
-        response = self.client.get(url_users)
-        self.assertEqual(len(response.data), 2)
+        response = self.client.get(self.url_users)
+        self.assertEqual(CustomUser.objects.all().count(), 1)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_user(self):
         """Тест на изменения аккаунта пользователя"""
-        url = reverse('users_register')
-        data = {'username': 'Nikita',
-                'password': '123456789Zz',
-                'first_name': 'Nikita',
-                'last_name': 'Metelev',
-                'avatar': self.ava
-                }
-        self.client.post(url, data)
-        url_put = reverse('users_detail', kwargs={'user_pk': 1})
-        data_put = {'username': 'Artem',
-                    'password': '987654321zZ',
-                    'first_name': 'Artem',
-                    'last_name': 'Bochkarev',
-                    'avatar': self.ava
-                    }
+        resp_post = self.client.post(self.url_register, self.data)
+        self.assertEqual(resp_post.status_code, status.HTTP_201_CREATED)
         self.client.login(username='Nikita', password='123456789Zz')
-        response = self.client.put(url_put, data_put)
+        response = self.client.put(self.url_put, self.data2)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(CustomUser.objects.get(pk=1).username, "Artem")
 
     def test_delete_user(self):
-        url = reverse('users_register')
         url_delete = reverse('users_detail', kwargs={'user_pk': 1})
-        data = {'username': 'Nikita',
-                'password': '123456789Zz',
-                'first_name': 'Nikita',
-                'last_name': 'Metelev',
-                'avatar': self.ava
-                }
-        data2 = {'username': 'Artem',
-                 'password': '123456789Zz',
-                 'first_name': 'Artem',
-                 'last_name': 'Bochkarev',
-                 'avatar': self.ava
-                 }
-        self.client.post(url, data)
-        self.client.post(url, data2)
+        self.client.post(self.url_register, self.data)
+        self.client.post(self.url_register, self.data2)
         self.assertEqual(CustomUser.objects.all().count(), 2)
         self.client.login(username='Nikita', password='123456789Zz')
         response = self.client.delete(url_delete)
