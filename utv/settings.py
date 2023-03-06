@@ -156,8 +156,8 @@ LOGGING = {
         'file': {
             'level': 'INFO',
             'class': 'logging.FileHandler',
-            'filename': os.path.join(BASE_DIR, 'log/utv_api/src/log.log'),
-            },
+            'filename': os.path.join(BASE_DIR, 'log/utv_api/src/log.log')
+        },
     },
     'loggers': {
         'utv_api': {
@@ -166,7 +166,6 @@ LOGGING = {
             'propagate': True,
 
         },
-
     },
 }
 REST_FRAMEWORK = {
