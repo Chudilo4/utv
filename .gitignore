@@ -5,3 +5,4 @@ selfsigned.key
 .coverage
 coverage.xml
 cache
+db.sqlite3
