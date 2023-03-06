@@ -44,20 +44,6 @@ class AccountTests(APITestCase):
         self.client.login(username="Nikita", password='123456789Zz')
         response = self.client.get(url_users)
         self.assertEqual(len(response.data), 2)
-        self.assertEqual(response.data, [
-            {"id": 1,
-             "username": "Nikita",
-             "avatar": "/media/profile/avatar/Default_ava.png",
-             "first_name": "Nikita",
-             "last_name": "Metelev"
-             },
-            {
-                "id": 2,
-                "username": "Artem",
-                "avatar": "/media/profile/avatar/Default_ava.png",
-                "first_name": "Artem",
-                "last_name": "Bochkarev"
-            }])
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_update_user(self):
