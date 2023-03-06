@@ -33,6 +33,7 @@ from utv_api.serializers import (
     TableUpdatePlannedSerializers,
     TableUpdateFactSerializers, ExcelSerializer, ExcelCreateSerializer)
 from utv_api.models import Comments, Worker, TableProject
+from django.utils import timezone
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +44,7 @@ class UsersReadAPIView(APIView):
     def get(self, request, format=None):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True, context={'request': request})
-        logger.info(f'{request.user} получил список пользователей')
+        logger.info(f'{timezone.now()} {request.user} получил список пользователей')
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -59,7 +60,7 @@ class UserRegisterAPIView(APIView):
                                              )
             user.set_password(request.data['password'])
             user.save()
-            logger.info('Зарегестрировался новый пользователь')
+            logger.info(f'{timezone.now()} Зарегестрировался новый пользователь')
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
@@ -70,7 +71,7 @@ class UserDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
         serializer = UserReadSerializer(user)
-        logger.info(f'{request.user} обратился к своему профилю')
+        logger.info(f'{timezone.now()} {request.user} обратился к своему профилю')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
@@ -82,14 +83,14 @@ class UserDetailAPIView(APIView):
             user.last_name = request.data['last_name']
             user.set_password(request.data['password'])
             user.save()
-            logger.info(f'{request.user} поменял свой профиль')
+            logger.info(f'{timezone.now()} {request.user} поменял свой профиль')
             return Response(request.data, status.HTTP_200_OK)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
         user.delete()
-        logger.info(f'{request.user} удалил профиль {user}')
+        logger.info(f'{timezone.now()} {request.user} удалил профиль {user}')
         return Response(request.data, status.HTTP_200_OK)
 
 
@@ -99,14 +100,14 @@ class CardsListAPIView(APIView):
     def get(self, request, format=None):
         data = CardService.my_cards(author_id=request.user.pk)
         serializer = CardListSerializers(instance=data, many=True)
-        logger.info(f'{request.user} получил список карточек')
+        logger.info(f'{timezone.now()} {request.user} получил список карточек')
         return Response(serializer.data)
 
     def post(self, request, format=None):
         serializer = CardCreateSerializers(data=request.data)
         if serializer.is_valid():
             CardService.create_card(author_id=request.user.pk, **serializer.data)
-            logger.info(f'{request.user} добавил новую карточку')
+            logger.info(f'{timezone.now()} {request.user} добавил новую карточку')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -117,14 +118,14 @@ class CardsDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
         card = CardService.give_me_card(card_pk=kwargs['card_pk'])
         serializer = CardDetailSerializer(instance=card)
-        logger.info(f'{request.user} обратился к карточке {card.pk}')
+        logger.info(f'{timezone.now()} {request.user} обратился к карточке {card.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
         serializer = CardDetailUpdateSerializer(data=request.data)
         if serializer.is_valid():
             CardService.update_card(card_pk=kwargs['card_pk'], **serializer.data)
-            logger.info(f'{request.user} изменил карточку')
+            logger.info(f'{timezone.now()} {request.user} изменил карточку')
             return Response(serializer.data, status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
