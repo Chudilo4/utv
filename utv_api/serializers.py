@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.models import CustomUser
-from utv_smeta.models import Cards, Comments, TableProject, Worker
+from utv_smeta.models import Cards, Comments, TableProject, Worker, TableExcel
 
 
 class UserReadSerializer(serializers.Serializer):
@@ -183,3 +183,9 @@ class CommentDetailUpdateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Comments
         fields = ['text']
+
+
+class ExcelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = TableExcel
+        fields = ['id', 'table', 'path_excel']

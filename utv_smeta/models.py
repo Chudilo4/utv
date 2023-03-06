@@ -119,6 +119,14 @@ class EmployeeRate(models.Model):
         return f'ЗП в час сотрудника {self.user} составляет {self.money}'
 
 
+class TableExcel(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1)
+    table = models.ForeignKey(TableProject, on_delete=models.CASCADE)
+    path_excel = models.FileField(upload_to='excel/')
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+
 class CommentsCards(models.Model):
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     comment = models.ForeignKey(Comments, on_delete=models.CASCADE)

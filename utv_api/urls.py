@@ -12,7 +12,7 @@ from .views import (
     TableListAPIView,
     UserDetailAPIView,
     UserRegisterAPIView,
-    TableDetailAPIView, TableUpdateFactAPIView, TableUpdatePlannedAPIView)
+    TableDetailAPIView, TableUpdateFactAPIView, TableUpdatePlannedAPIView, TableExcelAPIView)
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -49,4 +49,5 @@ urlpatterns = [
     path('cards/<int:card_pk>/table/<int:table_pk>/update_planned/',
          TableUpdatePlannedAPIView.as_view(),
          name='table_update_planned'),
+    path('cards/<int:card_pk>/table/<int:table_pk>/excel/list/', TableExcelAPIView.as_view(), name='table_excel'),
 ]

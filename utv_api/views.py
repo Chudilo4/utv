@@ -1,9 +1,11 @@
+from openpyxl import Workbook
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from service_app.service import CardService, CommentService, WorkerService, TableService
+from service_app.service import CardService, CommentService, WorkerService, TableService, create_excel, \
+    get_my_excel_table
 from users.models import CustomUser
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
@@ -23,7 +25,7 @@ from utv_api.serializers import (
     UserCreateSerializers,
     UserDetailSerializers,
     TableUpdatePlannedSerializers,
-    TableUpdateFactSerializers)
+    TableUpdateFactSerializers, ExcelSerializer)
 from utv_smeta.models import Comments, Worker, TableProject
 
 
@@ -295,3 +297,16 @@ class TableUpdateFactAPIView(APIView):
                 **request.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class TableExcelAPIView(APIView):
+
+    def post(self, request, *args, **kwargs):
+        excel = create_excel(request.user.pk, **kwargs)
+        serializer = ExcelSerializer(instance=excel)
+        return Response(serializer.data, status.HTTP_201_CREATED)
+
+    def get(self, request, *args, **kwargs):
+        excel = get_my_excel_table(author_id=request.user.pk, **kwargs)
+        serializer = ExcelSerializer(instance=excel, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)

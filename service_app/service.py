@@ -1,4 +1,10 @@
-from utv_smeta.models import Worker, TableProject, Cards, Comments
+import os
+
+from openpyxl.workbook import Workbook
+
+from utv import settings
+from utv_smeta.models import Worker, TableProject, Cards, Comments, TableExcel
+from django.core.files import File
 
 
 class CardService:
@@ -248,3 +254,33 @@ class TableService(CardService):
         card = self.give_me_card(card_pk=card_pk)
         table = card.table.get(pk=table_pk)
         table.delete()
+
+
+def create_excel(author_id: int, **kwargs):
+    """Создаём excel файл из сформированной таблицы"""
+    table = TableService().get_table(kwargs['table_pk'])
+    path = os.path.join(settings.EXCEL_ROOT, f'{table.created_time}.xlsx')
+    wb = Workbook()
+    ws = wb.active
+    ws['B6'] = table.price_client
+    ws['B7'] = table.planned_cost
+    ws['B8'] = table.planned_salary
+    ws['B9'] = table.planed_actors_salary
+    ws['B10'] = table.planned_taxes_FOT
+    ws['B11'] = table.planned_other_expenses
+    ws['B12'] = table.planned_buying_music
+    ws['B13'] = table.planned_travel_expenses
+    ws['B14'] = table.planned_fare
+    ws['B15'] = table.planned_general_expenses
+    ws['B16'] = table.planned_profit
+    ws['B17'] = table.planned_profitability
+    wb.save(path)
+    excel = TableExcel.objects.create(user_id=author_id, table_id=kwargs['table_pk'])
+    excel.path_excel.save(f'132.xlsx', File(open(path, 'rb')))
+    os.remove(path)
+    return excel
+
+def get_my_excel_table(author_id: int, **kwargs):
+    """Отдаём пользователю все excel связанные с таблицой"""
+    excel = TableExcel.objects.filter(table_id=kwargs['table_pk'])
+    return excel
