@@ -4,12 +4,12 @@ from users.models import CustomUser
 from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel
 
 
-class UserReadSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    username = serializers.CharField()
-    avatar = serializers.ImageField()
-    first_name = serializers.CharField()
-    last_name = serializers.CharField()
+class UserReadSerializer(serializers.ModelSerializer):
+    avatar = serializers.ImageField(use_url=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ['id', 'username', 'avatar', 'first_name', 'last_name']
 
 
 class UserCreateSerializers(serializers.ModelSerializer):
@@ -25,6 +25,8 @@ class UserCreateSerializers(serializers.ModelSerializer):
 
 
 class UserDetailSerializers(serializers.ModelSerializer):
+    avatar = serializers.ImageField(use_url=True)
+
     class Meta:
         model = CustomUser
         fields = ['username', 'first_name', 'last_name', 'password', 'avatar']

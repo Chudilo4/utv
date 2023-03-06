@@ -42,7 +42,7 @@ class UsersReadAPIView(APIView):
 
     def get(self, request, format=None):
         snippets = CustomUser.objects.all()
-        serializer = UserReadSerializer(snippets, many=True)
+        serializer = UserReadSerializer(snippets, many=True, context={'request': request})
         logger.info(f'{request.user} получил список пользователей')
         return Response(serializer.data, status.HTTP_200_OK)
 
