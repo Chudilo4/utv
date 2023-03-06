@@ -154,7 +154,7 @@ LOGGING = {
     'disable_existing_loggers': False,
     'handlers': {
         'file': {
-            'level': 'WARNING',
+            'level': 'INFO',
             'class': 'logging.FileHandler',
             'filename': os.path.join(BASE_DIR, 'log/utv_api/src/log.log'),
             },
@@ -162,7 +162,7 @@ LOGGING = {
     'loggers': {
         'utv_api': {
             'handlers': ['file'],
-            'level': 'WARNING',
+            'level': 'INFO',
             'propagate': True,
 
         },
