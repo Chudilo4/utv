@@ -155,3 +155,32 @@ Artem добавил новую карточку
 Artem добавил новую карточку
 Artem добавил новую карточку
 Artem добавил новую карточку
+2023-03-06 10:50:43.088583+00:00 root получил список пользователей
+2023-03-06 10:56:09.943992+00:00 Зарегестрировался новый пользователь
+2023-03-06 10:56:41.621456+00:00 root получил список пользователей
+2023-03-06 11:00:48.313500+00:00 Зарегестрировался новый пользователь
+<QueryDict: {'username': ['Artem'], 'password': ['1234'], 'first_name': ['Артём'], 'last_name': ['Бочкарёв'], 'avatar': [<InMemoryUploadedFile: artem.jpg (image/jpeg)>]}>
+2023-03-06 11:02:45.244718+00:00 Зарегестрировался новый пользователь
+<QueryDict: {'username': ['Artem'], 'password': ['1234'], 'first_name': ['Артём'], 'last_name': ['Бочкарёв'], 'avatar': [<InMemoryUploadedFile: artem.jpg (image/jpeg)>]}>
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: artem.jpg (image/jpeg)>]}>
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: artem.jpg (image/jpeg)>]}>
+2023-03-06 11:05:02.458008+00:00 Зарегестрировался новый пользователь
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: artem.jpg (image/jpeg)>]}>
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: artem.jpg (image/jpeg)>]}>
+2023-03-06 11:12:25.741196+00:00 root получил список пользователей
+2023-03-06 11:12:26.327131+00:00 root получил список пользователей
+2023-03-06 11:12:26.793264+00:00 root получил список пользователей
+2023-03-06 11:12:27.075382+00:00 root получил список пользователей
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: artem.jpg (image/jpeg)>]}>
+2023-03-06 11:13:26.546389+00:00 Зарегестрировался новый пользователь
+2023-03-06 11:14:04.609854+00:00 root получил список пользователей
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: _yiSCbZhkIc.jpg (image/jpeg)>]}>
+2023-03-06 11:15:23.917700+00:00 Зарегестрировался новый пользователь
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: THRpkwUqDFI.jpg (image/jpeg)>]}>
+2023-03-06 11:16:51.624478+00:00 Зарегестрировался новый пользователь
+2023-03-06 11:17:15.130087+00:00 root получил список пользователей
+<MultiValueDict: {}>
+<MultiValueDict: {}>
+<MultiValueDict: {'avatar': [<InMemoryUploadedFile: THRpkwUqDFI.jpg (image/jpeg)>]}>
+2023-03-06 11:18:59.587704+00:00 Зарегестрировался новый пользователь
+2023-03-06 11:19:05.177607+00:00 root получил список пользователей

@@ -52,16 +52,20 @@ class UserRegisterAPIView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
+        logger.info(f'{request.FILES}')
         serializer = UserCreateSerializers(data=request.data)
         if serializer.is_valid():
+            avatar = request.data['avatar']
             user = CustomUser.objects.create(username=request.data['username'],
                                              first_name=request.data['first_name'],
                                              last_name=request.data['last_name'],
+                                             avatar=avatar
                                              )
             user.set_password(request.data['password'])
             user.save()
+            serializer2 = UserReadSerializer(instance=user)
             logger.info(f'{timezone.now()} Зарегестрировался новый пользователь')
-            return Response(serializer.data, status.HTTP_201_CREATED)
+            return Response(serializer2.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
 
