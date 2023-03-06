@@ -47,14 +47,14 @@ class AccountTests(APITestCase):
         self.assertEqual(response.data, [
             {"id": 1,
              "username": "Nikita",
-             "avatar": "/media/media/profile/avatar/Default_ava.png",
+             "avatar": "/media/profile/avatar/Default_ava.png",
              "first_name": "Nikita",
              "last_name": "Metelev"
              },
             {
                 "id": 2,
                 "username": "Artem",
-                "avatar": "/media/media/profile/avatar/Default_ava.png",
+                "avatar": "/media/profile/avatar/Default_ava.png",
                 "first_name": "Artem",
                 "last_name": "Bochkarev"
             }])

@@ -5,5 +5,5 @@ from django.contrib.auth.models import AbstractUser
 
 
 class CustomUser(AbstractUser):
-    avatar = models.ImageField(upload_to='media/profile/avatar/', null=True,
-                               default='media/profile/avatar/Default_ava.png')
+    avatar = models.ImageField(upload_to='profile/avatar/', null=True,
+                               default='profile/avatar/Default_ava.png')

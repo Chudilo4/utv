@@ -1,11 +1,15 @@
-from openpyxl import Workbook
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from service_app.service import CardService, CommentService, WorkerService, TableService, create_excel, \
-    get_my_excel_table
+from service_app.service import (
+    CardService,
+    CommentService,
+    WorkerService,
+    TableService,
+    create_excel,
+    get_my_excel_table)
 from users.models import CustomUser
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
@@ -25,7 +29,7 @@ from utv_api.serializers import (
     UserCreateSerializers,
     UserDetailSerializers,
     TableUpdatePlannedSerializers,
-    TableUpdateFactSerializers, ExcelSerializer)
+    TableUpdateFactSerializers, ExcelSerializer, ExcelCreateSerializer)
 from utv_smeta.models import Comments, Worker, TableProject
 
 
@@ -300,13 +304,17 @@ class TableUpdateFactAPIView(APIView):
 
 
 class TableExcelAPIView(APIView):
+    permission_classes = [IsOwnerCard]
 
     def post(self, request, *args, **kwargs):
-        excel = create_excel(request.user.pk, **kwargs)
-        serializer = ExcelSerializer(instance=excel)
-        return Response(serializer.data, status.HTTP_201_CREATED)
+        serializer_create = ExcelCreateSerializer(data=request.data)
+        if serializer_create.is_valid():
+            excel = create_excel(request.user.pk, serializer_create.data['name'], **kwargs)
+            serializer = ExcelSerializer(instance=excel)
+            return Response(serializer.data, status.HTTP_201_CREATED)
+        return Response(serializer_create.errors, status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
-        excel = get_my_excel_table(author_id=request.user.pk, **kwargs)
+        excel = get_my_excel_table(**kwargs)
         serializer = ExcelSerializer(instance=excel, many=True)
         return Response(serializer.data, status.HTTP_200_OK)

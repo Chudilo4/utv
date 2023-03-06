@@ -120,6 +120,7 @@ class EmployeeRate(models.Model):
 
 
 class TableExcel(models.Model):
+    name = models.CharField(max_length=255)
     user = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1)
     table = models.ForeignKey(TableProject, on_delete=models.CASCADE)
     path_excel = models.FileField(upload_to='excel/')

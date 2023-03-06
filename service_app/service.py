@@ -256,10 +256,11 @@ class TableService(CardService):
         table.delete()
 
 
-def create_excel(author_id: int, **kwargs):
+def create_excel(author_id: int, name: str, **kwargs):
     """Создаём excel файл из сформированной таблицы"""
     table = TableService().get_table(kwargs['table_pk'])
-    path = os.path.join(settings.EXCEL_ROOT, f'{table.created_time}.xlsx')
+    name_file = f'{name}.xlsx'
+    path = os.path.join(settings.EXCEL_ROOT, name_file)
     wb = Workbook()
     ws = wb.active
     ws['B6'] = table.price_client
@@ -275,12 +276,15 @@ def create_excel(author_id: int, **kwargs):
     ws['B16'] = table.planned_profit
     ws['B17'] = table.planned_profitability
     wb.save(path)
-    excel = TableExcel.objects.create(user_id=author_id, table_id=kwargs['table_pk'])
-    excel.path_excel.save(f'132.xlsx', File(open(path, 'rb')))
+    excel = TableExcel.objects.create(user_id=author_id,
+                                      table_id=kwargs['table_pk'],
+                                      name=name_file)
+    excel.path_excel.save(name_file, File(open(path, 'rb')))
     os.remove(path)
     return excel
 
-def get_my_excel_table(author_id: int, **kwargs):
+
+def get_my_excel_table(**kwargs):
     """Отдаём пользователю все excel связанные с таблицой"""
     excel = TableExcel.objects.filter(table_id=kwargs['table_pk'])
     return excel

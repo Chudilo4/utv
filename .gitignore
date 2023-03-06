@@ -1,6 +1,6 @@
 venv
 .idea
-dn.sqlite3
+db.sqlite3
 selfsigned.crt
 selfsigned.key
 .coverage

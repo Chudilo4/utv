@@ -186,6 +186,13 @@ class CommentDetailUpdateSerializer(serializers.ModelSerializer):
 
 
 class ExcelSerializer(serializers.ModelSerializer):
+    path_excel = serializers.FileField(use_url=True)
+    name = serializers.CharField(max_length=255)
+
     class Meta:
         model = TableExcel
-        fields = ['id', 'table', 'path_excel']
+        fields = ['id', 'name', 'table', 'path_excel', 'created_time']
+
+
+class ExcelCreateSerializer(serializers.Serializer):
+    name = serializers.CharField(max_length=255)
