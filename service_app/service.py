@@ -3,7 +3,7 @@ import os
 from openpyxl.workbook import Workbook
 
 from utv import settings
-from utv_smeta.models import Worker, TableProject, Cards, Comments, TableExcel
+from utv_api.models import Worker, TableProject, Cards, Comments, TableExcel
 from django.core.files import File
 
 

@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.test import APITestCase
 
 from users.models import CustomUser
-from utv_smeta.models import Cards, EmployeeRate, Comments, TableProject, Worker
+from utv_api.models import Cards, EmployeeRate, Comments, TableProject, Worker
 
 
 class AccountTests(APITestCase):

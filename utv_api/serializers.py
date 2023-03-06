@@ -1,7 +1,7 @@
 from rest_framework import serializers
 
 from users.models import CustomUser
-from utv_smeta.models import Cards, Comments, TableProject, Worker, TableExcel
+from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel
 
 
 class UserReadSerializer(serializers.Serializer):

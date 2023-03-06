@@ -1,9 +1,0 @@
-{% extends 'utv_smeta/base.html' %}
-{% block content %}
-    <h1>Ваш профиль</h1>
-    <p>{{ profileuser.user.username }}</p>
-    {% if profileuser.avatar %}
-    <img src="{{ profileuser.avatar.url }}" height="320" width="320">
-    {% endif %}
-    <a href="{% url 'prpfile_update' request.user.profileuser.pk %}">Изменить</a>
-{% endblock %}

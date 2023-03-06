@@ -32,7 +32,7 @@ from utv_api.serializers import (
     UserDetailSerializers,
     TableUpdatePlannedSerializers,
     TableUpdateFactSerializers, ExcelSerializer, ExcelCreateSerializer)
-from utv_smeta.models import Comments, Worker, TableProject
+from utv_api.models import Comments, Worker, TableProject
 
 logger = logging.getLogger(__name__)
 
