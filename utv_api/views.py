@@ -1,3 +1,5 @@
+import logging
+
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -32,6 +34,8 @@ from utv_api.serializers import (
     TableUpdateFactSerializers, ExcelSerializer, ExcelCreateSerializer)
 from utv_smeta.models import Comments, Worker, TableProject
 
+logger = logging.getLogger(__name__)
+
 
 class UsersReadAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
@@ -39,6 +43,7 @@ class UsersReadAPIView(APIView):
     def get(self, request, format=None):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True)
+        logger.warning(f'{request.user} получил список пользователей')
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -54,6 +59,7 @@ class UserRegisterAPIView(APIView):
                                              )
             user.set_password(request.data['password'])
             user.save()
+            logger.warning('Зарегестрировался новый пользователь')
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
