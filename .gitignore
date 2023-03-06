@@ -6,3 +6,4 @@ selfsigned.key
 coverage.xml
 cache
 db.sqlite3
+__pycache__
