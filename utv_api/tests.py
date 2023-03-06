@@ -7,6 +7,8 @@ from utv_api.models import Cards, EmployeeRate, Comments, TableProject, Worker
 
 
 class AccountTests(APITestCase):
+    ava = open('media/profile/avatar/Default_ava.png', 'rb')
+
     def test_create_account(self):
         """
         Ensure we can create a new account object.
@@ -17,6 +19,7 @@ class AccountTests(APITestCase):
                 'password': '123456789Zz',
                 'first_name': 'Artem',
                 'last_name': 'Bochkarev',
+                'avatar': self.ava
                 }
         response = self.client.get(url_users)
         self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
@@ -33,11 +36,13 @@ class AccountTests(APITestCase):
                 'password': '123456789Zz',
                 'first_name': 'Nikita',
                 'last_name': 'Metelev',
+                'avatar': self.ava
                 }
         data2 = {'username': 'Artem',
                  'password': '123456789Zz',
                  'first_name': 'Artem',
                  'last_name': 'Bochkarev',
+                 'avatar': self.ava
                  }
         self.client.post(url, data)
         self.client.post(url, data2)
@@ -53,6 +58,7 @@ class AccountTests(APITestCase):
                 'password': '123456789Zz',
                 'first_name': 'Nikita',
                 'last_name': 'Metelev',
+                'avatar': self.ava
                 }
         self.client.post(url, data)
         url_put = reverse('users_detail', kwargs={'user_pk': 1})
@@ -60,6 +66,7 @@ class AccountTests(APITestCase):
                     'password': '987654321zZ',
                     'first_name': 'Artem',
                     'last_name': 'Bochkarev',
+                    'avatar': self.ava
                     }
         self.client.login(username='Nikita', password='123456789Zz')
         response = self.client.put(url_put, data_put)
@@ -73,11 +80,13 @@ class AccountTests(APITestCase):
                 'password': '123456789Zz',
                 'first_name': 'Nikita',
                 'last_name': 'Metelev',
+                'avatar': self.ava
                 }
         data2 = {'username': 'Artem',
                  'password': '123456789Zz',
                  'first_name': 'Artem',
                  'last_name': 'Bochkarev',
+                 'avatar': self.ava
                  }
         self.client.post(url, data)
         self.client.post(url, data2)

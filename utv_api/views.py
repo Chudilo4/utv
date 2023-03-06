@@ -52,7 +52,6 @@ class UserRegisterAPIView(APIView):
     permission_classes = [permissions.AllowAny]
 
     def post(self, request, *args, **kwargs):
-        logger.info(f'{request.FILES}')
         serializer = UserCreateSerializers(data=request.data)
         if serializer.is_valid():
             avatar = request.data['avatar']
@@ -103,7 +102,7 @@ class CardsListAPIView(APIView):
 
     def get(self, request, format=None):
         data = CardService.my_cards(author_id=request.user.pk)
-        serializer = CardListSerializers(instance=data, many=True)
+        serializer = CardListSerializers(instance=data, many=True, context={'request': request})
         logger.info(f'{timezone.now()} {request.user} получил список карточек')
         return Response(serializer.data)
 
