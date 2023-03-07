@@ -9,9 +9,16 @@ class CustomUserAdmin(admin.ModelAdmin):
 
 @admin.register(Cards)
 class CardsAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['id', 'author', 'title', 'description', "created_time",
+                    'deadline', 'update_time']
+    search_fields = ['author', 'title', 'created_time']
+    list_max_show_all = 10
+    ordering = ["-created_time"]
 
 
 @admin.register(EmployeeRate)
 class EmployeeRateAdmin(admin.ModelAdmin):
-    pass
+    list_display = ['user', 'money', 'created_time', 'update_time']
+    search_fields = ['user']
+    list_max_show_all = 10
+    ordering = ["-created_time"]

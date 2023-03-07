@@ -9,22 +9,30 @@ class CustomUser(AbstractUser):
 
 
 class Cards(models.Model):
-    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
-    title = models.CharField(max_length=255)
-    description = models.TextField()
-    created_time = models.DateTimeField(auto_now_add=True)
-    performers = models.ManyToManyField(CustomUser, related_name='CardEvent', blank=True)
-    deadline = models.DateTimeField()
-    comment = models.ManyToManyField('Comments', through='CommentsCards')
-    table = models.ManyToManyField('TableProject', through='TableCards')
-    worker = models.ManyToManyField('Worker', through='WorkerCards')
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL,
+                               null=True, verbose_name='Автор')
+    title = models.CharField(max_length=255, verbose_name='Название проекта')
+    description = models.TextField(verbose_name='Описание проекта')
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    performers = models.ManyToManyField(CustomUser, related_name='CardEvent',
+                                        blank=True, verbose_name='Исполнители')
+    deadline = models.DateTimeField(verbose_name='Дедлайн')
+    comment = models.ManyToManyField('Comments', through='CommentsCards',
+                                     verbose_name="Комментарии")
+    table = models.ManyToManyField('TableProject', through='TableCards', verbose_name="Таблицы")
+    worker = models.ManyToManyField('Worker', through='WorkerCards',
+                                    verbose_name='Рабочее время сотрудников')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
 
     def __str__(self):
         return self.title
 
     def get_absolute_url(self):
-        return reverse('card_detail', kwargs={'card_pk': self.pk})
+        return reverse('cards_detail', kwargs={'card_pk': self.pk})
+
+    class Meta:
+        verbose_name = 'Карточка'
+        verbose_name_plural = 'Карточки'
 
 
 class Comments(models.Model):
@@ -37,6 +45,8 @@ class Comments(models.Model):
         return self.text
 
     class Meta:
+        verbose_name = 'Комментарий'
+        verbose_name_plural = 'Комментарии'
         ordering = ('-created_time',)
 
 
@@ -49,6 +59,10 @@ class Worker(models.Model):
 
     def __str__(self):
         return self.author.username
+
+    class Meta:
+        verbose_name = 'Работа'
+        verbose_name_plural = 'Работы'
 
 
 class TableProject(models.Model):
@@ -112,15 +126,24 @@ class TableProject(models.Model):
     def __str__(self):
         return f'Таблица {self.created_time}'
 
+    class Meta:
+        verbose_name = 'Таблица'
+        verbose_name_plural = 'Таблицы'
+
 
 class EmployeeRate(models.Model):
-    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='employeerate')
+    user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='employeerate',
+                             verbose_name='Пользователь')
     money = models.IntegerField(verbose_name='Заработок в час', null=True)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
 
     def __str__(self):
         return f'ЗП в час сотрудника {self.user} составляет {self.money}'
+
+    class Meta:
+        verbose_name = 'Зарплата'
+        verbose_name_plural = 'Зарплаты'
 
 
 class TableExcel(models.Model):
@@ -130,6 +153,10 @@ class TableExcel(models.Model):
     path_excel = models.FileField(upload_to='excel/')
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
+
+    class Meta:
+        verbose_name = 'Таблица Excel'
+        verbose_name_plural = 'Таблицы Excel'
 
 
 class CommentsCards(models.Model):
