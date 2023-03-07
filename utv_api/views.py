@@ -73,7 +73,7 @@ class UserDetailAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
-        serializer = UserReadSerializer(user)
+        serializer = UserReadSerializer(user, context={'request': request})
         logger.info(f'{timezone.now()} {request.user} обратился к своему профилю')
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -92,7 +92,6 @@ class UserDetailAPIView(APIView):
             logger.info(f'{timezone.now()} {request.user} поменял свой профиль')
             serializer2 = UserReadSerializer(instance=user)
             return Response(serializer2.data, status.HTTP_200_OK)
-        print(serializer.errors)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
     def delete(self, request, *args, **kwargs):
@@ -174,7 +173,7 @@ class CommentDetailAPIView(APIView):
         except Comments.DoesNotExist:
             return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_404_NOT_FOUND)
         serializer = CommentDetailUpdateSerializer(instance=comment, context={"request": request})
-        return Response(serializer.data)
+        return Response(serializer.data, status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
         serializer = CommentDetailUpdateSerializer(data=request.data, context={"request": request})

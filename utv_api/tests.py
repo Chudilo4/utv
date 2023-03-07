@@ -54,6 +54,8 @@ class AccountTests(APITestCase):
         response = self.client.get(self.url_users)
         self.assertEqual(CustomUser.objects.all().count(), 1)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+        resp = self.client.get(self.url_put)
+        self.assertEqual(resp.status_code, status.HTTP_200_OK)
 
     def test_update_user(self):
         """Тест на изменения аккаунта пользователя"""
@@ -201,6 +203,12 @@ class CommentTests(APITestCase):
         response_get = self.client.get(self.url)
         self.assertEqual(response_get.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response_get.data), 2)
+        response_get_detail = self.client.get(reverse('comment_detail',
+                                                      kwargs={
+                                                          "card_pk": self.card.pk,
+                                                          'com_pk': 1}
+                                                      ))
+        self.assertEqual(response_get_detail.status_code, status.HTTP_200_OK)
 
 
 class WorkerTests(APITestCase):
@@ -256,6 +264,9 @@ class WorkerTests(APITestCase):
                                            kwargs={"card_pk": self.card.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(len(response.data), 6)
+        response2 = self.client.get(reverse('worker_detail', kwargs={"work_pk": 1,
+                                                                     "card_pk": self.card.pk}))
+        self.assertEqual(response2.status_code, status.HTTP_200_OK)
 
 
 class TableTests(APITestCase):
@@ -286,12 +297,6 @@ class TableTests(APITestCase):
                                                      "planned_fare": 2000})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
         self.assertEqual(self.card.table.count(), 1)
-        # table = self.card.table.get(planned_other_expenses=2000.0)
-        # self.assertEqual(table.planned_salary, 2800)
-        # self.assertEqual(table.planned_cost, 15006)
-        # self.assertEqual(table.planned_taxes_FOT, 1400)
-        # self.assertEqual(table.planned_general_expenses, 2806)
-        # self.assertEqual(table.planned_profit, -6)
 
     def test_update_table(self):
         self.client.post(self.url_table, {"planed_actors_salary": 2000,
@@ -346,6 +351,16 @@ class TableTests(APITestCase):
         self.assertEqual(table.profit, 134994)
         self.assertEqual(table.planned_profitability, 89.996)
         self.assertEqual(table.profitability, 89.996)
+
+    def test_read_table(self):
+        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+                                          "planned_other_expenses": 2000,
+                                          "planned_buying_music": 2000,
+                                          "planned_travel_expenses": 2000,
+                                          "planned_fare": 2000})
+        response = self.client.get(reverse('table_detail', kwargs={"table_pk": 1,
+                                                                   'card_pk': self.card.pk}))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_table(self):
         self.client.post(self.url_table, {"planed_actors_salary": 2000,
