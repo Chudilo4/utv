@@ -12,7 +12,7 @@ from service_app.service import (
     TableService,
     create_excel,
     get_my_excels_table, get_excel, delete_excel)
-from utv_api.models import CustomUser
+from utv_api.models import CustomUser, TableExcel
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
     UserReadSerializer,
@@ -148,7 +148,8 @@ class CommentListAPIView(APIView):
         comment = CommentService().get_comments_card(
             card_pk=kwargs['card_pk']
         )
-        serializer = CommentListSerializers(instance=comment, many=True, context={"request": request})
+        serializer = CommentListSerializers(instance=comment, many=True,
+                                            context={"request": request})
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
@@ -171,7 +172,7 @@ class CommentDetailAPIView(APIView):
                 card_pk=kwargs['card_pk'],
                 com_pk=kwargs['com_pk'])
         except Comments.DoesNotExist:
-            return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_404_NOT_FOUND)
         serializer = CommentDetailUpdateSerializer(instance=comment, context={"request": request})
         return Response(serializer.data)
 
@@ -223,7 +224,7 @@ class WorkerDetailAPIView(APIView):
                 author_id=request.user.pk,
             )
         except Worker.DoesNotExist:
-            return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_404_NOT_FOUND)
         serializer = WorkerListSerializers(instance=worker)
         return Response(serializer.data)
 
@@ -282,7 +283,7 @@ class TableDetailAPIView(APIView):
         try:
             table = TableService().get_my_tables(card_pk=kwargs['card_pk'])
         except Worker.DoesNotExist:
-            return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_404_NOT_FOUND)
         serializer = TableListSerializers(instance=table, many=True)
         return Response(serializer.data)
 
@@ -348,7 +349,10 @@ class ExcelDetailAPIView(APIView):
     permission_classes = [IsOwnerCard]
 
     def get(self, request, *args, **kwargs):
-        excel = get_excel(kwargs['excel_pk'])
+        try:
+            excel = get_excel(kwargs['excel_pk'])
+        except TableExcel.DoesNotExist:
+            return Response({'Excel': 'Файл не найден'}, status.HTTP_404_NOT_FOUND)
         serializer = ExcelSerializer(instance=excel)
         logger.info(f'{timezone.now()} {request.user} смотрит excel')
         return Response(serializer.data, status.HTTP_200_OK)
@@ -356,5 +360,3 @@ class ExcelDetailAPIView(APIView):
     def delete(self, request, *args, **kwargs):
         delete_excel(kwargs['excel_pk'])
         return Response({'Excel': 'Успешно удалён'}, status.HTTP_200_OK)
-
-
