@@ -24,9 +24,6 @@ class Cards(models.Model):
                                     verbose_name='Рабочее время сотрудников')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
 
-    def __str__(self):
-        return self.title
-
     def get_absolute_url(self):
         return reverse('cards_detail', kwargs={'card_pk': self.pk})
 
@@ -41,9 +38,6 @@ class Comments(models.Model):
     created_time = models.DateTimeField(auto_now_add=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
 
-    def __str__(self):
-        return self.text
-
     class Meta:
         verbose_name = 'Комментарий'
         verbose_name_plural = 'Комментарии'
@@ -56,9 +50,6 @@ class Worker(models.Model):
     scheduled_time = models.IntegerField(verbose_name='Плановое время', default=0)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания работы')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления работы')
-
-    def __str__(self):
-        return self.author.username
 
     class Meta:
         verbose_name = 'Работа'
@@ -123,9 +114,6 @@ class TableProject(models.Model):
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания таблицы')
     updated_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления таблицы')
 
-    def __str__(self):
-        return f'Таблица {self.created_time}'
-
     class Meta:
         verbose_name = 'Таблица'
         verbose_name_plural = 'Таблицы'
@@ -137,9 +125,6 @@ class EmployeeRate(models.Model):
     money = models.IntegerField(verbose_name='Заработок в час', null=True)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
-
-    def __str__(self):
-        return f'ЗП в час сотрудника {self.user} составляет {self.money}'
 
     class Meta:
         verbose_name = 'Зарплата'
