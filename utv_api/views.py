@@ -11,7 +11,7 @@ from service_app.service import (
     WorkerService,
     TableService,
     create_excel,
-    get_my_excel_table)
+    get_my_excels_table, get_excel, delete_excel)
 from utv_api.models import CustomUser
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
@@ -112,7 +112,7 @@ class CardsListAPIView(APIView):
         return Response(serializer.data)
 
     def post(self, request, format=None):
-        serializer = CardCreateSerializers(data=request.data)
+        serializer = CardCreateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             CardService.create_card(author_id=request.user.pk, **serializer.data)
             logger.info(f'{timezone.now()} {request.user} добавил новую карточку')
@@ -125,12 +125,12 @@ class CardsDetailAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         card = CardService.give_me_card(card_pk=kwargs['card_pk'])
-        serializer = CardDetailSerializer(instance=card)
+        serializer = CardDetailSerializer(instance=card, context={"request": request})
         logger.info(f'{timezone.now()} {request.user} обратился к карточке {card.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
-        serializer = CardDetailUpdateSerializer(data=request.data)
+        serializer = CardDetailUpdateSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             CardService.update_card(card_pk=kwargs['card_pk'], **serializer.data)
             logger.info(f'{timezone.now()} {request.user} изменил карточку')
@@ -148,11 +148,11 @@ class CommentListAPIView(APIView):
         comment = CommentService().get_comments_card(
             card_pk=kwargs['card_pk']
         )
-        serializer = CommentListSerializers(instance=comment, many=True)
+        serializer = CommentListSerializers(instance=comment, many=True, context={"request": request})
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        serializer = CommentCreateSerializers(data=request.data)
+        serializer = CommentCreateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             CommentService().create_comment(
                 author_id=request.user.pk,
@@ -172,11 +172,11 @@ class CommentDetailAPIView(APIView):
                 com_pk=kwargs['com_pk'])
         except Comments.DoesNotExist:
             return Response({'Ошибка': 'Коментарий не найден'}, status=status.HTTP_400_BAD_REQUEST)
-        serializer = CommentDetailUpdateSerializer(instance=comment)
+        serializer = CommentDetailUpdateSerializer(instance=comment, context={"request": request})
         return Response(serializer.data)
 
     def put(self, request, *args, **kwargs):
-        serializer = CommentDetailUpdateSerializer(data=request.data)
+        serializer = CommentDetailUpdateSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             CommentService().update_comment(
                 card_pk=kwargs['card_pk'],
@@ -199,11 +199,11 @@ class WorkerListAPIView(APIView):
                                                **kwargs)
         except Worker.DoesNotExist:
             return Response({'Ошибка': 'Работа не найден'}, status=status.HTTP_404_NOT_FOUND)
-        serializer = WorkerListSerializers(instance=work)
+        serializer = WorkerListSerializers(instance=work, context={"request": request})
         return Response(serializer.data)
 
     def post(self, request, *args, **kwargs):
-        serializer = WorkerCreateSerializers(data=request.data)
+        serializer = WorkerCreateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             WorkerService().create_worker(
                 author_id=request.user.pk,
@@ -325,7 +325,7 @@ class TableUpdateFactAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class TableExcelAPIView(APIView):
+class ExcelAPIView(APIView):
     permission_classes = [IsOwnerCard]
 
     def post(self, request, *args, **kwargs):
@@ -333,10 +333,28 @@ class TableExcelAPIView(APIView):
         if serializer_create.is_valid():
             excel = create_excel(request.user.pk, serializer_create.data['name'], **kwargs)
             serializer = ExcelSerializer(instance=excel)
+            logger.info(f'{timezone.now()} {request.user} создал excel')
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer_create.errors, status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
-        excel = get_my_excel_table(**kwargs)
-        serializer = ExcelSerializer(instance=excel, many=True)
+        excel = get_my_excels_table(**kwargs)
+        serializer = ExcelSerializer(instance=excel, many=True, context={'request': request})
+        logger.info(f'{timezone.now()} {request.user} смотрит excel файлы')
         return Response(serializer.data, status.HTTP_200_OK)
+
+
+class ExcelDetailAPIView(APIView):
+    permission_classes = [IsOwnerCard]
+
+    def get(self, request, *args, **kwargs):
+        excel = get_excel(kwargs['excel_pk'])
+        serializer = ExcelSerializer(instance=excel)
+        logger.info(f'{timezone.now()} {request.user} смотрит excel')
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        delete_excel(kwargs['excel_pk'])
+        return Response({'Excel': 'Успешно удалён'}, status.HTTP_200_OK)
+
+

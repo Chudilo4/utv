@@ -284,7 +284,18 @@ def create_excel(author_id: int, name: str, **kwargs):
     return excel
 
 
-def get_my_excel_table(**kwargs):
+def get_my_excels_table(**kwargs):
     """Отдаём пользователю все excel связанные с таблицой"""
     excel = TableExcel.objects.filter(table_id=kwargs['table_pk'])
     return excel
+
+
+def get_excel(excel_pk: int):
+    excel = TableExcel.objects.get(pk=excel_pk)
+    return excel
+
+
+def delete_excel(excel_pk: int):
+    excel = get_excel(excel_pk)
+    excel.path_excel.delete(save=False)
+    excel.delete()

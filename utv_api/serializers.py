@@ -15,9 +15,10 @@ class UserCreateSerializers(serializers.ModelSerializer):
     password = serializers.CharField(
         write_only=True,
         required=True,
-        max_length=256
+        max_length=14,
+        min_length=4
     )
-    avatar = serializers.ImageField(allow_null=False)
+    avatar = serializers.ImageField()
 
     class Meta:
         model = CustomUser
@@ -103,6 +104,9 @@ class WorkerDetailSerializers(serializers.ModelSerializer):
 
 
 class WorkerCreateSerializers(serializers.ModelSerializer):
+    actual_time = serializers.IntegerField(min_value=0, allow_null=False)
+    scheduled_time = serializers.IntegerField(min_value=0, allow_null=False)
+
     class Meta:
         model = Worker
         fields = ['actual_time', 'scheduled_time']
@@ -188,7 +192,6 @@ class CommentDetailUpdateSerializer(serializers.ModelSerializer):
 
 class ExcelSerializer(serializers.ModelSerializer):
     path_excel = serializers.FileField(use_url=True)
-    name = serializers.CharField(max_length=255)
 
     class Meta:
         model = TableExcel

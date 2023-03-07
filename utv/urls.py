@@ -22,7 +22,6 @@ from utv_api.yasg import urlpatterns as doc_url
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    # path('', include('utv_smeta.urls')),
     path('api/v1/', include('utv_api.urls')),
 ]
 
