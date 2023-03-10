@@ -200,3 +200,7 @@ class ExcelSerializer(serializers.ModelSerializer):
 
 class ExcelCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
+
+
+class FfmpegSerializer(serializers.Serializer):
+    path_video = serializers.FileField()

@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'drf_yasg',
     'debug_toolbar',
     'openpyxl',
+    'ffmpeg',
 ]
 
 MIDDLEWARE = [
@@ -180,7 +181,7 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=29),
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=2),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
     'ROTATE_REFRESH_TOKENS': False,
     'BLACKLIST_AFTER_ROTATION': False,

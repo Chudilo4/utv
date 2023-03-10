@@ -1,5 +1,5 @@
 import logging
-
+import ffmpeg
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
@@ -359,3 +359,8 @@ class ExcelDetailAPIView(APIView):
     def delete(self, request, *args, **kwargs):
         delete_excel(kwargs['excel_pk'])
         return Response({'Excel': 'Успешно удалён'}, status.HTTP_200_OK)
+
+
+# class FfmpegAPIView(APIView):
+#     def post(self, request, *args, **kwargs):
+#         serializer =

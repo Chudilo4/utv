@@ -6,6 +6,7 @@ from django.urls import reverse
 class CustomUser(AbstractUser):
     avatar = models.ImageField(upload_to='profile/avatar/', null=True,
                                default='profile/avatar/Default_ava.png')
+    telegram_id = models.CharField(null=True, verbose_name='Telegram ID', max_length=35)
 
 
 class Cards(models.Model):
@@ -157,3 +158,8 @@ class WorkerCards(models.Model):
 class TableCards(models.Model):
     card = models.ForeignKey(Cards, on_delete=models.CASCADE)
     table = models.ForeignKey(TableProject, on_delete=models.CASCADE)
+
+
+class Video(models.Model):
+    name = models.CharField(max_length=255)
+    path = models.FileField(upload_to='video/')
