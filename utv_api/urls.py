@@ -16,7 +16,7 @@ from .views import (
     TableUpdateFactAPIView,
     TableUpdatePlannedAPIView,
     ExcelAPIView,
-    ExcelDetailAPIView, FfmpegAPIView, FfmpegHflipAPIView)
+    ExcelDetailAPIView, CategoryEventAPIView, CategoryEventDetailAPIView, EventCalendarAPIView)
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -59,6 +59,8 @@ urlpatterns = [
     path('cards/<int:card_pk>/table/<int:table_pk>/excel/<int:excel_pk>/',
          ExcelDetailAPIView.as_view(),
          name='excel_detail'),
-    path('video/', FfmpegAPIView.as_view(), name='video'),
-    path('video/<int:video_pk>/', FfmpegHflipAPIView.as_view(), name='video_flip')
+    path('category/event/', CategoryEventAPIView.as_view(), name='category_event'),
+    path('event/categore/<int:cat_event_pk>/', CategoryEventDetailAPIView.as_view(), name='category_detail'),
+    path('event/', EventCalendarAPIView.as_view(), name='event_list')
+
 ]

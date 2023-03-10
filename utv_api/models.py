@@ -1,6 +1,7 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 
 
 class CustomUser(AbstractUser):
@@ -24,6 +25,7 @@ class Cards(models.Model):
     worker = models.ManyToManyField('Worker', through='WorkerCards',
                                     verbose_name='Рабочее время сотрудников')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
+    archived = models.BooleanField(verbose_name='Добавить в архив', default=False, blank=True)
 
     def get_absolute_url(self):
         return reverse('cards_detail', kwargs={'card_pk': self.pk})
@@ -160,6 +162,21 @@ class TableCards(models.Model):
     table = models.ForeignKey(TableProject, on_delete=models.CASCADE)
 
 
-class Video(models.Model):
-    name = models.CharField(max_length=255)
-    path = models.FileField(upload_to='video/')
+class Event(models.Model):
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1, verbose_name='Автор')
+    title = models.CharField(max_length=255, blank=False, verbose_name='Название события')
+    date_begin = models.DateTimeField(verbose_name='Дата начала события', blank=False)
+    data_end = models.DateTimeField(verbose_name='Дата конца события', blank=False)
+    category = models.ForeignKey('CategoryEvent', on_delete=models.SET_DEFAULT, default=1, blank=True)
+    performers = models.ManyToManyField(CustomUser, verbose_name='Исполнители', related_name='performers')
+    created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    class Meta:
+        verbose_name = 'Событие в календаре'
+        verbose_name_plural = 'События в календаре'
+
+class CategoryEvent(models.Model):
+    title = models.CharField(max_length=255, blank=False)
+
+    class Meta:
+        verbose_name = 'Категория события'
+        verbose_name_plural = 'Категории событий'

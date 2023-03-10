@@ -1,21 +1,21 @@
 import logging
-import os
 
-import ffmpeg
+from django.utils import timezone
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.core.files import File
+
 from service_app.service import (
     CardService,
     CommentService,
     WorkerService,
     TableService,
     create_excel,
-    get_my_excels_table, get_excel, delete_excel)
-from utv import settings
-from utv_api.models import CustomUser, TableExcel, Video
+    get_my_excels_table, get_excel, delete_excel, get_categorys_event, add_category_event, get_category_event,
+    delete_category_event, get_events, add_event)
+from utv_api.models import Comments, Worker, TableProject, CategoryEvent
+from utv_api.models import CustomUser, TableExcel
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
     UserReadSerializer,
@@ -34,9 +34,11 @@ from utv_api.serializers import (
     UserCreateSerializers,
     UserDetailSerializers,
     TableUpdatePlannedSerializers,
-    TableUpdateFactSerializers, ExcelSerializer, ExcelCreateSerializer, FfmpegSerializer)
-from utv_api.models import Comments, Worker, TableProject
-from django.utils import timezone
+    TableUpdateFactSerializers,
+    ExcelSerializer,
+    ExcelCreateSerializer,
+    CategoryEventListSerializer,
+    CategoryEventAddSerializer, EventListSerializer, EventAddSerializer)
 
 logger = logging.getLogger(__name__)
 
@@ -364,40 +366,49 @@ class ExcelDetailAPIView(APIView):
         return Response({'Excel': 'Успешно удалён'}, status.HTTP_200_OK)
 
 
-class FfmpegAPIView(APIView):
+class CategoryEventAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        category = get_categorys_event()
+        serializer = CategoryEventListSerializer(instance=category, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
+
     def post(self, request, *args, **kwargs):
-        serializer = FfmpegSerializer(data=request.data)
+        serializer = CategoryEventAddSerializer(data=request.data)
         if serializer.is_valid():
-            Video.objects.create(name=request.data['name'],
-                                 path=request.data['path'])
+            add_category_event(serializer.data['title'])
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
+
+class CategoryEventDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        video = Video.objects.all()
-        serializer = FfmpegSerializer(instance=video, many=True, context={'request': request})
+        try:
+            category = get_category_event(kwargs['cat_event_pk'])
+        except CategoryEvent.DoesNotExist:
+            return Response({'Категория': 'Не найдена!'}, status.HTTP_404_NOT_FOUND)
+        serializer = CategoryEventListSerializer(instance=category)
         return Response(serializer.data, status.HTTP_200_OK)
 
+    def delete(self, request, *args, **kwargs):
+        try:
+            delete_category_event(kwargs['cat_event_pk'])
+        except CategoryEvent.DoesNotExist:
+            return Response({'Категория': 'Не найдена!'}, status.HTTP_404_NOT_FOUND)
+        return Response({'Категория': 'Удалена'}, status.HTTP_200_OK)
 
-class FfmpegHflipAPIView(APIView):
+
+class EventCalendarAPIView(APIView):
     def get(self, request, *args, **kwargs):
-        video = Video.objects.get(pk=kwargs['video_pk'])
-        ser = FfmpegSerializer(instance=video, context={'request': request})
-        return Response(ser.data, status.HTTP_200_OK)
+        events = get_events()
+        serializer = EventListSerializer(instance=events, many=True)
+        return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        video = Video.objects.get(pk=kwargs['video_pk'])
-        name_video = f'{video.pk}.mp4'
-        path = os.path.join(settings.MEDIA_ROOT, name_video)
-        try:
-            stream = ffmpeg.input(video.path.path)
-            stream = ffmpeg.filter(stream, 'fps', fps=25)
-            stream = ffmpeg.output(stream, path)
-            ffmpeg.run(stream)
-            video.path.delete(save=False)
-            video.path.save(name_video, File(open(path, 'rb')))
-            os.remove(path)
-        except ffmpeg.Error as e:
-            logger.info(e)
-        ser = FfmpegSerializer(instance=video, context={'request': request})
-        return Response(ser.data, status.HTTP_200_OK)
+        serializer = EventAddSerializer(data=request.data)
+        if serializer.is_valid():
+            print(serializer.data)
+            event = add_event(author_id=request.user.pk,
+                              **serializer.data)
+            ser = EventListSerializer(instance=event)
+            return Response(ser.data, status.HTTP_201_CREATED)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)

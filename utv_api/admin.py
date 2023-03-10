@@ -1,4 +1,4 @@
-from utv_api.models import Cards, EmployeeRate, CustomUser
+from utv_api.models import Cards, EmployeeRate, CustomUser, CategoryEvent, Event
 from django.contrib import admin
 
 
@@ -20,5 +20,20 @@ class CardsAdmin(admin.ModelAdmin):
 class EmployeeRateAdmin(admin.ModelAdmin):
     list_display = ['user', 'money', 'created_time', 'update_time']
     search_fields = ['user']
+    list_max_show_all = 10
+    ordering = ["-created_time"]
+
+
+@admin.register(CategoryEvent)
+class CategoryEventAdmin(admin.ModelAdmin):
+    list_display = ['id', 'title']
+    list_max_show_all = 10
+
+
+@admin.register(Event)
+class EventAdmin(admin.ModelAdmin):
+    list_display = ['id', 'author', 'title', 'date_begin',
+                    'data_end', 'category']
+    search_fields = ['author', 'title', 'date_begin', 'data_end', 'category']
     list_max_show_all = 10
     ordering = ["-created_time"]

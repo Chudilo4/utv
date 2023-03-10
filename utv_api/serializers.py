@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel, CustomUser, Video
+from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel, CustomUser, CategoryEvent, Event
 
 
 class UserReadSerializer(serializers.ModelSerializer):
@@ -133,6 +133,7 @@ class CardReadSerializer(serializers.Serializer):
     update_time = serializers.DateTimeField()
     performers = UserReadSerializer(many=True, read_only=True)
     deadline = serializers.DateTimeField()
+    archived = serializers.BooleanField()
 
 
 class CardDetailSerializer(serializers.ModelSerializer):
@@ -146,7 +147,8 @@ class CardDetailSerializer(serializers.ModelSerializer):
         model = Cards
         fields = ['id', 'author', 'title', 'description',
                   'created_time', 'update_time', 'performers',
-                  'deadline', 'comment', 'table', 'worker']
+                  'deadline', 'comment', 'table', 'worker',
+                  'archived']
 
 
 class CardDetailUpdateSerializer(serializers.ModelSerializer):
@@ -202,9 +204,31 @@ class ExcelCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
 
 
-class FfmpegSerializer(serializers.ModelSerializer):
-    path = serializers.FileField(use_url=True)
+class CategoryEventListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
+    title = serializers.CharField(max_length=255)
 
+
+class CategoryEventAddSerializer(serializers.ModelSerializer):
     class Meta:
-        model = Video
-        fields = ['id', 'name', 'path']
+        model = CategoryEvent
+        fields = '__all__'
+
+
+class EventListSerializer(serializers.Serializer):
+    author = UserReadSerializer()
+    title = serializers.CharField(max_length=255, min_length=3, allow_blank=False)
+    date_begin = serializers.DateTimeField()
+    data_end = serializers.DateTimeField()
+    category = CategoryEventListSerializer()
+    performers = UserReadSerializer(many=True)
+
+
+class EventAddSerializer(serializers.Serializer):
+    title = serializers.CharField(allow_blank=False)
+    date_begin = serializers.DateTimeField(allow_null=False)
+    data_end = serializers.DateTimeField(allow_null=False)
+    category = serializers.IntegerField(allow_null=False)
+    class Meta:
+        model = Event
+        fields = ['title', 'date_begin', 'data_end', 'category', 'performers']
