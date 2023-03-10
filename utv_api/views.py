@@ -1,10 +1,12 @@
 import logging
+import os
+
 import ffmpeg
 from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.core.files import File
 from service_app.service import (
     CardService,
     CommentService,
@@ -12,7 +14,8 @@ from service_app.service import (
     TableService,
     create_excel,
     get_my_excels_table, get_excel, delete_excel)
-from utv_api.models import CustomUser, TableExcel
+from utv import settings
+from utv_api.models import CustomUser, TableExcel, Video
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
     UserReadSerializer,
@@ -31,7 +34,7 @@ from utv_api.serializers import (
     UserCreateSerializers,
     UserDetailSerializers,
     TableUpdatePlannedSerializers,
-    TableUpdateFactSerializers, ExcelSerializer, ExcelCreateSerializer)
+    TableUpdateFactSerializers, ExcelSerializer, ExcelCreateSerializer, FfmpegSerializer)
 from utv_api.models import Comments, Worker, TableProject
 from django.utils import timezone
 
@@ -44,7 +47,7 @@ class UsersReadAPIView(APIView):
     def get(self, request, format=None):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True, context={'request': request})
-        logger.info(f'{timezone.now()} {request.user} получил список пользователей')
+        logger.info(f'{timezone.datetime.now()} {request.user} получил список пользователей')
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -63,7 +66,7 @@ class UserRegisterAPIView(APIView):
             user.set_password(request.data['password'])
             user.save()
             serializer2 = UserReadSerializer(instance=user)
-            logger.info(f'{timezone.now()} Зарегестрировался новый пользователь')
+            logger.info(f'{timezone.datetime.now()} Зарегестрировался новый пользователь')
             return Response(serializer2.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
 
@@ -74,7 +77,7 @@ class UserDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
         serializer = UserReadSerializer(user, context={'request': request})
-        logger.info(f'{timezone.now()} {request.user} обратился к своему профилю')
+        logger.info(f'{timezone.datetime.now()} {request.user} обратился к своему профилю')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
@@ -89,7 +92,7 @@ class UserDetailAPIView(APIView):
             user.avatar.delete(save=False)
             user.avatar = avatar
             user.save()
-            logger.info(f'{timezone.now()} {request.user} поменял свой профиль')
+            logger.info(f'{timezone.datetime.now()} {request.user} поменял свой профиль')
             serializer2 = UserReadSerializer(instance=user)
             return Response(serializer2.data, status.HTTP_200_OK)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
@@ -97,7 +100,7 @@ class UserDetailAPIView(APIView):
     def delete(self, request, *args, **kwargs):
         user = CustomUser.objects.get(pk=kwargs['user_pk'])
         user.delete()
-        logger.info(f'{timezone.now()} {request.user} удалил профиль {user}')
+        logger.info(f'{timezone.datetime.now()} {request.user} удалил профиль {user}')
         return Response(request.data, status.HTTP_200_OK)
 
 
@@ -107,14 +110,14 @@ class CardsListAPIView(APIView):
     def get(self, request, format=None):
         data = CardService.my_cards(author_id=request.user.pk)
         serializer = CardListSerializers(instance=data, many=True, context={'request': request})
-        logger.info(f'{timezone.now()} {request.user} получил список карточек')
+        logger.info(f'{timezone.datetime.now()} {request.user} получил список карточек')
         return Response(serializer.data)
 
     def post(self, request, format=None):
         serializer = CardCreateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             CardService.create_card(author_id=request.user.pk, **serializer.data)
-            logger.info(f'{timezone.now()} {request.user} добавил новую карточку')
+            logger.info(f'{timezone.datetime.now()} {request.user} добавил новую карточку')
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
@@ -125,14 +128,14 @@ class CardsDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
         card = CardService.give_me_card(card_pk=kwargs['card_pk'])
         serializer = CardDetailSerializer(instance=card, context={"request": request})
-        logger.info(f'{timezone.now()} {request.user} обратился к карточке {card.pk}')
+        logger.info(f'{timezone.datetime.now()} {request.user} обратился к карточке {card.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def put(self, request, *args, **kwargs):
         serializer = CardDetailUpdateSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
             CardService.update_card(card_pk=kwargs['card_pk'], **serializer.data)
-            logger.info(f'{timezone.now()} {request.user} изменил карточку')
+            logger.info(f'{timezone.datetime.now()} {request.user} изменил карточку')
             return Response(serializer.data, status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
@@ -333,14 +336,14 @@ class ExcelAPIView(APIView):
         if serializer_create.is_valid():
             excel = create_excel(request.user.pk, serializer_create.data['name'], **kwargs)
             serializer = ExcelSerializer(instance=excel)
-            logger.info(f'{timezone.now()} {request.user} создал excel')
+            logger.info(f'{timezone.datetime.now()} {request.user} создал excel')
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer_create.errors, status.HTTP_400_BAD_REQUEST)
 
     def get(self, request, *args, **kwargs):
         excel = get_my_excels_table(**kwargs)
         serializer = ExcelSerializer(instance=excel, many=True, context={'request': request})
-        logger.info(f'{timezone.now()} {request.user} смотрит excel файлы')
+        logger.info(f'{timezone.datetime.now()} {request.user} смотрит excel файлы')
         return Response(serializer.data, status.HTTP_200_OK)
 
 
@@ -353,7 +356,7 @@ class ExcelDetailAPIView(APIView):
         except TableExcel.DoesNotExist:
             return Response({'Excel': 'Файл не найден'}, status.HTTP_404_NOT_FOUND)
         serializer = ExcelSerializer(instance=excel)
-        logger.info(f'{timezone.now()} {request.user} смотрит excel')
+        logger.info(f'{timezone.datetime.now()} {request.user} смотрит excel')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
@@ -361,6 +364,40 @@ class ExcelDetailAPIView(APIView):
         return Response({'Excel': 'Успешно удалён'}, status.HTTP_200_OK)
 
 
-# class FfmpegAPIView(APIView):
-#     def post(self, request, *args, **kwargs):
-#         serializer =
+class FfmpegAPIView(APIView):
+    def post(self, request, *args, **kwargs):
+        serializer = FfmpegSerializer(data=request.data)
+        if serializer.is_valid():
+            Video.objects.create(name=request.data['name'],
+                                 path=request.data['path'])
+            return Response(serializer.data, status.HTTP_201_CREATED)
+        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+    def get(self, request, *args, **kwargs):
+        video = Video.objects.all()
+        serializer = FfmpegSerializer(instance=video, many=True, context={'request': request})
+        return Response(serializer.data, status.HTTP_200_OK)
+
+
+class FfmpegHflipAPIView(APIView):
+    def get(self, request, *args, **kwargs):
+        video = Video.objects.get(pk=kwargs['video_pk'])
+        ser = FfmpegSerializer(instance=video, context={'request': request})
+        return Response(ser.data, status.HTTP_200_OK)
+
+    def post(self, request, *args, **kwargs):
+        video = Video.objects.get(pk=kwargs['video_pk'])
+        name_video = f'{video.pk}.mp4'
+        path = os.path.join(settings.MEDIA_ROOT, name_video)
+        try:
+            stream = ffmpeg.input(video.path.path)
+            stream = ffmpeg.filter(stream, 'fps', fps=25)
+            stream = ffmpeg.output(stream, path)
+            ffmpeg.run(stream)
+            video.path.delete(save=False)
+            video.path.save(name_video, File(open(path, 'rb')))
+            os.remove(path)
+        except ffmpeg.Error as e:
+            logger.info(e)
+        ser = FfmpegSerializer(instance=video, context={'request': request})
+        return Response(ser.data, status.HTTP_200_OK)

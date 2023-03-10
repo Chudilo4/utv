@@ -1,6 +1,6 @@
 from rest_framework import serializers
 
-from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel, CustomUser
+from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel, CustomUser, Video
 
 
 class UserReadSerializer(serializers.ModelSerializer):
@@ -202,5 +202,9 @@ class ExcelCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
 
 
-class FfmpegSerializer(serializers.Serializer):
-    path_video = serializers.FileField()
+class FfmpegSerializer(serializers.ModelSerializer):
+    path = serializers.FileField(use_url=True)
+
+    class Meta:
+        model = Video
+        fields = ['id', 'name', 'path']
