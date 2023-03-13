@@ -1,6 +1,6 @@
 from rest_framework import permissions
 
-from utv_api.models import CustomUser
+from utv_api.models import CustomUser, Event
 from utv_api.models import Cards
 
 
@@ -39,4 +39,19 @@ class IsUser(permissions.BasePermission):
         if user:
             if request.user == user:
                 return True
+        return False
+
+
+class AuthorOrPerformersEvent(permissions.BasePermission):
+    # def has_permission(self, request, view):
+    #     event_pk = request.path.split('/')[4]
+    #     event = get_or_none(Event, event_pk)
+    #     if event:
+    #         if request.user in event.performers.all() or request.user == event.author:
+    #             return True
+    #     return False
+
+    def has_object_permission(self, request, view, obj):
+        if request.user in obj.performers.all() or request.user == obj.author:
+            return True
         return False

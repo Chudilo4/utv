@@ -23,7 +23,7 @@ from service_app.service import (
     add_event, get_event, delete_event)
 from utv_api.models import Comments, Worker, TableProject, CategoryEvent, Event
 from utv_api.models import CustomUser, TableExcel
-from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
+from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser, AuthorOrPerformersEvent
 from utv_api.serializers import (
     UserReadSerializer,
     CardListSerializers,
@@ -53,7 +53,7 @@ logger = logging.getLogger(__name__)
 class UsersReadAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, format=None):
+    def get(self, request, *args, **kwargs):
         snippets = CustomUser.objects.all()
         serializer = UserReadSerializer(snippets, many=True, context={'request': request})
         logger.info(f'{timezone.datetime.now()} {request.user} получил список пользователей')
@@ -116,13 +116,13 @@ class UserDetailAPIView(APIView):
 class CardsListAPIView(APIView):
     permission_classes = [permissions.IsAuthenticated]
 
-    def get(self, request, format=None):
+    def get(self, request, *args, **kwargs):
         data = CardService.my_cards(author_id=request.user.pk)
         serializer = CardListSerializers(instance=data, many=True, context={'request': request})
         logger.info(f'{timezone.datetime.now()} {request.user} получил список карточек')
         return Response(serializer.data)
 
-    def post(self, request, format=None):
+    def post(self, request, *args, **kwargs):
         serializer = CardCreateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             CardService.create_card(author_id=request.user.pk, **serializer.data)
@@ -427,19 +427,16 @@ class EventCalendarAPIView(APIView):
 
 
 class EventCalendarDetailAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [AuthorOrPerformersEvent]
 
     def get(self, request, *args, **kwargs):
-        try:
-            event = get_event(kwargs['event_pk'])
-        except Event.DoesNotExist:
-            return Response({'Категория': 'Не найдена!'}, status.HTTP_404_NOT_FOUND)
+        event = get_event(kwargs['event_pk'])
+        self.check_object_permissions(request, event)
         serializer = EventListSerializer(instance=event, context={'request': request})
         return Response(serializer.data, status.HTTP_200_OK)
 
     def delete(self, request, *args, **kwargs):
-        try:
-            delete_event(kwargs['event_pk'])
-        except Event.DoesNotExist:
-            return Response({'Категория': 'Не найдена!'}, status.HTTP_404_NOT_FOUND)
-        return Response({'Категория': 'Удалена'}, status.HTTP_200_OK)
+        event = get_event(kwargs['event_pk'])
+        self.check_object_permissions(request, event)
+        event.delete()
+        return Response({'Событие': 'Удалено'}, status.HTTP_200_OK)
