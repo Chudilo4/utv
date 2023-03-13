@@ -19,7 +19,7 @@ from .views import (
     ExcelDetailAPIView,
     CategoryEventAPIView,
     CategoryEventDetailAPIView,
-    EventCalendarAPIView)
+    EventCalendarAPIView, EventCalendarDetailAPIView)
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -70,6 +70,8 @@ urlpatterns = [
          name='category_detail'),
     path('event/',
          EventCalendarAPIView.as_view(),
-         name='event_list')
-
+         name='event_list'),
+    path('event/<int:event_pk>/',
+         EventCalendarDetailAPIView.as_view(),
+         name='event_detail')
 ]

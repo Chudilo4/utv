@@ -11,7 +11,6 @@ class CustomUserAdmin(admin.ModelAdmin):
 class CardsAdmin(admin.ModelAdmin):
     list_display = ['id', 'author', 'title', 'description', "created_time",
                     'deadline', 'update_time']
-    search_fields = ['author', 'title', 'created_time']
     list_max_show_all = 10
     ordering = ["-created_time"]
 
@@ -19,7 +18,6 @@ class CardsAdmin(admin.ModelAdmin):
 @admin.register(EmployeeRate)
 class EmployeeRateAdmin(admin.ModelAdmin):
     list_display = ['user', 'money', 'created_time', 'update_time']
-    search_fields = ['user']
     list_max_show_all = 10
     ordering = ["-created_time"]
 
@@ -34,6 +32,5 @@ class CategoryEventAdmin(admin.ModelAdmin):
 class EventAdmin(admin.ModelAdmin):
     list_display = ['id', 'author', 'title', 'date_begin',
                     'data_end', 'category']
-    search_fields = ['author', 'title', 'date_begin', 'data_end', 'category']
     list_max_show_all = 10
     ordering = ["-created_time"]

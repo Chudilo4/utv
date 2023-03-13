@@ -33,6 +33,9 @@ class Cards(models.Model):
         verbose_name = 'Карточка'
         verbose_name_plural = 'Карточки'
 
+    def __str__(self):
+        return self.title
+
 
 class Comments(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
@@ -45,6 +48,9 @@ class Comments(models.Model):
         verbose_name_plural = 'Комментарии'
         ordering = ('-created_time',)
 
+    def __str__(self):
+        return self.text
+
 
 class Worker(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
@@ -56,6 +62,10 @@ class Worker(models.Model):
     class Meta:
         verbose_name = 'Работа'
         verbose_name_plural = 'Работы'
+
+    def __str__(self):
+        return f'{self.author} Фактическое время: ' \
+               f'{self.actual_time} Плановое время: {self.scheduled_time}'
 
 
 class TableProject(models.Model):
@@ -120,6 +130,9 @@ class TableProject(models.Model):
         verbose_name = 'Таблица'
         verbose_name_plural = 'Таблицы'
 
+    def __str__(self):
+        return self.pk
+
 
 class EmployeeRate(models.Model):
     user = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name='employeerate',
@@ -131,6 +144,9 @@ class EmployeeRate(models.Model):
     class Meta:
         verbose_name = 'Зарплата'
         verbose_name_plural = 'Зарплаты'
+
+    def __str__(self):
+        return f'{self.user} {self.money}'
 
 
 class TableExcel(models.Model):
@@ -144,6 +160,9 @@ class TableExcel(models.Model):
     class Meta:
         verbose_name = 'Таблица Excel'
         verbose_name_plural = 'Таблицы Excel'
+
+    def __str__(self):
+        return self.name
 
 
 class CommentsCards(models.Model):
@@ -186,6 +205,9 @@ class Event(models.Model):
         verbose_name = 'Событие в календаре'
         verbose_name_plural = 'События в календаре'
 
+    def __str__(self):
+        return self.title
+
 
 class CategoryEvent(models.Model):
     title = models.CharField(max_length=255, blank=False)
@@ -193,3 +215,6 @@ class CategoryEvent(models.Model):
     class Meta:
         verbose_name = 'Категория события'
         verbose_name_plural = 'Категории событий'
+
+    def __str__(self):
+        return self.title

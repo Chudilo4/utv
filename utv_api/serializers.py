@@ -244,6 +244,7 @@ class CategoryEventAddSerializer(serializers.ModelSerializer):
 
 
 class EventListSerializer(serializers.Serializer):
+    id = serializers.IntegerField()
     author = UserReadSerializer()
     title = serializers.CharField(max_length=255, min_length=3, allow_blank=False)
     date_begin = serializers.DateTimeField()

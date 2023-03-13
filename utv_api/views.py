@@ -20,8 +20,8 @@ from service_app.service import (
     get_category_event,
     delete_category_event,
     get_events,
-    add_event)
-from utv_api.models import Comments, Worker, TableProject, CategoryEvent
+    add_event, get_event, delete_event)
+from utv_api.models import Comments, Worker, TableProject, CategoryEvent, Event
 from utv_api.models import CustomUser, TableExcel
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
 from utv_api.serializers import (
@@ -374,6 +374,8 @@ class ExcelDetailAPIView(APIView):
 
 
 class CategoryEventAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         category = get_categorys_event()
         serializer = CategoryEventListSerializer(instance=category, many=True)
@@ -388,6 +390,8 @@ class CategoryEventAPIView(APIView):
 
 
 class CategoryEventDetailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         try:
             category = get_category_event(kwargs['cat_event_pk'])
@@ -405,17 +409,37 @@ class CategoryEventDetailAPIView(APIView):
 
 
 class EventCalendarAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
     def get(self, request, *args, **kwargs):
         events = get_events()
-        serializer = EventListSerializer(instance=events, many=True)
+        serializer = EventListSerializer(instance=events, many=True, context={'request': request})
         return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         serializer = EventAddSerializer(data=request.data)
         if serializer.is_valid():
-            print(serializer.data)
             event = add_event(author_id=request.user.pk,
                               **serializer.data)
             ser = EventListSerializer(instance=event)
             return Response(ser.data, status.HTTP_201_CREATED)
         return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
+
+
+class EventCalendarDetailAPIView(APIView):
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        try:
+            event = get_event(kwargs['event_pk'])
+        except Event.DoesNotExist:
+            return Response({'Категория': 'Не найдена!'}, status.HTTP_404_NOT_FOUND)
+        serializer = EventListSerializer(instance=event, context={'request': request})
+        return Response(serializer.data, status.HTTP_200_OK)
+
+    def delete(self, request, *args, **kwargs):
+        try:
+            delete_event(kwargs['event_pk'])
+        except Event.DoesNotExist:
+            return Response({'Категория': 'Не найдена!'}, status.HTTP_404_NOT_FOUND)
+        return Response({'Категория': 'Удалена'}, status.HTTP_200_OK)

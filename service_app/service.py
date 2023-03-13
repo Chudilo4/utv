@@ -361,6 +361,10 @@ def get_events():
     return Event.objects.all()
 
 
+def get_event(event_pk):
+    return Event.objects.get(pk=event_pk)
+
+
 def add_event(author_id: int, **kwargs):
     eve = Event.objects.create(author_id=author_id,
                                title=kwargs['title'],
@@ -370,3 +374,7 @@ def add_event(author_id: int, **kwargs):
     for i in kwargs['performers']:
         eve.performers.add(i)
     return eve
+
+
+def delete_event(event_pk):
+    get_event(event_pk).delete()
