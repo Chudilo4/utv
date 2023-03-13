@@ -1,6 +1,14 @@
 from rest_framework import serializers
 
-from utv_api.models import Cards, Comments, TableProject, Worker, TableExcel, CustomUser, CategoryEvent, Event
+from utv_api.models import (
+    Cards,
+    Comments,
+    TableProject,
+    Worker,
+    TableExcel,
+    CustomUser,
+    CategoryEvent,
+    Event)
 
 
 class UserReadSerializer(serializers.ModelSerializer):
@@ -39,7 +47,7 @@ class TableListSerializers(serializers.Serializer):
     cost = serializers.FloatField()
     planned_salary = serializers.FloatField()
     salary = serializers.FloatField()
-    planed_actors_salary = serializers.FloatField()
+    planned_actors_salary = serializers.FloatField()
     actors_salary = serializers.FloatField()
     planned_taxes_FOT = serializers.FloatField()
     taxes_FOT = serializers.FloatField()
@@ -62,16 +70,29 @@ class TableListSerializers(serializers.Serializer):
 
 
 class TableCreateSerializers(serializers.ModelSerializer):
+    planned_actors_salary = serializers.FloatField(allow_null=False)
+    planned_other_expenses = serializers.FloatField(allow_null=False)
+    planned_buying_music = serializers.FloatField(allow_null=False)
+    planned_travel_expenses = serializers.FloatField(allow_null=False)
+    planned_fare = serializers.FloatField(allow_null=False)
+
     class Meta:
         model = TableProject
-        fields = ['planed_actors_salary', 'planned_other_expenses', 'planned_buying_music',
+        fields = ['planned_actors_salary', 'planned_other_expenses', 'planned_buying_music',
                   'planned_travel_expenses', 'planned_fare']
 
 
 class TableUpdatePlannedSerializers(serializers.ModelSerializer):
+    price_client = serializers.FloatField(allow_null=False)
+    planned_actors_salary = serializers.FloatField(allow_null=False)
+    planned_other_expenses = serializers.FloatField(allow_null=False)
+    planned_buying_music = serializers.FloatField(allow_null=False)
+    planned_travel_expenses = serializers.FloatField(allow_null=False)
+    planned_fare = serializers.FloatField(allow_null=False)
+
     class Meta:
         model = TableProject
-        fields = ['price_client', 'planed_actors_salary',
+        fields = ['price_client', 'planned_actors_salary',
                   'planned_other_expenses',
                   'planned_buying_music',
                   'planned_travel_expenses',
@@ -79,6 +100,13 @@ class TableUpdatePlannedSerializers(serializers.ModelSerializer):
 
 
 class TableUpdateFactSerializers(serializers.ModelSerializer):
+    price_client = serializers.FloatField(allow_null=False)
+    actors_salary = serializers.FloatField(allow_null=False)
+    other_expenses = serializers.FloatField(allow_null=False)
+    buying_music = serializers.FloatField(allow_null=False)
+    travel_expenses = serializers.FloatField(allow_null=False)
+    fare = serializers.FloatField(allow_null=False)
+
     class Meta:
         model = TableProject
         fields = ['price_client', 'actors_salary',
@@ -229,6 +257,7 @@ class EventAddSerializer(serializers.Serializer):
     date_begin = serializers.DateTimeField(allow_null=False)
     data_end = serializers.DateTimeField(allow_null=False)
     category = serializers.IntegerField(allow_null=False)
+
     class Meta:
         model = Event
         fields = ['title', 'date_begin', 'data_end', 'category', 'performers']

@@ -1,7 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.urls import reverse
-from django.utils import timezone
 
 
 class CustomUser(AbstractUser):
@@ -13,12 +12,12 @@ class CustomUser(AbstractUser):
 class Cards(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL,
                                null=True, verbose_name='Автор')
-    title = models.CharField(max_length=255, verbose_name='Название проекта')
-    description = models.TextField(verbose_name='Описание проекта')
+    title = models.CharField(max_length=255, verbose_name='Название проекта', blank=False)
+    description = models.TextField(verbose_name='Описание проекта', blank=False)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     performers = models.ManyToManyField(CustomUser, related_name='CardEvent',
                                         blank=True, verbose_name='Исполнители')
-    deadline = models.DateTimeField(verbose_name='Дедлайн')
+    deadline = models.DateTimeField(verbose_name='Дедлайн', blank=False)
     comment = models.ManyToManyField('Comments', through='CommentsCards',
                                      verbose_name="Комментарии")
     table = models.ManyToManyField('TableProject', through='TableCards', verbose_name="Таблицы")
@@ -70,8 +69,8 @@ class TableProject(models.Model):
                                        null=True, blank=True)
     salary = models.FloatField(verbose_name='Фактическая зарплата',
                                null=True, blank=True)
-    planed_actors_salary = models.FloatField(verbose_name='Плановая зарплата актёрам',
-                                             null=True, blank=True)
+    planned_actors_salary = models.FloatField(verbose_name='Плановая зарплата актёрам',
+                                              null=True, blank=True)
     actors_salary = models.FloatField(verbose_name='Зарплата актёрам',
                                       null=True, blank=True)
     planned_taxes_FOT = models.FloatField(verbose_name='Плановые налоги с ФОТ',
@@ -163,16 +162,30 @@ class TableCards(models.Model):
 
 
 class Event(models.Model):
-    author = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1, verbose_name='Автор')
-    title = models.CharField(max_length=255, blank=False, verbose_name='Название события')
-    date_begin = models.DateTimeField(verbose_name='Дата начала события', blank=False)
-    data_end = models.DateTimeField(verbose_name='Дата конца события', blank=False)
-    category = models.ForeignKey('CategoryEvent', on_delete=models.SET_DEFAULT, default=1, blank=True)
-    performers = models.ManyToManyField(CustomUser, verbose_name='Исполнители', related_name='performers')
-    created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
+    author = models.ForeignKey(CustomUser,
+                               on_delete=models.SET_DEFAULT,
+                               default=1, verbose_name='Автор')
+    title = models.CharField(max_length=255,
+                             blank=False,
+                             verbose_name='Название события')
+    date_begin = models.DateTimeField(verbose_name='Дата начала события',
+                                      blank=False)
+    data_end = models.DateTimeField(verbose_name='Дата конца события',
+                                    blank=False)
+    category = models.ForeignKey('CategoryEvent',
+                                 on_delete=models.SET_DEFAULT,
+                                 default=1,
+                                 blank=True)
+    performers = models.ManyToManyField(CustomUser,
+                                        verbose_name='Исполнители',
+                                        related_name='performers')
+    created_time = models.DateTimeField(auto_now_add=True,
+                                        verbose_name='Дата создания')
+
     class Meta:
         verbose_name = 'Событие в календаре'
         verbose_name_plural = 'События в календаре'
+
 
 class CategoryEvent(models.Model):
     title = models.CharField(max_length=255, blank=False)

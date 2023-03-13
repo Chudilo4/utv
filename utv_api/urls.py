@@ -16,7 +16,10 @@ from .views import (
     TableUpdateFactAPIView,
     TableUpdatePlannedAPIView,
     ExcelAPIView,
-    ExcelDetailAPIView, CategoryEventAPIView, CategoryEventDetailAPIView, EventCalendarAPIView)
+    ExcelDetailAPIView,
+    CategoryEventAPIView,
+    CategoryEventDetailAPIView,
+    EventCalendarAPIView)
 
 urlpatterns = [
     path('api-auth/', include('rest_framework.urls')),
@@ -59,8 +62,14 @@ urlpatterns = [
     path('cards/<int:card_pk>/table/<int:table_pk>/excel/<int:excel_pk>/',
          ExcelDetailAPIView.as_view(),
          name='excel_detail'),
-    path('category/event/', CategoryEventAPIView.as_view(), name='category_event'),
-    path('event/categore/<int:cat_event_pk>/', CategoryEventDetailAPIView.as_view(), name='category_detail'),
-    path('event/', EventCalendarAPIView.as_view(), name='event_list')
+    path('category/',
+         CategoryEventAPIView.as_view(),
+         name='category_event'),
+    path('category/<int:cat_event_pk>/',
+         CategoryEventDetailAPIView.as_view(),
+         name='category_detail'),
+    path('event/',
+         EventCalendarAPIView.as_view(),
+         name='event_list')
 
 ]

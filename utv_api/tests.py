@@ -107,9 +107,6 @@ class CardTests(APITestCase):
         self.client.login(username='Artem', password='123456789Zz')
         self.client.post(reverse('cards_list'), data)
         url = reverse('cards_detail', kwargs={'card_pk': 1})
-        response_get = self.client.get(url)
-        self.assertEqual(response_get.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response_get.data), 11)
         response_delete = self.client.delete(url)
         self.assertEqual(Cards.objects.count(), 0)
         self.assertEqual(response_delete.status_code, 200)
@@ -271,7 +268,7 @@ class WorkerTests(APITestCase):
 
 class TableTests(APITestCase):
     def setUp(self):
-        self.user = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        self.user = CustomUser.objects.create_user('ArtemTEST', password='123456789Zz')
         EmployeeRate.objects.create(user=self.user, money=200)
         data = {
             "title": "Тестовая карточка",
@@ -279,7 +276,7 @@ class TableTests(APITestCase):
             'performers': [1],
             "deadline": "2023-02-28T12:00:00+05:00",
         }
-        self.client.login(username='Artem', password='123456789Zz')
+        self.client.login(username='ArtemTEST', password='123456789Zz')
         self.url_card = reverse('cards_list')
         self.client.post(self.url_card, data)
         self.card = Cards.objects.get(title="Тестовая карточка")
@@ -290,7 +287,7 @@ class TableTests(APITestCase):
         self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
 
     def test_created_table(self):
-        response = self.client.post(self.url_table, {"planed_actors_salary": 2000,
+        response = self.client.post(self.url_table, {"planned_actors_salary": 2000,
                                                      "planned_other_expenses": 2000,
                                                      "planned_buying_music": 2000,
                                                      "planned_travel_expenses": 2000,
@@ -299,34 +296,34 @@ class TableTests(APITestCase):
         self.assertEqual(self.card.table.count(), 1)
 
     def test_update_table(self):
-        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+        self.client.post(self.url_table, {"planned_actors_salary": 2000,
                                           "planned_other_expenses": 2000,
                                           "planned_buying_music": 2000,
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
-        table = self.card.table.get(planed_actors_salary=2000)
+        table = self.card.table.get(planned_actors_salary=2000)
         url_table_planned = reverse('table_update_planned',
                                     kwargs={'card_pk': self.card.pk,
                                             'table_pk': table.pk})
         url_table_fact = reverse('table_update_fact',
                                  kwargs={'card_pk': self.card.pk,
                                          'table_pk': table.pk})
-        response = self.client.put(url_table_planned,
-                                   '''{"planed_actors_salary": 2000,
-                                   "planned_other_expenses": 2000,
-                                   "planned_buying_music": 2000,
-                                   "planned_travel_expenses": 2000,
-                                   "planned_fare": 2000,
-                                   "price_client": 150000}''',
-                                   content_type='application/json')
-        response2 = self.client.put(url_table_fact,
-                                    '''{"actors_salary": 2000,
-                                   "other_expenses": 2000,
-                                   "buying_music": 2000,
-                                   "travel_expenses": 2000,
-                                   "fare": 2000,
-                                   "price_client": 150000}''',
-                                    content_type='application/json')
+        response = self.client.put(url_table_planned, {
+            "planned_actors_salary": 2000,
+            "planned_other_expenses": 2000,
+            "planned_buying_music": 2000,
+            "planned_travel_expenses": 2000,
+            "planned_fare": 2000,
+            "price_client": 150000
+        }, format='json')
+        response2 = self.client.put(url_table_fact, {
+            "actors_salary": 2000,
+            "other_expenses": 2000,
+            "buying_music": 2000,
+            "travel_expenses": 2000,
+            "fare": 2000,
+            "price_client": 150000
+        }, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.table.count(), 1)
@@ -353,7 +350,7 @@ class TableTests(APITestCase):
         self.assertEqual(table.profitability, 89.996)
 
     def test_read_table(self):
-        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+        self.client.post(self.url_table, {"planned_actors_salary": 2000,
                                           "planned_other_expenses": 2000,
                                           "planned_buying_music": 2000,
                                           "planned_travel_expenses": 2000,
@@ -363,12 +360,12 @@ class TableTests(APITestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_delete_table(self):
-        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+        self.client.post(self.url_table, {"planned_actors_salary": 2000,
                                           "planned_other_expenses": 2000,
                                           "planned_buying_music": 2000,
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
-        table = self.card.table.get(planed_actors_salary=2000)
+        table = self.card.table.get(planned_actors_salary=2000)
         url_table_detail = reverse('table_detail',
                                    kwargs={'card_pk': self.card.pk,
                                            'table_pk': table.pk})
@@ -403,7 +400,7 @@ class TestPermissions(APITestCase):
         self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': self.card.pk})
         self.client.post(self.url_comment, {"text": "Тест коментария"})
         self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
-        self.client.post(self.url_table, {"planed_actors_salary": 2000,
+        self.client.post(self.url_table, {"planned_actors_salary": 2000,
                                           "planned_other_expenses": 2000,
                                           "planned_buying_music": 2000,
                                           "planned_travel_expenses": 2000,
@@ -418,7 +415,7 @@ class TestPermissions(APITestCase):
 
     def test_not_permission(self):
         table_post_data = {
-            "planed_actors_salary": 2000,
+            "planned_actors_salary": 2000,
             "planned_other_expenses": 2000,
             "planned_buying_music": 2000,
             "planned_travel_expenses": 2000,

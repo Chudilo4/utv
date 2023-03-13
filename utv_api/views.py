@@ -12,8 +12,15 @@ from service_app.service import (
     WorkerService,
     TableService,
     create_excel,
-    get_my_excels_table, get_excel, delete_excel, get_categorys_event, add_category_event, get_category_event,
-    delete_category_event, get_events, add_event)
+    get_my_excels_table,
+    get_excel,
+    delete_excel,
+    get_categorys_event,
+    add_category_event,
+    get_category_event,
+    delete_category_event,
+    get_events,
+    add_event)
 from utv_api.models import Comments, Worker, TableProject, CategoryEvent
 from utv_api.models import CustomUser, TableExcel
 from utv_api.permissions import IsOwnerOrPerformersReadOnly, IsOwnerCard, IsUser
@@ -254,7 +261,7 @@ class WorkerDetailAPIView(APIView):
 class TableListAPIView(APIView):
     """Пример POST
     {
-    "planed_actors_salary": 2000.0,
+    "planned_actors_salary": 2000.0,
     "planned_other_expenses": 2000.0,
     "planned_buying_music": 2000.0,
     "planned_travel_expenses": 2000.0,
@@ -337,7 +344,7 @@ class ExcelAPIView(APIView):
         serializer_create = ExcelCreateSerializer(data=request.data)
         if serializer_create.is_valid():
             excel = create_excel(request.user.pk, serializer_create.data['name'], **kwargs)
-            serializer = ExcelSerializer(instance=excel)
+            serializer = ExcelSerializer(instance=excel, context={'request': request})
             logger.info(f'{timezone.datetime.now()} {request.user} создал excel')
             return Response(serializer.data, status.HTTP_201_CREATED)
         return Response(serializer_create.errors, status.HTTP_400_BAD_REQUEST)
