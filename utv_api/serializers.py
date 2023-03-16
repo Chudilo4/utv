@@ -151,11 +151,12 @@ class CardDetailSerializer(serializers.ModelSerializer):
     author = UserReadSerializer(read_only=True)
     performers = UserReadSerializer(many=True, read_only=True)
     comments_card = CommentListSerializers(many=True, read_only=True)
+    workers_card = WorkerListSerializers(many=True)
 
     class Meta:
         model = Cards
         fields = ['id', 'author', 'title', "description", 'created_time', 'update_time',
-                  'performers', 'deadline', 'archived', 'comments_card']
+                  'performers', 'deadline', 'archived', 'comments_card', 'workers_card']
 
 
 class CardDetailUpdateSerializer(serializers.ModelSerializer):

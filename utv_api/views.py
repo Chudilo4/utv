@@ -137,10 +137,8 @@ class CardsDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
         """Пользователь обратился к карточке"""
         card = get_object_or_404(
-            Cards.objects.select_related(
-                'author'
-            ).prefetch_related(
-                'performers', 'comments_card', 'comments_card__author'
+            Cards.objects.prefetch_related(
+                'performers', 'comments_card', 'comments_card__author', 'workers_card',
             ),
             pk=kwargs['card_pk']
         )
@@ -177,9 +175,12 @@ class CardsDetailAPIView(APIView):
 
 
 class CommentListAPIView(APIView):
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         """Получаем все коментарии к карточке"""
+        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
+        self.check_object_permissions(request, card)
         comment = Comments.objects.filter(card_id=kwargs['card_pk'])
         serializer = CommentListSerializers(instance=comment, many=True,
                                             context={"request": request})
@@ -188,6 +189,8 @@ class CommentListAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Оставляем коментарий к карточке"""
+        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
+        self.check_object_permissions(request, card)
         serializer = CommentCreateUpdateSerializers(
             data=request.data,
             context={"request": request})
@@ -211,6 +214,7 @@ class CommentDetailAPIView(APIView):
     def get(self, request, *args, **kwargs):
         """Получить конкретный коментарий"""
         comment = get_object_or_404(Comments, pk=kwargs['com_pk'])
+        self.check_object_permissions(request, comment)
         serializer = CommentListSerializers(instance=comment, context={"request": request})
         logger.info(f'{request.user} получил комментарий {comment.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
@@ -218,6 +222,7 @@ class CommentDetailAPIView(APIView):
     def put(self, request, *args, **kwargs):
         """Изменить коомментарий"""
         comment = get_object_or_404(Comments, pk=kwargs['com_pk'])
+        self.check_object_permissions(request, comment)
         serializer = CommentCreateUpdateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             comment.text = serializer.data.get('text', comment.text)
@@ -229,15 +234,19 @@ class CommentDetailAPIView(APIView):
     def delete(self, request, *args, **kwargs):
         """Удалить комментарий"""
         comment = get_object_or_404(Comments, pk=kwargs['com_pk'])
+        self.check_object_permissions(request, comment)
         comment.delete()
         logger.info(f'{request.user} удалил комментарий')
         return Response({'Выполнено': "Комментарий удален"}, status=status.HTTP_200_OK)
 
 
 class WorkerListAPIView(APIView):
+    permission_classes = [IsOwnerOrPerformersReadOnly]
 
     def get(self, request, *args, **kwargs):
         """Получить рабочее время над проектом"""
+        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
+        self.check_object_permissions(request, card)
         work = get_object_or_404(Worker.objects.select_related('author'), card=kwargs['card_pk'])
         serializer = WorkerListSerializers(instance=work, context={"request": request})
         logger.info(f'{request.user} получил работу {work.pk}')
@@ -245,6 +254,8 @@ class WorkerListAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Создать рабочее время нал проектом"""
+        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
+        # self.check_object_permissions(request, card)
         work = Worker.objects.filter(card_id=kwargs['card_pk'])
         if not work:
             serializer = WorkerCreateUpdateSerializers(data=request.data)
