@@ -25,3 +25,9 @@ class IsOwnerCardOrReadPerformers(IsAuthor):
         return False
 
 
+class OnlyAuthorCard(permissions.BasePermission):
+    def has_permission(self, request, view):
+        card = Cards.objects.get(pk=view.kwargs['card_pk'])
+        if request.user == card.author:
+            return True
+        return False

@@ -12,7 +12,7 @@ from service_app.service import (
     calculation_table)
 from utv_api.models import Comments, Worker, TableProject, Cards
 from utv_api.models import CustomUser, TableExcel
-from utv_api.permissions import IsUser, IsOwnerCardOrReadPerformers, IsAuthor
+from utv_api.permissions import IsUser, IsOwnerCardOrReadPerformers, IsAuthor, OnlyAuthorCard
 from utv_api.serializers import (
     UserReadSerializer,
     UserCreateSerializers,
@@ -185,7 +185,6 @@ class CommentListAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Оставляем коментарий к карточке"""
-        card = Cards.objects.get(pk=kwargs['card_pk'])
         serializer = CommentCreateUpdateSerializers(
             data=request.data,
             context={"request": request})
@@ -303,7 +302,7 @@ class WorkerDetailAPIView(APIView):
 
 
 class TableListAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [OnlyAuthorCard]
 
     def get(self, request, *args, **kwargs):
         """Получить список таблиц"""
@@ -334,7 +333,7 @@ class TableListAPIView(APIView):
 
 
 class TableDetailAPIView(APIView):
-    permission_classes = [IsAuthor]
+    permission_classes = [OnlyAuthorCard]
 
     def get(self, request, *args, **kwargs):
         """Получить таблицу"""
@@ -417,7 +416,7 @@ class TableUpdateFactAPIView(APIView):
 
 
 class ExcelAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
+    permission_classes = [OnlyAuthorCard]
 
     def get(self, request, *args, **kwargs):
         """Получить список Excel файлов"""
