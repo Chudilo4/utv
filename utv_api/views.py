@@ -12,7 +12,7 @@ from service_app.service import (
     calculation_table)
 from utv_api.models import Comments, Worker, TableProject, Cards
 from utv_api.models import CustomUser, TableExcel
-from utv_api.permissions import IsUser, IsOwnerOrPerformersReadOnly, IsOwner
+from utv_api.permissions import IsUser, IsOwnerCardOrReadPerformers, IsAuthor
 from utv_api.serializers import (
     UserReadSerializer,
     UserCreateSerializers,
@@ -132,17 +132,17 @@ class CardsListAPIView(APIView):
 
 
 class CardsDetailAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly]
+    permission_classes = [IsOwnerCardOrReadPerformers]
 
     def get(self, request, *args, **kwargs):
         """Пользователь обратился к карточке"""
+
         card = get_object_or_404(
             Cards.objects.prefetch_related(
                 'performers', 'comments_card', 'comments_card__author', 'workers_card',
             ),
             pk=kwargs['card_pk']
         )
-        self.check_object_permissions(request, card)
         serializer = CardDetailSerializer(instance=card, context={"request": request})
         logger.info(f'{timezone.datetime.now()} {request.user} обратился к карточке {card.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
@@ -153,7 +153,6 @@ class CardsDetailAPIView(APIView):
         self.check_object_permissions(request, card)
         serializer = CardDetailUpdateSerializer(data=request.data, context={"request": request})
         if serializer.is_valid():
-            # CardService.update_card(card_pk=kwargs['card_pk'], **serializer.data)
             card.title = serializer.data.get('title', card.title)
             card.description = serializer.data.get('description', card.description)
             card.deadline = serializer.data.get('deadline', card.deadline)
@@ -167,7 +166,6 @@ class CardsDetailAPIView(APIView):
 
     def delete(self, request, *args, **kwargs):
         """Пользователь удаляет карточку"""
-        # CardService.delete_card(card_pk=kwargs['card_pk'])
         card = get_object_or_404(Cards, pk=kwargs['card_pk'])
         self.check_object_permissions(request, card)
         card.delete()
@@ -175,12 +173,10 @@ class CardsDetailAPIView(APIView):
 
 
 class CommentListAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly]
+    permission_classes = [IsOwnerCardOrReadPerformers]
 
     def get(self, request, *args, **kwargs):
         """Получаем все коментарии к карточке"""
-        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
-        self.check_object_permissions(request, card)
         comment = Comments.objects.filter(card_id=kwargs['card_pk'])
         serializer = CommentListSerializers(instance=comment, many=True,
                                             context={"request": request})
@@ -189,8 +185,7 @@ class CommentListAPIView(APIView):
 
     def post(self, request, *args, **kwargs):
         """Оставляем коментарий к карточке"""
-        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
-        self.check_object_permissions(request, card)
+        card = Cards.objects.get(pk=kwargs['card_pk'])
         serializer = CommentCreateUpdateSerializers(
             data=request.data,
             context={"request": request})
@@ -209,12 +204,11 @@ class CommentListAPIView(APIView):
 
 
 class CommentDetailAPIView(APIView):
-    permission_classes = [IsOwner]
+    permission_classes = [IsOwnerCardOrReadPerformers]
 
     def get(self, request, *args, **kwargs):
         """Получить конкретный коментарий"""
         comment = get_object_or_404(Comments, pk=kwargs['com_pk'])
-        self.check_object_permissions(request, comment)
         serializer = CommentListSerializers(instance=comment, context={"request": request})
         logger.info(f'{request.user} получил комментарий {comment.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
@@ -222,7 +216,6 @@ class CommentDetailAPIView(APIView):
     def put(self, request, *args, **kwargs):
         """Изменить коомментарий"""
         comment = get_object_or_404(Comments, pk=kwargs['com_pk'])
-        self.check_object_permissions(request, comment)
         serializer = CommentCreateUpdateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             comment.text = serializer.data.get('text', comment.text)
@@ -241,21 +234,21 @@ class CommentDetailAPIView(APIView):
 
 
 class WorkerListAPIView(APIView):
-    permission_classes = [IsOwnerOrPerformersReadOnly]
+    permission_classes = [IsOwnerCardOrReadPerformers]
 
     def get(self, request, *args, **kwargs):
         """Получить рабочее время над проектом"""
-        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
-        self.check_object_permissions(request, card)
-        work = get_object_or_404(Worker.objects.select_related('author'), card=kwargs['card_pk'])
+        try:
+            work = Worker.objects.get(card_id=kwargs['card_pk'],
+                                      author_id=request.user.pk)
+        except Worker.DoesNotExist:
+            return Response({"Работа": "В данный момент работы нет"}, status.HTTP_200_OK)
         serializer = WorkerListSerializers(instance=work, context={"request": request})
         logger.info(f'{request.user} получил работу {work.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
         """Создать рабочее время нал проектом"""
-        card = get_object_or_404(Cards, pk=kwargs['card_pk'])
-        # self.check_object_permissions(request, card)
         work = Worker.objects.filter(card_id=kwargs['card_pk'])
         if not work:
             serializer = WorkerCreateUpdateSerializers(data=request.data)
@@ -276,7 +269,7 @@ class WorkerListAPIView(APIView):
 
 
 class WorkerDetailAPIView(APIView):
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthor]
 
     def get(self, request, *args, **kwargs):
         """Получить созданное время над проектом"""
@@ -341,7 +334,7 @@ class TableListAPIView(APIView):
 
 
 class TableDetailAPIView(APIView):
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthor]
 
     def get(self, request, *args, **kwargs):
         """Получить таблицу"""
@@ -362,7 +355,7 @@ class TableDetailAPIView(APIView):
 
 
 class TableUpdatePlannedAPIView(APIView):
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthor]
 
     def put(self, request, *args, **kwargs):
         """Изменить плановые значения в таблице и ценник для клиента"""
@@ -395,7 +388,7 @@ class TableUpdatePlannedAPIView(APIView):
 
 
 class TableUpdateFactAPIView(APIView):
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthor]
 
     def put(self, request, *args, **kwargs):
         """Изменить фактические значения в таблице и ценник для клиента"""
@@ -445,7 +438,7 @@ class ExcelAPIView(APIView):
 
 
 class ExcelDetailAPIView(APIView):
-    permission_classes = [IsOwner]
+    permission_classes = [IsAuthor]
 
     def get(self, request, *args, **kwargs):
         """Получил Excel файл"""

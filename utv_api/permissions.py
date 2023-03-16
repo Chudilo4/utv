@@ -1,14 +1,9 @@
 from rest_framework import permissions
 
-
-class IsOwnerOrPerformersReadOnly(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user in obj.performers.all() or request.user == obj.author:
-            return True
-        return False
+from utv_api.models import Cards
 
 
-class IsOwner(permissions.BasePermission):
+class IsAuthor(permissions.BasePermission):
     def has_object_permission(self, request, view, obj):
         if request.user == obj.author:
             return True
@@ -22,9 +17,11 @@ class IsUser(permissions.BasePermission):
         return False
 
 
-class AuthorOrPerformersEvent(permissions.BasePermission):
-
-    def has_object_permission(self, request, view, obj):
-        if request.user in obj.performers.all() or request.user == obj.author:
+class IsOwnerCardOrReadPerformers(IsAuthor):
+    def has_permission(self, request, view):
+        card = Cards.objects.get(pk=view.kwargs['card_pk'])
+        if request.user in card.performers.all():
             return True
         return False
+
+

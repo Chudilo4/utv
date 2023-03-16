@@ -134,7 +134,7 @@ class WorkerCreateUpdateSerializers(serializers.ModelSerializer):
 
 
 class CommentListSerializers(serializers.ModelSerializer):
-    author = UserReadSerializer()
+    author = UserReadSerializer(read_only=True)
 
     class Meta:
         model = Comments
