@@ -15,14 +15,9 @@ class Cards(models.Model):
     title = models.CharField(max_length=255, verbose_name='Название проекта', blank=False)
     description = models.TextField(verbose_name='Описание проекта', blank=False)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    performers = models.ManyToManyField(CustomUser, related_name='CardEvent',
+    performers = models.ManyToManyField(CustomUser, related_name='performers_card',
                                         blank=True, verbose_name='Исполнители')
     deadline = models.DateTimeField(verbose_name='Дедлайн', blank=False)
-    comment = models.ManyToManyField('Comments', through='CommentsCards',
-                                     verbose_name="Комментарии")
-    table = models.ManyToManyField('TableProject', through='TableCards', verbose_name="Таблицы")
-    worker = models.ManyToManyField('Worker', through='WorkerCards',
-                                    verbose_name='Рабочее время сотрудников')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления карточки')
     archived = models.BooleanField(verbose_name='Добавить в архив', default=False, blank=True)
 
@@ -38,7 +33,9 @@ class Cards(models.Model):
 
 
 class Comments(models.Model):
-    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True,
+                               related_name='comment_author')
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE, related_name='comments_card')
     text = models.TextField(verbose_name='Поле для коментария')
     created_time = models.DateTimeField(auto_now_add=True)
     parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True)
@@ -54,6 +51,7 @@ class Comments(models.Model):
 
 class Worker(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE, related_name='workers_card')
     actual_time = models.IntegerField(verbose_name='Фактическое время', default=0)
     scheduled_time = models.IntegerField(verbose_name='Плановое время', default=0)
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания работы')
@@ -69,6 +67,8 @@ class Worker(models.Model):
 
 
 class TableProject(models.Model):
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1)
     price_client = models.FloatField(verbose_name='Цена для клиента',
                                      null=True, blank=True)
     planned_cost = models.FloatField(verbose_name='Плановая себестоимость',
@@ -151,8 +151,9 @@ class EmployeeRate(models.Model):
 
 class TableExcel(models.Model):
     name = models.CharField(max_length=255)
-    user = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1)
+    author = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1)
     table = models.ForeignKey(TableProject, on_delete=models.CASCADE)
+    card = models.ForeignKey(Cards, on_delete=models.CASCADE, null=True)
     path_excel = models.FileField(upload_to='excel/')
     created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
     update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
@@ -163,21 +164,6 @@ class TableExcel(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class CommentsCards(models.Model):
-    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
-    comment = models.ForeignKey(Comments, on_delete=models.CASCADE)
-
-
-class WorkerCards(models.Model):
-    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
-    worker = models.ForeignKey(Worker, on_delete=models.CASCADE)
-
-
-class TableCards(models.Model):
-    card = models.ForeignKey(Cards, on_delete=models.CASCADE)
-    table = models.ForeignKey(TableProject, on_delete=models.CASCADE)
 
 
 class Event(models.Model):

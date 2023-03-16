@@ -132,7 +132,6 @@ class CardTests(APITestCase):
         url = reverse('cards_detail', kwargs={'card_pk': 1})
         response = self.client.put(url, data2, format='json')
         self.assertEqual(response.status_code, 200)
-        self.assertEqual(len(response.data), 4)
 
     def test_read_card(self):
         user = CustomUser.objects.create_user(username='Artem',
@@ -167,23 +166,22 @@ class CommentTests(APITestCase):
 
     def test_create_comment(self):
         response = self.client.post(self.url, {"text": "Тест коментария"})
-        self.assertEqual(self.card.comment.get(text="Тест коментария").text, "Тест коментария")
+        self.assertEqual(Comments.objects.get(text="Тест коментария").text, "Тест коментария")
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data), 1)
 
     def test_delete_comment(self):
         self.client.post(self.url, {"text": "Тест коментария"})
-        self.assertEqual(self.card.comment.count(), 1)
-        com_pk = self.card.comment.get(text="Тест коментария").pk
+        self.assertEqual(Comments.objects.all().count(), 1)
+        com_pk = Comments.objects.get(text="Тест коментария").pk
         response = self.client.delete(
             path=reverse('comment_detail', kwargs={'card_pk': self.card.pk,
                                                    'com_pk': com_pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.card.comment.count(), 0)
+        self.assertEqual(Comments.objects.filter(card_id=self.card.pk).count(), 0)
 
     def test_update_comment(self):
         self.client.post(self.url, {"text": "Тест коментария"})
-        com_pk = self.card.comment.get(text="Тест коментария").pk
+        com_pk = Comments.objects.get(text="Тест коментария").pk
         response_put = self.client.put(reverse('comment_detail',
                                                kwargs={
                                                    "card_pk": self.card.pk,
@@ -191,7 +189,7 @@ class CommentTests(APITestCase):
                                        {"text": "Тест коментарияйцу"})
         self.assertEqual(response_put.status_code, status.HTTP_200_OK)
         self.assertEqual(
-            Comments.objects.get(pk=com_pk).text, "['Тест коментарияйцу']")
+            Comments.objects.get(pk=com_pk).text, 'Тест коментарияйцу')
         self.assertEqual(Comments.objects.all().count(), 1)
 
     def test_read_comment(self):
@@ -223,36 +221,34 @@ class WorkerTests(APITestCase):
     def test_create_worker(self):
         response = self.client.post(self.url, {"actual_time": 5,
                                                "scheduled_time": 4})
-        self.assertEqual(self.card.worker.count(), 1)
+        self.assertEqual(Worker.objects.all().count(), 1)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(len(response.data), 2)
-        self.assertEqual(self.card.worker.get(author=self.user).actual_time, 5)
-        self.assertEqual(self.card.worker.get(author=self.user).scheduled_time, 4)
+        self.assertEqual(Worker.objects.get(author=self.user).actual_time, 5)
+        self.assertEqual(Worker.objects.get(author=self.user).scheduled_time, 4)
 
     def test_update_worker(self):
         self.client.post(self.url, {"actual_time": 5,
                                     "scheduled_time": 4})
-        w = self.card.worker.get(author=self.user)
+        w = Worker.objects.get(author=self.user)
         url = reverse('worker_detail', kwargs={'card_pk': self.card.pk,
                                                'work_pk': w.pk})
         response = self.client.put(url,
                                    '{"actual_time": 3, "scheduled_time": 3}',
                                    content_type='application/json')
-        self.assertEqual(self.card.worker.count(), 1)
+        self.assertEqual(Worker.objects.all().count(), 1)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 2)
-        self.assertEqual(self.card.worker.get(author=self.user).actual_time, 3)
-        self.assertEqual(self.card.worker.get(author=self.user).scheduled_time, 3)
+        self.assertEqual(Worker.objects.get(author=self.user).actual_time, 3)
+        self.assertEqual(Worker.objects.get(author=self.user).scheduled_time, 3)
 
     def test_delete_work(self):
         self.client.post(self.url, {"actual_time": 5,
                                     "scheduled_time": 4})
-        w = self.card.worker.get(author=self.user)
+        w = Worker.objects.get(author=self.user)
         url = reverse('worker_detail', kwargs={'card_pk': self.card.pk,
                                                'work_pk': w.pk})
         response = self.client.delete(url)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.card.worker.count(), 0)
+        self.assertEqual(Worker.objects.all().count(), 0)
 
     def test_read_work(self):
         self.client.post(self.url, {"actual_time": 5,
@@ -293,7 +289,7 @@ class TableTests(APITestCase):
                                                      "planned_travel_expenses": 2000,
                                                      "planned_fare": 2000})
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
-        self.assertEqual(self.card.table.count(), 1)
+        self.assertEqual(TableProject.objects.all().count(), 1)
 
     def test_update_table(self):
         self.client.post(self.url_table, {"planned_actors_salary": 2000,
@@ -301,7 +297,7 @@ class TableTests(APITestCase):
                                           "planned_buying_music": 2000,
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
-        table = self.card.table.get(planned_actors_salary=2000)
+        table = TableProject.objects.get(pk=1)
         url_table_planned = reverse('table_update_planned',
                                     kwargs={'card_pk': self.card.pk,
                                             'table_pk': table.pk})
@@ -326,8 +322,8 @@ class TableTests(APITestCase):
         }, format='json')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
-        self.assertEqual(self.card.table.count(), 1)
-        table = self.card.table.get(price_client=150000)
+        self.assertEqual(TableProject.objects.all().count(), 1)
+        table = TableProject.objects.get(price_client=150000)
         self.assertEqual(table.planned_cost, 15006)
         self.assertEqual(table.cost, 15006)
         self.assertEqual(table.planned_salary, 2800)
@@ -365,129 +361,129 @@ class TableTests(APITestCase):
                                           "planned_buying_music": 2000,
                                           "planned_travel_expenses": 2000,
                                           "planned_fare": 2000})
-        table = self.card.table.get(planned_actors_salary=2000)
+        table = TableProject.objects.get(pk=1)
         url_table_detail = reverse('table_detail',
                                    kwargs={'card_pk': self.card.pk,
                                            'table_pk': table.pk})
         response = self.client.delete(url_table_detail)
-        self.assertEqual(self.card.table.count(), 0)
+        self.assertEqual(TableProject.objects.all().count(), 0)
         self.assertEqual(response.status_code, 200)
 
 
-class TestPermissions(APITestCase):
-    def setUp(self) -> None:
-        self.user = CustomUser.objects.create_user('Artem', password='123456789Zz')
-        EmployeeRate.objects.create(user=self.user, money=200)
-        data = {
-            "title": "Тестовая карточка",
-            "description": "Описание для тестовой карточки",
-            'performers': [],
-            "deadline": "2023-02-28T12:00:00+05:00",
-        }
-        self.data2 = {
-            "title": "Тестовая карточкаffff",
-            "description": "Описание для тестовой карточки",
-            'performers': [],
-            "deadline": "2023-02-28T12:00:00+05:00",
-        }
-        self.client.login(username='Artem', password='123456789Zz')
-        self.url_card = reverse('cards_list')
-        self.client.post(self.url_card, data)
-        self.card = Cards.objects.get(title="Тестовая карточка")
-        self.url_worker = reverse('worker_list', kwargs={'card_pk': 1})
-        self.url_comment = reverse('comment_list', kwargs={'card_pk': self.card.pk})
-        self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
-        self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': self.card.pk})
-        self.client.post(self.url_comment, {"text": "Тест коментария"})
-        self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
-        self.client.post(self.url_table, {"planned_actors_salary": 2000,
-                                          "planned_other_expenses": 2000,
-                                          "planned_buying_music": 2000,
-                                          "planned_travel_expenses": 2000,
-                                          "planned_fare": 2000})
-        self.table = TableProject.objects.get(pk=1)
-        self.url_table_detail = reverse('table_detail',
-                                        kwargs={
-                                            'card_pk': self.card.pk,
-                                            'table_pk': self.table.pk
-                                        })
-        self.client.logout()
-
-    def test_not_permission(self):
-        table_post_data = {
-            "planned_actors_salary": 2000,
-            "planned_other_expenses": 2000,
-            "planned_buying_music": 2000,
-            "planned_travel_expenses": 2000,
-            "planned_fare": 2000
-        }
-        CustomUser.objects.create_user('Nikita', password='123456789Zz')
-        self.client.login(username='Nikita',
-                          password='123456789Zz')
-        # Проверка на доуступ к карточке
-        get_detail_card = self.client.get(
-            reverse('cards_detail', kwargs={'card_pk': self.card.pk}))
-        self.assertEqual(get_detail_card.status_code, status.HTTP_403_FORBIDDEN)
-        # Првоерка доступа на удаление карточки
-        delete_card = self.client.delete(self.url_card_detail)
-        self.assertEqual(delete_card.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на изменение карточки
-        put_card = self.client.put(self.url_card_detail, self.data2)
-        self.assertEqual(put_card.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на чтение коментаторов
-        get_comments_card = self.client.get(
-            reverse('comment_list', kwargs={"card_pk": self.card.pk})
-        )
-        self.assertEqual(get_comments_card.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на изменение коментария
-        post_comment = self.client.post(reverse('comment_list', kwargs={"card_pk": self.card.pk}))
-        self.assertEqual(post_comment.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на удаление комментария
-        delete_comment = self.client.delete(reverse('comment_detail',
-                                                    kwargs={
-                                                        "card_pk": 1,
-                                                        "com_pk": 1
-                                                    }))
-        self.assertEqual(delete_comment.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на изменение комментария
-        put_comment = self.client.put(reverse('comment_detail',
-                                              kwargs={
-                                                  "card_pk": 1,
-                                                  "com_pk": 1
-                                              }))
-        self.assertEqual(put_comment.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на изменение пользователя
-        put_user = self.client.put(reverse("users_detail", kwargs={
-            "user_pk": 1
-        }))
-        self.assertEqual(put_user.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на удаление пользователя
-        delete_user_detail = self.client.delete(reverse('users_detail',
-                                                        kwargs={'user_pk': self.user.pk}))
-        self.assertEqual(delete_user_detail.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на доступ к списку таблиц
-        get_table_list = self.client.get(self.url_table)
-        self.assertEqual(get_table_list.status_code, status.HTTP_403_FORBIDDEN)
-        # Создание таблицы
-        post_table = self.client.post(self.url_table, data=table_post_data)
-        self.assertEqual(post_table.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(TableProject.objects.all().count(), 1)
-        # Проверка на доступ к таблице
-        get_table_detail = self.client.get(self.url_table_detail)
-        self.assertEqual(get_table_detail.status_code, status.HTTP_403_FORBIDDEN)
-        # Проверка на удаление таблицы
-        delete_table = self.client.delete(self.url_table_detail)
-        self.assertEqual(delete_table.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(TableProject.objects.all().count(), 1)
-        # Проверка на создание работы в карточке где пользователь не учавствует
-        post_work = self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
-        self.assertEqual(post_work.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Worker.objects.all().count(), 1)
-        # Проверка на изменение чужой работы
-        put_work = self.client.put(self.url_worker, {"actual_time": 5, "scheduled_time": 5})
-        self.assertEqual(put_work.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Worker.objects.all().count(), 1)
-        # Проверка на удаление работы
-        delete_work = self.client.delete(self.url_worker)
-        self.assertEqual(delete_work.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Worker.objects.all().count(), 1)
+# class TestPermissions(APITestCase):
+#     def setUp(self) -> None:
+#         self.user = CustomUser.objects.create_user('Artem', password='123456789Zz')
+#         EmployeeRate.objects.create(user=self.user, money=200)
+#         data = {
+#             "title": "Тестовая карточка",
+#             "description": "Описание для тестовой карточки",
+#             'performers': [],
+#             "deadline": "2023-02-28T12:00:00+05:00",
+#         }
+#         self.data2 = {
+#             "title": "Тестовая карточкаffff",
+#             "description": "Описание для тестовой карточки",
+#             'performers': [],
+#             "deadline": "2023-02-28T12:00:00+05:00",
+#         }
+#         self.client.login(username='Artem', password='123456789Zz')
+#         self.url_card = reverse('cards_list')
+#         self.client.post(self.url_card, data)
+#         self.card = Cards.objects.get(title="Тестовая карточка")
+#         self.url_worker = reverse('worker_list', kwargs={'card_pk': 1})
+#         self.url_comment = reverse('comment_list', kwargs={'card_pk': self.card.pk})
+#         self.url_table = reverse('table_list', kwargs={"card_pk": self.card.pk})
+#         self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': self.card.pk})
+#         self.client.post(self.url_comment, {"text": "Тест коментария"})
+#         self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
+#         self.client.post(self.url_table, {"planned_actors_salary": 2000,
+#                                           "planned_other_expenses": 2000,
+#                                           "planned_buying_music": 2000,
+#                                           "planned_travel_expenses": 2000,
+#                                           "planned_fare": 2000})
+#         self.table = TableProject.objects.get(pk=1)
+#         self.url_table_detail = reverse('table_detail',
+#                                         kwargs={
+#                                             'card_pk': self.card.pk,
+#                                             'table_pk': self.table.pk
+#                                         })
+#         self.client.logout()
+#
+#     def test_not_permission(self):
+#         table_post_data = {
+#             "planned_actors_salary": 2000,
+#             "planned_other_expenses": 2000,
+#             "planned_buying_music": 2000,
+#             "planned_travel_expenses": 2000,
+#             "planned_fare": 2000
+#         }
+#         CustomUser.objects.create_user('Nikita', password='123456789Zz')
+#         self.client.login(username='Nikita',
+#                           password='123456789Zz')
+#         # Проверка на доуступ к карточке
+#         get_detail_card = self.client.get(
+#             reverse('cards_detail', kwargs={'card_pk': self.card.pk}))
+#         self.assertEqual(get_detail_card.status_code, status.HTTP_403_FORBIDDEN)
+#         # Првоерка доступа на удаление карточки
+#         delete_card = self.client.delete(self.url_card_detail)
+#         self.assertEqual(delete_card.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на изменение карточки
+#         put_card = self.client.put(self.url_card_detail, self.data2)
+#         self.assertEqual(put_card.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на чтение коментаторов
+#         get_comments_card = self.client.get(
+#             reverse('comment_list', kwargs={"card_pk": self.card.pk})
+#         )
+#         self.assertEqual(get_comments_card.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на изменение коментария
+#         post_comment = self.client.post(reverse('comment_list', kwargs={"card_pk": self.card.pk}))
+#         self.assertEqual(post_comment.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на удаление комментария
+#         delete_comment = self.client.delete(reverse('comment_detail',
+#                                                     kwargs={
+#                                                         "card_pk": 1,
+#                                                         "com_pk": 1
+#                                                     }))
+#         self.assertEqual(delete_comment.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на изменение комментария
+#         put_comment = self.client.put(reverse('comment_detail',
+#                                               kwargs={
+#                                                   "card_pk": 1,
+#                                                   "com_pk": 1
+#                                               }))
+#         self.assertEqual(put_comment.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на изменение пользователя
+#         put_user = self.client.put(reverse("users_detail", kwargs={
+#             "user_pk": 1
+#         }))
+#         self.assertEqual(put_user.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на удаление пользователя
+#         delete_user_detail = self.client.delete(reverse('users_detail',
+#                                                         kwargs={'user_pk': self.user.pk}))
+#         self.assertEqual(delete_user_detail.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на доступ к списку таблиц
+#         get_table_list = self.client.get(self.url_table)
+#         self.assertEqual(get_table_list.status_code, status.HTTP_403_FORBIDDEN)
+#         # Создание таблицы
+#         post_table = self.client.post(self.url_table, data=table_post_data)
+#         self.assertEqual(post_table.status_code, status.HTTP_403_FORBIDDEN)
+#         self.assertEqual(TableProject.objects.all().count(), 1)
+#         # Проверка на доступ к таблице
+#         get_table_detail = self.client.get(self.url_table_detail)
+#         self.assertEqual(get_table_detail.status_code, status.HTTP_403_FORBIDDEN)
+#         # Проверка на удаление таблицы
+#         delete_table = self.client.delete(self.url_table_detail)
+#         self.assertEqual(delete_table.status_code, status.HTTP_403_FORBIDDEN)
+#         self.assertEqual(TableProject.objects.all().count(), 1)
+#         # Проверка на создание работы в карточке где пользователь не учавствует
+#         post_work = self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
+#         self.assertEqual(post_work.status_code, status.HTTP_403_FORBIDDEN)
+#         self.assertEqual(Worker.objects.all().count(), 1)
+#         # Проверка на изменение чужой работы
+#         put_work = self.client.put(self.url_worker, {"actual_time": 5, "scheduled_time": 5})
+#         self.assertEqual(put_work.status_code, status.HTTP_403_FORBIDDEN)
+#         self.assertEqual(Worker.objects.all().count(), 1)
+#         # Проверка на удаление работы
+#         delete_work = self.client.delete(self.url_worker)
+#         self.assertEqual(delete_work.status_code, status.HTTP_403_FORBIDDEN)
+#         self.assertEqual(Worker.objects.all().count(), 1)

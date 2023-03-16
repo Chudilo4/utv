@@ -7,8 +7,7 @@ from utv_api.models import (
     Worker,
     TableExcel,
     CustomUser,
-    CategoryEvent,
-    Event)
+)
 
 
 class UserReadSerializer(serializers.ModelSerializer):
@@ -40,8 +39,56 @@ class UserDetailSerializers(serializers.ModelSerializer):
         fields = ['username', 'first_name', 'last_name', 'password', 'avatar']
 
 
+class TableUpdateFactSerializers(serializers.ModelSerializer):
+    price_client = serializers.FloatField(allow_null=False)
+    actors_salary = serializers.FloatField(allow_null=False)
+    other_expenses = serializers.FloatField(allow_null=False)
+    buying_music = serializers.FloatField(allow_null=False)
+    travel_expenses = serializers.FloatField(allow_null=False)
+    fare = serializers.FloatField(allow_null=False)
+
+    class Meta:
+        model = TableProject
+        fields = ['price_client', 'actors_salary',
+                  'other_expenses',
+                  'buying_music',
+                  'travel_expenses',
+                  'fare']
+
+
+class TableUpdatePlannedSerializers(serializers.ModelSerializer):
+    price_client = serializers.FloatField(allow_null=False)
+    planned_actors_salary = serializers.FloatField(allow_null=False)
+    planned_other_expenses = serializers.FloatField(allow_null=False)
+    planned_buying_music = serializers.FloatField(allow_null=False)
+    planned_travel_expenses = serializers.FloatField(allow_null=False)
+    planned_fare = serializers.FloatField(allow_null=False)
+
+    class Meta:
+        model = TableProject
+        fields = ['price_client', 'planned_actors_salary',
+                  'planned_other_expenses',
+                  'planned_buying_music',
+                  'planned_travel_expenses',
+                  'planned_fare']
+
+
+class TableCreateSerializers(serializers.ModelSerializer):
+    planned_actors_salary = serializers.FloatField(allow_null=False)
+    planned_other_expenses = serializers.FloatField(allow_null=False)
+    planned_buying_music = serializers.FloatField(allow_null=False)
+    planned_travel_expenses = serializers.FloatField(allow_null=False)
+    planned_fare = serializers.FloatField(allow_null=False)
+
+    class Meta:
+        model = TableProject
+        fields = ['planned_actors_salary', 'planned_other_expenses', 'planned_buying_music',
+                  'planned_travel_expenses', 'planned_fare']
+
+
 class TableListSerializers(serializers.Serializer):
     id = serializers.IntegerField()
+    author = UserReadSerializer()
     price_client = serializers.FloatField()
     planned_cost = serializers.FloatField()
     cost = serializers.FloatField()
@@ -69,69 +116,15 @@ class TableListSerializers(serializers.Serializer):
     updated_time = serializers.DateTimeField()
 
 
-class TableCreateSerializers(serializers.ModelSerializer):
-    planned_actors_salary = serializers.FloatField(allow_null=False)
-    planned_other_expenses = serializers.FloatField(allow_null=False)
-    planned_buying_music = serializers.FloatField(allow_null=False)
-    planned_travel_expenses = serializers.FloatField(allow_null=False)
-    planned_fare = serializers.FloatField(allow_null=False)
+class WorkerListSerializers(serializers.ModelSerializer):
+    author = UserReadSerializer(read_only=True)
 
-    class Meta:
-        model = TableProject
-        fields = ['planned_actors_salary', 'planned_other_expenses', 'planned_buying_music',
-                  'planned_travel_expenses', 'planned_fare']
-
-
-class TableUpdatePlannedSerializers(serializers.ModelSerializer):
-    price_client = serializers.FloatField(allow_null=False)
-    planned_actors_salary = serializers.FloatField(allow_null=False)
-    planned_other_expenses = serializers.FloatField(allow_null=False)
-    planned_buying_music = serializers.FloatField(allow_null=False)
-    planned_travel_expenses = serializers.FloatField(allow_null=False)
-    planned_fare = serializers.FloatField(allow_null=False)
-
-    class Meta:
-        model = TableProject
-        fields = ['price_client', 'planned_actors_salary',
-                  'planned_other_expenses',
-                  'planned_buying_music',
-                  'planned_travel_expenses',
-                  'planned_fare']
-
-
-class TableUpdateFactSerializers(serializers.ModelSerializer):
-    price_client = serializers.FloatField(allow_null=False)
-    actors_salary = serializers.FloatField(allow_null=False)
-    other_expenses = serializers.FloatField(allow_null=False)
-    buying_music = serializers.FloatField(allow_null=False)
-    travel_expenses = serializers.FloatField(allow_null=False)
-    fare = serializers.FloatField(allow_null=False)
-
-    class Meta:
-        model = TableProject
-        fields = ['price_client', 'actors_salary',
-                  'other_expenses',
-                  'buying_music',
-                  'travel_expenses',
-                  'fare']
-
-
-class WorkerListSerializers(serializers.Serializer):
-    id = serializers.IntegerField()
-    author = UserReadSerializer()
-    actual_time = serializers.IntegerField()
-    scheduled_time = serializers.IntegerField()
-    created_time = serializers.DateTimeField()
-    update_time = serializers.DateTimeField()
-
-
-class WorkerDetailSerializers(serializers.ModelSerializer):
     class Meta:
         model = Worker
-        fields = ['actual_time', 'scheduled_time']
+        fields = ['id', 'author', 'actual_time', 'scheduled_time', 'created_time', 'update_time']
 
 
-class WorkerCreateSerializers(serializers.ModelSerializer):
+class WorkerCreateUpdateSerializers(serializers.ModelSerializer):
     actual_time = serializers.IntegerField(min_value=0, allow_null=False)
     scheduled_time = serializers.IntegerField(min_value=0, allow_null=False)
 
@@ -140,60 +133,39 @@ class WorkerCreateSerializers(serializers.ModelSerializer):
         fields = ['actual_time', 'scheduled_time']
 
 
-class CommentsSerializers(serializers.Serializer):
-    id = serializers.IntegerField()
+class CommentListSerializers(serializers.ModelSerializer):
     author = UserReadSerializer()
-    text = serializers.CharField()
 
-
-class TableSerializers(serializers.ModelSerializer):
     class Meta:
-        model = TableProject
-        fields = '__all__'
+        model = Comments
+        fields = ['id', 'text', 'author']
 
 
-class CardReadSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    author = UserReadSerializer()
-    title = serializers.CharField()
-    description = serializers.CharField()
-    created_time = serializers.DateTimeField()
-    update_time = serializers.DateTimeField()
-    performers = UserReadSerializer(many=True, read_only=True)
-    deadline = serializers.DateTimeField()
-    archived = serializers.BooleanField()
+class CommentCreateUpdateSerializers(serializers.ModelSerializer):
+    class Meta:
+        model = Comments
+        fields = ['text']
 
 
 class CardDetailSerializer(serializers.ModelSerializer):
-    author = UserReadSerializer()
-    comment = CommentsSerializers(many=True)
-    performers = UserReadSerializer(many=True)
-    worker = WorkerListSerializers(many=True)
-    table = TableListSerializers(many=True)
+    author = UserReadSerializer(read_only=True)
+    performers = UserReadSerializer(many=True, read_only=True)
+    comments_card = CommentListSerializers(many=True, read_only=True)
 
     class Meta:
         model = Cards
-        fields = ['id', 'author', 'title', 'description',
-                  'created_time', 'update_time', 'performers',
-                  'deadline', 'comment', 'table', 'worker',
-                  'archived']
+        fields = ['id', 'author', 'title', "description", 'created_time', 'update_time',
+                  'performers', 'deadline', 'archived', 'comments_card']
 
 
 class CardDetailUpdateSerializer(serializers.ModelSerializer):
+    title = serializers.CharField(allow_blank=True, max_length=255)
+    description = serializers.CharField(allow_blank=True)
+    deadline = serializers.DateTimeField(allow_null=True)
+
     class Meta:
         model = Cards
         fields = ['title', 'description', 'performers', 'deadline']
-
-
-class CardListSerializers(serializers.Serializer):
-    id = serializers.IntegerField()
-    author = UserReadSerializer()
-    title = serializers.CharField()
-    description = serializers.CharField()
-    created_time = serializers.DateTimeField()
-    performers = UserReadSerializer(many=True)
-    deadline = serializers.DateTimeField()
-    update_time = serializers.DateTimeField()
 
 
 class CardCreateSerializers(serializers.ModelSerializer):
@@ -202,22 +174,14 @@ class CardCreateSerializers(serializers.ModelSerializer):
         fields = ['title', 'description', 'performers', 'deadline']
 
 
-class CommentListSerializers(serializers.Serializer):
-    id = serializers.IntegerField()
-    text = serializers.CharField()
-    author = UserReadSerializer()
+class CardListSerializers(serializers.ModelSerializer):
+    author = UserReadSerializer(read_only=True)
+    performers = UserReadSerializer(many=True, read_only=True)
 
-
-class CommentCreateSerializers(serializers.ModelSerializer):
     class Meta:
-        model = Comments
-        fields = ['text']
-
-
-class CommentDetailUpdateSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = Comments
-        fields = ['text']
+        model = Cards
+        fields = ['id', 'author', 'title', "description", 'created_time', 'update_time',
+                  'performers', 'deadline', 'archived']
 
 
 class ExcelSerializer(serializers.ModelSerializer):
@@ -230,35 +194,35 @@ class ExcelSerializer(serializers.ModelSerializer):
 
 class ExcelCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
-
-
-class CategoryEventListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField(max_length=255)
-
-
-class CategoryEventAddSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CategoryEvent
-        fields = '__all__'
-
-
-class EventListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    author = UserReadSerializer()
-    title = serializers.CharField(max_length=255, min_length=3, allow_blank=False)
-    date_begin = serializers.DateTimeField()
-    data_end = serializers.DateTimeField()
-    category = CategoryEventListSerializer()
-    performers = UserReadSerializer(many=True)
-
-
-class EventAddSerializer(serializers.Serializer):
-    title = serializers.CharField(allow_blank=False)
-    date_begin = serializers.DateTimeField(allow_null=False)
-    data_end = serializers.DateTimeField(allow_null=False)
-    category = serializers.IntegerField(allow_null=False)
-
-    class Meta:
-        model = Event
-        fields = ['title', 'date_begin', 'data_end', 'category', 'performers']
+#
+#
+# class CategoryEventListSerializer(serializers.Serializer):
+#     id = serializers.IntegerField()
+#     title = serializers.CharField(max_length=255)
+#
+#
+# class CategoryEventAddSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = CategoryEvent
+#         fields = '__all__'
+#
+#
+# class EventListSerializer(serializers.Serializer):
+#     id = serializers.IntegerField()
+#     author = UserReadSerializer()
+#     title = serializers.CharField(max_length=255, min_length=3, allow_blank=False)
+#     date_begin = serializers.DateTimeField()
+#     data_end = serializers.DateTimeField()
+#     category = CategoryEventListSerializer()
+#     performers = UserReadSerializer(many=True)
+#
+#
+# class EventAddSerializer(serializers.Serializer):
+#     title = serializers.CharField(allow_blank=False)
+#     date_begin = serializers.DateTimeField(allow_null=False)
+#     data_end = serializers.DateTimeField(allow_null=False)
+#     category = serializers.IntegerField(allow_null=False)
+#
+#     class Meta:
+#         model = Event
+#         fields = ['title', 'date_begin', 'data_end', 'category', 'performers']
