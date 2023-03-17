@@ -429,7 +429,8 @@ class ExcelAPIView(APIView):
         """Создать Excel файл"""
         serializer_create = ExcelCreateSerializer(data=request.data)
         if serializer_create.is_valid():
-            excel = create_excel(request.user.pk, serializer_create.data['name'], **kwargs)
+            excel = create_excel(author_id=request.user.pk,
+                                 name=serializer_create.data['name'], **kwargs)
             serializer = ExcelSerializer(instance=excel, context={'request': request})
             logger.info(f'{timezone.datetime.now()} {request.user} создал excel')
             return Response(serializer.data, status.HTTP_201_CREATED)
