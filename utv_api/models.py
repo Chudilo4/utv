@@ -48,6 +48,10 @@ class Comments(models.Model):
     def __str__(self):
         return self.text
 
+    def get_absolute_url(self):
+        return reverse('comment_detail', kwargs={'card_pk': self.card_id,
+                                                 'com_pk': self.pk})
+
 
 class Worker(models.Model):
     author = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
@@ -64,6 +68,10 @@ class Worker(models.Model):
     def __str__(self):
         return f'{self.author} Фактическое время: ' \
                f'{self.actual_time} Плановое время: {self.scheduled_time}'
+
+    def get_absolute_url(self):
+        return reverse('worker_detail', kwargs={'card_pk': self.card_id,
+                                                'work_pk': self.pk})
 
 
 class TableProject(models.Model):
@@ -131,7 +139,11 @@ class TableProject(models.Model):
         verbose_name_plural = 'Таблицы'
 
     def __str__(self):
-        return self.pk
+        return f'Таблица {self.card.title}'
+
+    def get_absolute_url(self):
+        return reverse('table_detail', kwargs={'card_pk': self.card_id,
+                                               'table_pk': self.pk})
 
 
 class EmployeeRate(models.Model):
@@ -164,6 +176,10 @@ class TableExcel(models.Model):
 
     def __str__(self):
         return self.name
+
+    def get_absolute_url(self):
+        return reverse('excel_detail', kwargs={'card_pk': self.card_id,
+                                               'table_pk': self.table_id})
 
 
 class Event(models.Model):
