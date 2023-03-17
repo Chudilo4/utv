@@ -62,7 +62,7 @@ def create_excel(author_id: int, name: str, **kwargs):
     ws['C17'] = 'Фактическая рентабельность'
     ws['D17'] = table.profitability
     wb.save(path)
-    excel = TableExcel.objects.create(user_id=author_id,
+    excel = TableExcel.objects.create(author_id=author_id,
                                       table_id=kwargs['table_pk'],
                                       name=name_file)
     excel.path_excel.save(name_file, File(open(path, 'rb')))
