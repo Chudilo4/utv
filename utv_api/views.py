@@ -136,13 +136,14 @@ class CardsDetailAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         """Пользователь обратился к карточке"""
-
         card = get_object_or_404(
-            Cards.objects.prefetch_related(
+            Cards.objects.select_related('author').prefetch_related(
                 'performers', 'comments_card', 'comments_card__author', 'workers_card',
+
             ),
             pk=kwargs['card_pk']
         )
+        self.check_object_permissions(request, card)
         serializer = CardDetailSerializer(instance=card, context={"request": request})
         logger.info(f'{timezone.datetime.now()} {request.user} обратился к карточке {card.pk}')
         return Response(serializer.data, status.HTTP_200_OK)

@@ -17,12 +17,16 @@ class IsUser(permissions.BasePermission):
         return False
 
 
-class IsOwnerCardOrReadPerformers(IsAuthor):
-    def has_permission(self, request, view):
-        card = Cards.objects.get(pk=view.kwargs['card_pk'])
-        if request.user in card.performers.all():
+class IsOwnerCardOrReadPerformers(permissions.BasePermission):
+
+    def has_object_permission(self, request, view, obj):
+        if obj.author == request.user:
             return True
-        return False
+        elif request.user in obj.performers.all():
+            if request.method in permissions.SAFE_METHODS:
+                return True
+        else:
+            return False
 
 
 class OnlyAuthorCard(permissions.BasePermission):

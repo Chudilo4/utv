@@ -19,6 +19,9 @@ class UserReadSerializer(serializers.ModelSerializer):
 
 
 class UserCreateSerializers(serializers.ModelSerializer):
+    username = serializers.CharField(min_length=3, allow_blank=False)
+    first_name = serializers.CharField(allow_blank=False)
+    last_name = serializers.CharField(allow_blank=False)
     password = serializers.CharField(
         write_only=True,
         required=True,

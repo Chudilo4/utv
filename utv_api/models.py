@@ -5,8 +5,9 @@ from django.urls import reverse
 
 class CustomUser(AbstractUser):
     avatar = models.ImageField(upload_to='profile/avatar/', null=True,
-                               default='profile/avatar/Default_ava.png')
-    telegram_id = models.CharField(null=True, verbose_name='Telegram ID', max_length=35)
+                               default='profile/avatar/Default_ava.png',
+                               blank=True)
+    telegram = models.CharField(null=True, verbose_name='Telegram ID', max_length=35)
 
 
 class Cards(models.Model):
