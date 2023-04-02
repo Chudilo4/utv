@@ -6,13 +6,13 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from django.db.utils import IntegrityError
 from service_app.service import (
     create_excel,
     calculation_table)
 from utv_api.models import Comments, Worker, TableProject, Cards, CategoryEvent, Event
 from utv_api.models import CustomUser, TableExcel
-from utv_api.permissions import IsUser, IsOwnerCardOrReadPerformers, IsAuthor, OnlyAuthorCard
+from utv_api.permissions import IsUser, IsOwnerCardOrReadPerformers, IsAuthor, OnlyAuthorCard, OnlyPerformers
 from utv_api.serializers import (
     UserReadSerializer,
     UserCreateSerializers,
@@ -234,38 +234,35 @@ class CommentDetailAPIView(APIView):
 
 
 class WorkerListAPIView(APIView):
-    permission_classes = [IsOwnerCardOrReadPerformers]
+    permission_classes = [OnlyPerformers]
 
     def get(self, request, *args, **kwargs):
         """Получить рабочее время над проектом"""
-        try:
-            work = Worker.objects.get(card_id=kwargs['card_pk'],
-                                      author_id=request.user.pk)
-        except Worker.DoesNotExist:
-            return Response({"Работа": "В данный момент работы нет"}, status.HTTP_200_OK)
-        serializer = WorkerListSerializers(instance=work, context={"request": request})
-        logger.info(f'{request.user} получил работу {work.pk}')
+        work = Worker.objects.filter(card_id=kwargs['card_pk'])
+        self.check_object_permissions(request, work)
+        serializer = WorkerListSerializers(instance=work,
+                                           context={"request": request},
+                                           many=True)
+        logger.info(f'{request.user} получил список работ {work}')
         return Response(serializer.data, status.HTTP_200_OK)
 
     def post(self, request, *args, **kwargs):
-        """Создать рабочее время нал проектом"""
-        work = Worker.objects.filter(card_id=kwargs['card_pk'])
-        if not work:
-            serializer = WorkerCreateUpdateSerializers(data=request.data)
-            if serializer.is_valid():
-                work = Worker.objects.create(
+        """Создать рабочее время над проектом"""
+        if Worker.objects.filter(card_id=kwargs['card_pk'], author=request.user).count() > 0:
+            return Response({'Предупреждение': 'Нельзя создавать больше одной работы над проектом'})
+        serializer = WorkerCreateUpdateSerializers(data=request.data)
+        if serializer.is_valid():
+            work = Worker.objects.create(
                     author_id=request.user.pk,
                     actual_time=serializer.data['actual_time'],
                     scheduled_time=serializer.data['scheduled_time'],
                     card_id=kwargs['card_pk']
                 )
-                serializer2 = WorkerListSerializers(instance=work, context={"request": request})
-                logger.info(f'{request.user} создал работу {work.pk}')
-                return Response(serializer2.data, status=status.HTTP_201_CREATED)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        return Response(
-            {'Предупреждение': 'Вы не можете создавать больше одной работы над проектом!'},
-            status.HTTP_403_FORBIDDEN)
+
+            serializer2 = WorkerListSerializers(instance=work, context={"request": request})
+            logger.info(f'{request.user} создал работу {work.pk}')
+            return Response(serializer2.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 class WorkerDetailAPIView(APIView):
