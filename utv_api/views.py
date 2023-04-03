@@ -6,13 +6,19 @@ from rest_framework import permissions
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from django.db.utils import IntegrityError
+
 from service_app.service import (
     create_excel,
     calculation_table)
 from utv_api.models import Comments, Worker, TableProject, Cards, CategoryEvent, Event
 from utv_api.models import CustomUser, TableExcel
-from utv_api.permissions import IsUser, IsOwnerCardOrReadPerformers, IsAuthor, OnlyAuthorCard, OnlyPerformers
+from utv_api.permissions import (
+    IsUser,
+    IsOwnerCardOrReadPerformers,
+    IsAuthor,
+    OnlyAuthorCard,
+    OnlyPerformers
+)
 from utv_api.serializers import (
     UserReadSerializer,
     UserCreateSerializers,
@@ -32,7 +38,9 @@ from utv_api.serializers import (
     ExcelSerializer,
     ExcelCreateSerializer,
     CategoryEventListSerializer,
-    CategoryEventAddSerializer, EventListSerializer, EventAddSerializer
+    CategoryEventAddSerializer,
+    EventListSerializer,
+    EventAddSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -255,12 +263,10 @@ class WorkerListAPIView(APIView):
         serializer = WorkerCreateUpdateSerializers(data=request.data)
         if serializer.is_valid():
             work = Worker.objects.create(
-                    author_id=request.user.pk,
-                    actual_time=serializer.data['actual_time'],
-                    scheduled_time=serializer.data['scheduled_time'],
-                    card_id=kwargs['card_pk']
-                )
-
+                author_id=request.user.pk,
+                actual_time=serializer.data['actual_time'],
+                scheduled_time=serializer.data['scheduled_time'],
+                card_id=kwargs['card_pk'])
             serializer2 = WorkerListSerializers(instance=work, context={"request": request})
             logger.info(f'{request.user} создал работу {work.pk}')
             return Response(serializer2.data, status=status.HTTP_201_CREATED)
