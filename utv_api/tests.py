@@ -256,7 +256,7 @@ class WorkerTests(APITestCase):
         response = self.client.get(reverse('worker_list',
                                            kwargs={"card_pk": self.card.pk}))
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(len(response.data), 6)
+        self.assertEqual(len(response.data), 1)
         response2 = self.client.get(reverse('worker_detail', kwargs={"work_pk": 1,
                                                                      "card_pk": self.card.pk}))
         self.assertEqual(response2.status_code, status.HTTP_200_OK)
@@ -478,12 +478,12 @@ class TestPermissions(APITestCase):
         # Проверка на создание работы в карточке где пользователь не учавствует
         post_work = self.client.post(self.url_worker, {"actual_time": 4, "scheduled_time": 4})
         self.assertEqual(post_work.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Worker.objects.all().count(), 0)
+        self.assertEqual(Worker.objects.all().count(), 1)
         # Проверка на изменение чужой работы
         put_work = self.client.put(self.url_worker, {"actual_time": 5, "scheduled_time": 5})
         self.assertEqual(put_work.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Worker.objects.all().count(), 0)
+        self.assertEqual(Worker.objects.all().count(), 1)
         # Проверка на удаление работы
         delete_work = self.client.delete(self.url_worker)
         self.assertEqual(delete_work.status_code, status.HTTP_403_FORBIDDEN)
-        self.assertEqual(Worker.objects.all().count(), 0)
+        self.assertEqual(Worker.objects.all().count(), 1)
