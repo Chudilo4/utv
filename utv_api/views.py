@@ -346,7 +346,7 @@ class TableDetailAPIView(APIView):
         table = get_object_or_404(
             TableProject.objects.select_related('author'),
             pk=kwargs['table_pk'])
-        serializer = TableListSerializers(instance=table)
+        serializer = TableListSerializers(instance=table, context={'request': request})
         logger.info(f'{request.user} таблицу {table.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
 
@@ -415,7 +415,7 @@ class TableUpdateFactAPIView(APIView):
             table.travel_expenses = serializer.data.get('travel_expenses', table.travel_expenses)
             table.buying_music = serializer.data.get('buying_music', table.buying_music)
             table.save()
-            serializer2 = TableListSerializers(instance=table)
+            serializer2 = TableListSerializers(instance=table, context={'request': request})
             logger.info(f'{request.user} изменил фактические значения в таблице {table.pk}')
             return Response(serializer2.data, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

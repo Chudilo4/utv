@@ -64,6 +64,7 @@ def create_excel(author_id: int, name: str, **kwargs):
     wb.save(path)
     excel = TableExcel.objects.create(author_id=author_id,
                                       table_id=kwargs['table_pk'],
+                                      card_id=kwargs['card_pk'],
                                       name=name_file)
     excel.path_excel.save(name_file, File(open(path, 'rb')))
     os.remove(path)
