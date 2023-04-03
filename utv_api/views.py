@@ -174,11 +174,12 @@ class CardsDetailAPIView(APIView):
 
 
 class CommentListAPIView(APIView):
-    permission_classes = [IsOwnerCardOrReadPerformers]
+    permission_classes = [OnlyPerformers]
 
     def get(self, request, *args, **kwargs):
         """Получаем все коментарии к карточке"""
         comment = Comments.objects.filter(card_id=kwargs['card_pk'])
+        self.check_object_permissions(request, comment)
         serializer = CommentListSerializers(instance=comment, many=True,
                                             context={"request": request})
         logger.info(f'{request.user} получил список комментариев')
@@ -204,11 +205,12 @@ class CommentListAPIView(APIView):
 
 
 class CommentDetailAPIView(APIView):
-    permission_classes = [IsOwnerCardOrReadPerformers]
+    permission_classes = [IsAuthor]
 
     def get(self, request, *args, **kwargs):
         """Получить конкретный коментарий"""
-        comment = get_object_or_404(Comments, pk=kwargs['com_pk'])
+        comment = get_object_or_404(Comments.objects.select_related('author'), pk=kwargs['com_pk'])
+        self.check_object_permissions(request, comment)
         serializer = CommentListSerializers(instance=comment, context={"request": request})
         logger.info(f'{request.user} получил комментарий {comment.pk}')
         return Response(serializer.data, status.HTTP_200_OK)
@@ -216,6 +218,7 @@ class CommentDetailAPIView(APIView):
     def put(self, request, *args, **kwargs):
         """Изменить коомментарий"""
         comment = get_object_or_404(Comments, pk=kwargs['com_pk'])
+        self.check_object_permissions(request, comment)
         serializer = CommentCreateUpdateSerializers(data=request.data, context={"request": request})
         if serializer.is_valid():
             comment.text = serializer.data.get('text', comment.text)
@@ -239,7 +242,6 @@ class WorkerListAPIView(APIView):
     def get(self, request, *args, **kwargs):
         """Получить рабочее время над проектом"""
         work = Worker.objects.filter(card_id=kwargs['card_pk'])
-        self.check_object_permissions(request, work)
         serializer = WorkerListSerializers(instance=work,
                                            context={"request": request},
                                            many=True)

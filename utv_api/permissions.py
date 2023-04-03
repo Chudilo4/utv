@@ -30,7 +30,7 @@ class IsOwnerCardOrReadPerformers(permissions.BasePermission):
 
 
 class OnlyPerformers(permissions.BasePermission):
-    def has_object_permission(self, request, view, obj):
+    def has_permission(self, request, view):
         card = Cards.objects.get(pk=view.kwargs['card_pk'])
         if request.user == card.author or request.user in card.performers.all():
             return True
