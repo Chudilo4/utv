@@ -1,7 +1,7 @@
 from django.urls import path, include
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView, TokenVerifyView
 
-from .views import (
+from utv_api.views import (
     UsersReadAPIView,
     CardsListAPIView,
     CardsDetailAPIView,

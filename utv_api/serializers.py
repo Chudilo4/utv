@@ -155,11 +155,13 @@ class CardDetailSerializer(serializers.ModelSerializer):
     performers = UserReadSerializer(many=True, read_only=True)
     comments_card = CommentListSerializers(many=True, read_only=True)
     workers_card = WorkerListSerializers(many=True)
+    tableproject_set = serializers.PrimaryKeyRelatedField(many=True, read_only=True)
 
     class Meta:
         model = Cards
         fields = ['id', 'author', 'title', "description", 'created_time', 'update_time',
-                  'performers', 'deadline', 'archived', 'comments_card', 'workers_card']
+                  'performers', 'deadline', 'archived', 'comments_card', 'workers_card',
+                  'tableproject_set']
 
 
 class CardDetailUpdateSerializer(serializers.ModelSerializer):
