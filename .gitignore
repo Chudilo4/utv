@@ -9,3 +9,4 @@ db.sqlite3
 __pycache__
 log/utv_api/src/log.log
 .env
+log.log
