@@ -23,9 +23,9 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-    - name: Migration
+    - name: Build
       run: |
-        make migrate
+        make build
     - name: Run Tests
       run: |
         python manage.py test
