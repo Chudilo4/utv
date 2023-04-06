@@ -1,4 +1,3 @@
-import django.utils.timezone
 import io
 
 from PIL import Image
@@ -508,7 +507,8 @@ class TestCards(APITestCase):
         self.url_cards = reverse('cards_list')
 
     def test_no_permission_user_renegade(self):
-        """Тест на запрет чтения, изменения и удаления карточки если пользователь не исполнитель и не автор"""
+        """Тест на запрет чтения, изменения и удаления
+        карточки если пользователь не исполнитель и не автор"""
         self.client.login(username='Rafa', password='123456789Zz')
         response_card_detail_get = self.client.get(self.url_card_detail)
         response_card_detail_delete = self.client.delete(self.url_card_detail)
@@ -574,11 +574,12 @@ class TestCards(APITestCase):
 
     def test_no_permission_created_card(self):
         """Тест на создание карточки если пользователь не аутентифицирован"""
-        response_card_create_no_login = self.client.post(self.url_cards,
-                                                         {"title": "Новая карточка",
-                                                          "description": "Новое описание в новой карточке",
-                                                          "deadline": timezone.now(),
-                                                          "performers": [self.user_new_performer.pk]
-                                                          })
+        response_card_create_no_login = self.client.post(
+            self.url_cards,
+            {"title": "Новая карточка",
+             "description": "Новое описание в новой карточке",
+             "deadline": timezone.now(),
+             "performers": [self.user_new_performer.pk]
+             })
         self.assertEqual(response_card_create_no_login.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(Cards.objects.all().count(), 1)
