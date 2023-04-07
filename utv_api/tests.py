@@ -572,8 +572,8 @@ class TestCards(APITestCase):
         self.assertEqual(Cards.objects.get(pk=2).author, self.user_new_performer)
         self.assertEqual(Cards.objects.all().count(), 2)
 
-    def test_no_permission_created_card(self):
-        """Тест на создание карточки если пользователь не аутентифицирован"""
+    def test_no_permission_if_not_login(self):
+        """Тест на создание, изменение и удаление карточки если пользователь не аутентифицирован"""
         response_card_create_no_login = self.client.post(
             self.url_cards,
             {"title": "Новая карточка",
@@ -583,3 +583,99 @@ class TestCards(APITestCase):
              })
         self.assertEqual(response_card_create_no_login.status_code, status.HTTP_401_UNAUTHORIZED)
         self.assertEqual(Cards.objects.all().count(), 1)
+        response_card_detail_put = self.client.put(self.url_card_detail,
+                                                   {"title": "Новая карточка без логина",
+                                                    "description": "Новая карточка без логина",
+                                                    "deadline": timezone.now(),
+                                                    "performers": [self.user_new_performer.pk]
+                                                    })
+        self.assertEqual(response_card_detail_put.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(Cards.objects.get(pk=1).title, 'Мой проект')
+        response_card_detail_delete = self.client.delete(self.url_card_detail)
+        self.assertEqual(response_card_detail_delete.status_code, status.HTTP_401_UNAUTHORIZED)
+        self.assertEqual(Cards.objects.all().count(), 1)
+
+
+class TestComment(APITestCase):
+
+    def setUp(self) -> None:
+        self.user_owner = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        self.user_performer = CustomUser.objects.create_user('Nikita', password='123456789Zz')
+        self.user_renegade = CustomUser.objects.create_user('Rafa', password='123456789Zz')
+        self.user_new_performer = CustomUser.objects.create_user('Ruslan', password='123456789Zz')
+        self.card = Cards.objects.create(title='Мой проект',
+                                         description='Моё описание',
+                                         deadline=timezone.now(),
+                                         author=self.user_owner)
+        self.card.performers.add(self.user_performer.pk,
+                                 self.user_owner.pk)
+        self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': 1})
+        self.url_cards = reverse('cards_list')
+        self.url_comments = reverse('comment_list', kwargs={'card_pk': 1})
+        self.comment_owner = Comments.objects.create(author=self.user_owner,
+                                                     card=self.card,
+                                                     text='Это коментарий автора карточки')
+        self.url_comments_detail = reverse('comment_detail', kwargs={'card_pk': 1,
+                                                                     'com_pk': 1})
+
+    def test_no_permission_user_renegade(self):
+        """Тест на запрет чтения, и добавления коментария если пользователь не автор карточки или участник ,
+        а так же на чтение, удаление, изменение комментария автором которой он не является"""
+        # Чтение  и добавление коментариев в карточке
+        self.client.login(username='Rafa', password='123456789Zz')
+        response_comment_get = self.client.get(self.url_comments)
+        self.assertEqual(response_comment_get.status_code, status.HTTP_403_FORBIDDEN)
+        response_comment_post = self.client.post(self.url_comments,
+                                                 {
+                                                     "text": "Это коментарий ренегата"
+                                                 })
+        self.assertEqual(response_comment_post.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.card.comments_card.all().count(), 1)
+        # Чтение, добавление, удаление и изменение коментария в карточке
+        response_comment_detail_get = self.client.get(self.url_comments_detail)
+        self.assertEqual(response_comment_detail_get.status_code, status.HTTP_403_FORBIDDEN)
+        response_comment_put = self.client.put(self.url_comments_detail,
+                                               {"text": "Ахахаха я поменял этот коментарий"})
+        self.assertEqual(response_comment_put.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.comment_owner.text, 'Это коментарий автора карточки')
+        response_comment_delete = self.client.delete(self.url_comments_detail)
+        self.assertEqual(response_comment_delete.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.card.comments_card.all().count(), 1)
+
+    def test_no_permission_user_performers(self):
+        """Тест на запрет удаления и изменения коментария если пользователь не является его автором"""
+        self.client.login(username='Nikita', password='123456789Zz')
+        response_comment_detail_put = self.client.put(self.url_comments_detail,
+                                                      {
+                                                          "text": "Я поменял твой коммментарий"
+                                                      })
+        self.assertEqual(response_comment_detail_put.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.comment_owner.text, 'Это коментарий автора карточки')
+        response_comment_detail_delete = self.client.delete(self.url_comments_detail)
+        self.assertEqual(response_comment_detail_delete.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.card.comments_card.all().count(), 1)
+
+    def test_permission_user_performer_or_user_owner_card(self):
+        """Тест на добавление коментария и чтение если пользователь исполнитель ,
+        а так же изменение, и удаление своего коментария"""
+        self.client.login(username='Nikita', password='123456789Zz')
+        # Добавление и чтение всех коментариев к карточке
+        response_comment_post = self.client.post(self.url_comments,
+                                                 {"text": "Это комментарий исполнителя Nikita"})
+        self.assertEqual(response_comment_post.status_code, status.HTTP_201_CREATED)
+        self.assertEqual(self.card.comments_card.all().count(), 2)
+        response_comment_get = self.client.get(self.url_comments)
+        self.assertEqual(response_comment_get.status_code, status.HTTP_200_OK)
+        # Изменение и удаление своего коментария
+        url_comment_performer = reverse('comment_detail', kwargs={"card_pk": 1,
+                                                                  "com_pk": 2})
+        response_comment_detail_put = self.client.put(url_comment_performer,
+                                                      {
+                                                          "text": "Я поменял свой комментарий"
+                                                      })
+        self.assertEqual(response_comment_detail_put.status_code, status.HTTP_200_OK)
+        c = Comments.objects.get(author=self.user_performer, card=self.card)
+        self.assertEqual(c.text, 'Я поменял свой комментарий')
+        response_comment_detail_delete = self.client.delete(url_comment_performer)
+        self.assertEqual(response_comment_detail_delete.status_code, status.HTTP_200_OK)
+        self.assertEqual(self.card.comments_card.all().count(), 1)
