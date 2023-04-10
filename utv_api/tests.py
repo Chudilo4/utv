@@ -682,3 +682,84 @@ class TestComment(APITestCase):
         response_comment_detail_delete = self.client.delete(url_comment_performer)
         self.assertEqual(response_comment_detail_delete.status_code, status.HTTP_200_OK)
         self.assertEqual(self.card.comments_card.all().count(), 1)
+
+
+class TestWorker(APITestCase):
+
+    def setUp(self) -> None:
+        self.user_owner = CustomUser.objects.create_user('Artem', password='123456789Zz')
+        self.user_performer = CustomUser.objects.create_user('Nikita', password='123456789Zz')
+        self.user_renegade = CustomUser.objects.create_user('Rafa', password='123456789Zz')
+        self.user_new_performer = CustomUser.objects.create_user('Ruslan', password='123456789Zz')
+        self.card = Cards.objects.create(title='Мой проект',
+                                         description='Моё описание',
+                                         deadline=timezone.now(),
+                                         author=self.user_owner)
+        self.card.performers.add(self.user_performer.pk,
+                                 self.user_owner.pk)
+        self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': 1})
+        self.url_cards = reverse('cards_list')
+        self.work = Worker.objects.create(author=self.user_performer, actual_time=4, scheduled_time=4, card=self.card)
+        self.url_worker = reverse('worker_list', kwargs={'card_pk': 1})
+        self.url_worker_detail = reverse('worker_detail', kwargs={
+            'card_pk': 1,
+            'work_pk': 1
+        })
+
+    def test_no_permission_if_user_not_owner_and_not_performer(self):
+        """Тест на запрет чтения и добавление рабочего времени если пользователь не участник карточки ,
+        а так же на детальное чтение удаление и изменение рабочего времени участников"""
+        self.client.login(username="Rafa", password='123456789Zz')
+        # Тест на получение списка работ
+        response_get_worker = self.client.get(self.url_worker)
+        self.assertEqual(response_get_worker.status_code, status.HTTP_403_FORBIDDEN)
+        # Тест на создание работы
+        respone_post_worker = self.client.post(self.url_worker,
+                                               {
+                                                   "actual_time": 5,
+                                                   "scheduled_time": 5
+                                               })
+        self.assertEqual(respone_post_worker.status_code, status.HTTP_403_FORBIDDEN)
+        # Тест на чтение конкретной работы
+        response_get_worker_detail = self.client.get(self.url_worker_detail)
+        self.assertEqual(response_get_worker_detail.status_code, status.HTTP_403_FORBIDDEN)
+        # Тест на изменение рабочки
+        response_put_worker_detail = self.client.put(self.url_worker_detail,
+                                                     {
+                                                         "actual_time": 5,
+                                                         "scheduled_time": 5
+                                                     })
+        self.assertEqual(response_put_worker_detail.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(self.work.actual_time, 4)
+        # Тест на удаление рабочки
+        response_delete_worker_detail = self.client.delete(self.url_worker_detail)
+        self.assertEqual(response_delete_worker_detail.status_code, status.HTTP_403_FORBIDDEN)
+        self.assertEqual(Worker.objects.filter(card=self.card).count(), 1)
+
+    def test_permission_change_only_owner(self):
+        """Тест на изменение и удаление работы только автором работы"""
+        self.client.login(username="Artem", password='123456789Zz')
+        # Изменение карточки
+        response_put_worker_detail = self.client.put(self.url_worker_detail,
+                                                     {
+                                                         "actual_time": 5,
+                                                         "scheduled_time": 5
+                                                     })
+        self.assertEqual(response_put_worker_detail.status_code, status.HTTP_403_FORBIDDEN)
+        # Удаление карточки
+        response_delete_worker_detail = self.client.delete(self.url_worker_detail)
+        self.assertEqual(response_delete_worker_detail.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_have_permission_performer(self):
+        self.client.login(username='Nikita', password='123456789Zz')
+        response_get_worker_detail = self.client.get(self.url_worker_detail)
+        self.assertEqual(response_get_worker_detail.status_code, status.HTTP_200_OK)
+        response_put_worker_detail = self.client.put(self.url_worker_detail,
+                                                     {
+                                                         "actual_time": 5,
+                                                         "scheduled_time": 5
+                                                     })
+        self.assertEqual(response_put_worker_detail.status_code, status.HTTP_200_OK)
+        response_delete_worker_detail = self.client.delete(self.url_worker_detail)
+        self.assertEqual(response_delete_worker_detail.status_code, status.HTTP_200_OK)
+        self.assertEqual(Worker.objects.filter(card=self.card).count(), 0)
