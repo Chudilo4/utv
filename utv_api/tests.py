@@ -619,8 +619,10 @@ class TestComment(APITestCase):
                                                                      'com_pk': 1})
 
     def test_no_permission_user_renegade(self):
-        """Тест на запрет чтения, и добавления коментария если пользователь не автор карточки или участник ,
-        а так же на чтение, удаление, изменение комментария автором которой он не является"""
+        """Тест на запрет чтения, и добавления коментария если
+        пользователь не автор карточки или участник ,
+        а так же на чтение, удаление, изменение комментария
+        автором которой он не является"""
         # Чтение  и добавление коментариев в карточке
         self.client.login(username='Rafa', password='123456789Zz')
         response_comment_get = self.client.get(self.url_comments)
@@ -643,7 +645,8 @@ class TestComment(APITestCase):
         self.assertEqual(self.card.comments_card.all().count(), 1)
 
     def test_no_permission_user_performers(self):
-        """Тест на запрет удаления и изменения коментария если пользователь не является его автором"""
+        """Тест на запрет удаления и изменения коментария если
+        пользователь не является его автором"""
         self.client.login(username='Nikita', password='123456789Zz')
         response_comment_detail_put = self.client.put(self.url_comments_detail,
                                                       {

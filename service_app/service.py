@@ -2,7 +2,7 @@ import os
 
 from openpyxl.workbook import Workbook
 from utv import settings
-from utv_api.models import Worker, TableProject, TableExcel, CategoryEvent, Event
+from utv_api.models import Worker, TableProject, TableExcel
 from django.core.files import File
 
 
@@ -86,45 +86,6 @@ def delete_excel(excel_pk: int):
     excel = get_excel(excel_pk)
     excel.path_excel.delete(save=False)
     excel.delete()
-
-
-def get_categorys_event():
-    return CategoryEvent.objects.all()
-
-
-def add_category_event(title):
-    return CategoryEvent.objects.create(title=title)
-
-
-def get_category_event(pk):
-    return CategoryEvent.objects.get(pk=pk)
-
-
-def delete_category_event(pk):
-    CategoryEvent.objects.get(pk=pk).delete()
-
-
-def get_events():
-    return Event.objects.all()
-
-
-def get_event(event_pk):
-    return Event.objects.get(pk=event_pk)
-
-
-def add_event(author_id: int, **kwargs):
-    eve = Event.objects.create(author_id=author_id,
-                               title=kwargs['title'],
-                               date_begin=kwargs['date_begin'],
-                               data_end=kwargs['data_end'],
-                               category_id=kwargs['category'])
-    for i in kwargs['performers']:
-        eve.performers.add(i)
-    return eve
-
-
-def delete_event(event_pk):
-    get_event(event_pk).delete()
 
 
 def calculation_table(card_pk, **kwargs):

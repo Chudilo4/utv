@@ -6,7 +6,7 @@ from utv_api.models import (
     TableProject,
     Worker,
     TableExcel,
-    CustomUser, CategoryEvent, Event,
+    CustomUser
 )
 
 
@@ -201,35 +201,3 @@ class ExcelSerializer(serializers.ModelSerializer):
 
 class ExcelCreateSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=255)
-
-
-class CategoryEventListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField(max_length=255)
-
-
-class CategoryEventAddSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CategoryEvent
-        fields = '__all__'
-
-
-class EventListSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    author = UserReadSerializer()
-    title = serializers.CharField(max_length=255, min_length=3, allow_blank=False)
-    date_begin = serializers.DateTimeField()
-    data_end = serializers.DateTimeField()
-    category = CategoryEventListSerializer()
-    performers = UserReadSerializer(many=True)
-
-
-class EventAddSerializer(serializers.Serializer):
-    title = serializers.CharField(allow_blank=False)
-    date_begin = serializers.DateTimeField(allow_null=False)
-    data_end = serializers.DateTimeField(allow_null=False)
-    category = serializers.IntegerField(allow_null=False)
-
-    class Meta:
-        model = Event
-        fields = ['title', 'date_begin', 'data_end', 'category', 'performers']

@@ -10,7 +10,7 @@ from rest_framework.views import APIView
 from service_app.service import (
     create_excel,
     calculation_table)
-from utv_api.models import Comments, Worker, TableProject, Cards, CategoryEvent, Event
+from utv_api.models import Comments, Worker, TableProject, Cards
 from utv_api.models import CustomUser, TableExcel
 from utv_api.permissions import (
     IsUser,
@@ -37,10 +37,6 @@ from utv_api.serializers import (
     TableUpdateFactSerializers,
     ExcelSerializer,
     ExcelCreateSerializer,
-    CategoryEventListSerializer,
-    CategoryEventAddSerializer,
-    EventListSerializer,
-    EventAddSerializer
 )
 
 logger = logging.getLogger(__name__)
@@ -460,78 +456,3 @@ class ExcelDetailAPIView(APIView):
         excel.delete()
         logger.info(f'{timezone.datetime.now()} {request.user} удалил excel')
         return Response({'Excel': 'Успешно удалён'}, status.HTTP_200_OK)
-
-
-class CategoryEventAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        category = CategoryEvent.objects.all()
-        serializer = CategoryEventListSerializer(instance=category, many=True)
-        logger.info(f'{timezone.datetime.now()} {request.user} получил список категорий')
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        serializer = CategoryEventAddSerializer(data=request.data)
-        if serializer.is_valid():
-            category = CategoryEvent.objects.create(**serializer.data)
-            serializer2 = CategoryEventListSerializer(instance=category)
-            logger.info(f'{timezone.datetime.now()} {request.user} создал категорию')
-            return Response(serializer2.data, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
-
-
-class CategoryEventDetailAPIView(APIView):
-    permission_classes = [IsAuthor]
-
-    def get(self, request, *args, **kwargs):
-        category = get_object_or_404(CategoryEvent, pk=kwargs['cat_event_pk'])
-        serializer = CategoryEventListSerializer(instance=category)
-        logger.info(f'{timezone.datetime.now()} {request.user} получил категорию')
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def delete(self, request, *args, **kwargs):
-        category = get_object_or_404(CategoryEvent, pk=kwargs['cat_event_pk'])
-        category.delete()
-        logger.info(f'{timezone.datetime.now()} {request.user} удалил категорию')
-        return Response({'Категория': 'Удалена'}, status.HTTP_200_OK)
-
-
-class EventCalendarAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        events = Event.objects.filter(
-            author_id=request.user.pk
-        ).union(
-            Event.objects.filter(performers__in=request.user)
-        )
-        serializer = EventListSerializer(instance=events, many=True, context={'request': request})
-        logger.info(f'{timezone.datetime.now()} {request.user} получил события календаря')
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        serializer = EventAddSerializer(data=request.data)
-        if serializer.is_valid():
-            event = Event.objects.create(author=request.user,
-                                         **serializer.data)
-            ser = EventListSerializer(instance=event)
-            logger.info(f'{timezone.datetime.now()} {request.user} создал событие в календаре')
-            return Response(ser.data, status.HTTP_201_CREATED)
-        return Response(serializer.errors, status.HTTP_400_BAD_REQUEST)
-
-
-class EventCalendarDetailAPIView(APIView):
-    permission_classes = [permissions.IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        event = get_object_or_404(Event, pk=kwargs['event_pk'])
-        serializer = EventListSerializer(instance=event, context={'request': request})
-        logger.info(f'{timezone.datetime.now()} {request.user} получил событие в календаре')
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def delete(self, request, *args, **kwargs):
-        event = get_object_or_404(Event, pk=kwargs['event_pk'])
-        event.delete()
-        logger.info(f'{timezone.datetime.now()} {request.user} удалил событие в календаре')
-        return Response({'Событие': 'Удалено'}, status.HTTP_200_OK)
