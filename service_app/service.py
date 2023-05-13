@@ -1,16 +1,11 @@
-import os
-
 from openpyxl.workbook import Workbook
-from utv import settings
+
 from utv_api.models import Worker, TableProject, TableExcel
-from django.core.files import File
 
 
-def create_excel(author_id: int, name: str, **kwargs):
+def create_excel(author_id: int, **kwargs):
     """Создаём excel файл из сформированной таблицы"""
     table = TableProject.objects.get(pk=kwargs['table_pk'])
-    name_file = f'{name}.xlsx'
-    path = os.path.join(settings.EXCEL_ROOT, name_file)
     wb = Workbook()
     ws = wb.active
     ws['A6'] = 'ЦЕНА для клиента'
@@ -61,14 +56,7 @@ def create_excel(author_id: int, name: str, **kwargs):
     ws['B17'] = table.planned_profitability
     ws['C17'] = 'Фактическая рентабельность'
     ws['D17'] = table.profitability
-    wb.save(path)
-    excel = TableExcel.objects.create(author_id=author_id,
-                                      table_id=kwargs['table_pk'],
-                                      card_id=kwargs['card_pk'],
-                                      name=name_file)
-    excel.path_excel.save(name_file, File(open(path, 'rb')))
-    os.remove(path)
-    return excel
+    return wb
 
 
 def get_my_excels_table(**kwargs):
