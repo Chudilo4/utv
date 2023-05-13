@@ -5,7 +5,6 @@ from utv_api.models import (
     Comments,
     TableProject,
     Worker,
-    TableExcel,
     CustomUser
 )
 
@@ -189,15 +188,3 @@ class CardListSerializers(serializers.ModelSerializer):
         model = Cards
         fields = ['id', 'author', 'title', "description", 'created_time', 'update_time',
                   'performers', 'deadline', 'archived']
-
-
-class ExcelSerializer(serializers.ModelSerializer):
-    path_excel = serializers.FileField(use_url=True)
-
-    class Meta:
-        model = TableExcel
-        fields = ['id', 'name', 'table', 'path_excel', 'created_time']
-
-
-class ExcelCreateSerializer(serializers.Serializer):
-    name = serializers.CharField(max_length=255)

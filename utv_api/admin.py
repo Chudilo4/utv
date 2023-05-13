@@ -4,7 +4,6 @@ from utv_api.models import (
     Cards, EmployeeRate,
     CustomUser,
     Worker, TableProject,
-    TableExcel
 )
 
 
@@ -39,9 +38,3 @@ class WorkerAdmin(admin.ModelAdmin):
 class TableProjectAdmin(admin.ModelAdmin):
     list_max_show_all = 10
     list_display = ['id', 'card', 'author']
-
-
-@admin.register(TableExcel)
-class TableExcelAdmin(admin.ModelAdmin):
-    list_max_show_all = 10
-    list_display = ['id', 'name', 'author', 'table', 'card', 'created_time']

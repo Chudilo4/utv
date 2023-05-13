@@ -1,12 +1,9 @@
-import io
-
-from PIL import Image
 from django.urls import reverse
+from django.utils import timezone
 from rest_framework import status
 from rest_framework.test import APITestCase
-import datetime
-from utv_api.models import Cards, EmployeeRate, Comments, TableProject, Worker, CustomUser
-from django.utils import timezone
+
+from utv_api.models import Cards, Comments, Worker, CustomUser
 
 
 # class AccountTests(APITestCase):
@@ -699,7 +696,10 @@ class TestWorker(APITestCase):
                                  self.user_owner.pk)
         self.url_card_detail = reverse('cards_detail', kwargs={'card_pk': 1})
         self.url_cards = reverse('cards_list')
-        self.work = Worker.objects.create(author=self.user_performer, actual_time=4, scheduled_time=4, card=self.card)
+        self.work = Worker.objects.create(author=self.user_performer,
+                                          actual_time=4,
+                                          scheduled_time=4,
+                                          card=self.card)
         self.url_worker = reverse('worker_list', kwargs={'card_pk': 1})
         self.url_worker_detail = reverse('worker_detail', kwargs={
             'card_pk': 1,
@@ -707,8 +707,12 @@ class TestWorker(APITestCase):
         })
 
     def test_no_permission_if_user_not_owner_and_not_performer(self):
-        """Тест на запрет чтения и добавление рабочего времени если пользователь не участник карточки ,
-        а так же на детальное чтение удаление и изменение рабочего времени участников"""
+        """
+        Тест на запрет чтения и добавление рабочего времени
+        если пользователь не участник карточки ,
+        а так же на детальное чтение удаление и
+        изменение рабочего времени участников
+        """
         self.client.login(username="Rafa", password='123456789Zz')
         # Тест на получение списка работ
         response_get_worker = self.client.get(self.url_worker)

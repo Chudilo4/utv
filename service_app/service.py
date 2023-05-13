@@ -1,11 +1,11 @@
 from openpyxl.workbook import Workbook
 
-from utv_api.models import Worker, TableProject, TableExcel
+from utv_api.models import Worker, TableProject
 
 
-def create_excel(author_id: int, **kwargs):
+def create_excel(table_pk: int) -> Workbook:
     """Создаём excel файл из сформированной таблицы"""
-    table = TableProject.objects.get(pk=kwargs['table_pk'])
+    table = TableProject.objects.get(pk=table_pk)
     wb = Workbook()
     ws = wb.active
     ws['A6'] = 'ЦЕНА для клиента'
@@ -57,23 +57,6 @@ def create_excel(author_id: int, **kwargs):
     ws['C17'] = 'Фактическая рентабельность'
     ws['D17'] = table.profitability
     return wb
-
-
-def get_my_excels_table(**kwargs):
-    """Отдаём пользователю все excel связанные с таблицой"""
-    excel = TableExcel.objects.filter(table_id=kwargs['table_pk'])
-    return excel
-
-
-def get_excel(excel_pk: int):
-    excel = TableExcel.objects.get(pk=excel_pk)
-    return excel
-
-
-def delete_excel(excel_pk: int):
-    excel = get_excel(excel_pk)
-    excel.path_excel.delete(save=False)
-    excel.delete()
 
 
 def calculation_table(card_pk, **kwargs):

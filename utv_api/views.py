@@ -1,5 +1,6 @@
 import logging
 
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
 from rest_framework import permissions
@@ -11,7 +12,7 @@ from service_app.service import (
     create_excel,
     calculation_table)
 from utv_api.models import Comments, Worker, TableProject, Cards
-from utv_api.models import CustomUser, TableExcel
+from utv_api.models import CustomUser
 from utv_api.permissions import (
     IsUser,
     IsOwnerCardOrReadPerformers,
@@ -35,8 +36,6 @@ from utv_api.serializers import (
     TableCreateSerializers,
     TableUpdatePlannedSerializers,
     TableUpdateFactSerializers,
-    ExcelSerializer,
-    ExcelCreateSerializer,
 )
 
 logger = logging.getLogger(__name__)
@@ -422,37 +421,9 @@ class ExcelAPIView(APIView):
 
     def get(self, request, *args, **kwargs):
         """Получить список Excel файлов"""
-        excel = TableExcel.objects.filter(table_id=kwargs['table_pk'])
-        serializer = ExcelSerializer(instance=excel, many=True, context={'request': request})
-        logger.info(f'{timezone.datetime.now()} {request.user} смотрит excel файлы')
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def post(self, request, *args, **kwargs):
-        """Создать Excel файл"""
-        serializer_create = ExcelCreateSerializer(data=request.data)
-        if serializer_create.is_valid():
-            excel = create_excel(author_id=request.user.pk,
-                                 name=serializer_create.data['name'], **kwargs)
-            serializer = ExcelSerializer(instance=excel, context={'request': request})
-            logger.info(f'{timezone.datetime.now()} {request.user} создал excel')
-            return Response(serializer.data, status.HTTP_201_CREATED)
-        return Response(serializer_create.errors, status.HTTP_400_BAD_REQUEST)
-
-
-class ExcelDetailAPIView(APIView):
-    permission_classes = [IsAuthor]
-
-    def get(self, request, *args, **kwargs):
-        """Получил Excel файл"""
-        excel = get_object_or_404(TableExcel, pk=kwargs['excel_pk'])
-        serializer = ExcelSerializer(instance=excel, context={'request': request})
-        logger.info(f'{timezone.datetime.now()} {request.user} смотрит excel')
-        return Response(serializer.data, status.HTTP_200_OK)
-
-    def delete(self, request, *args, **kwargs):
-        """Удалил Excel файл"""
-        excel = get_object_or_404(TableExcel, pk=kwargs['excel_pk'])
-        self.check_object_permissions(request, excel)
-        excel.delete()
-        logger.info(f'{timezone.datetime.now()} {request.user} удалил excel')
-        return Response({'Excel': 'Успешно удалён'}, status.HTTP_200_OK)
+        excel = create_excel(author_id=request.user.pk,
+                             **kwargs)
+        response = HttpResponse(content_type="application/vnd.ms-excel")
+        response['Content-Disposition'] = 'attachment; filename=report.xls'
+        excel.save(response)
+        return response

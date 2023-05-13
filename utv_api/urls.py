@@ -16,7 +16,6 @@ from utv_api.views import (
     TableUpdateFactAPIView,
     TableUpdatePlannedAPIView,
     ExcelAPIView,
-    ExcelDetailAPIView,
 )
 
 urlpatterns = [
@@ -57,7 +56,4 @@ urlpatterns = [
     path('cards/<int:card_pk>/table/<int:table_pk>/excel/',
          ExcelAPIView.as_view(),
          name='table_excel'),
-    path('cards/<int:card_pk>/table/<int:table_pk>/excel/<int:excel_pk>/',
-         ExcelDetailAPIView.as_view(),
-         name='excel_detail'),
 ]
