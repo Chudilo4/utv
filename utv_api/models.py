@@ -160,24 +160,3 @@ class EmployeeRate(models.Model):
 
     def __str__(self):
         return f'{self.user} {self.money}'
-
-
-class TableExcel(models.Model):
-    name = models.CharField(max_length=255)
-    author = models.ForeignKey(CustomUser, on_delete=models.SET_DEFAULT, default=1)
-    table = models.ForeignKey(TableProject, on_delete=models.CASCADE)
-    card = models.ForeignKey(Cards, on_delete=models.CASCADE, null=True)
-    path_excel = models.FileField(upload_to='excel/')
-    created_time = models.DateTimeField(auto_now_add=True, verbose_name='Дата создания')
-    update_time = models.DateTimeField(auto_now=True, verbose_name='Дата обновления')
-
-    class Meta:
-        verbose_name = 'Таблица Excel'
-        verbose_name_plural = 'Таблицы Excel'
-
-    def __str__(self):
-        return self.name
-
-    def get_absolute_url(self):
-        return reverse('excel_detail', kwargs={'card_pk': self.card_id,
-                                               'table_pk': self.table_id})
